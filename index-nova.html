@@ -1479,7 +1479,10 @@
         }
       }
 
-            const sb = window.supabase.createClient('https://khduswpbhozkqjxnqufk.supabase.co', 'sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8');
+            const URL_PARAMS = (location.hash + '&' + location.search).replace(/[?#]/g, '&');
+      const RECOVERY_IN_URL = /(^|&)type=recovery(&|$)/.test(URL_PARAMS);
+      const AUTH_ERROR_IN_URL = (URL_PARAMS.match(/(^|&)error_description=([^&]*)/) || [])[2] || '';
+      const sb = window.supabase.createClient('https://khduswpbhozkqjxnqufk.supabase.co', 'sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8');
 
       async function fetchAllRows(table, orderCol) {
         const out = [];
@@ -1681,6 +1684,7 @@
           e.target.reset();
           closeModal('reset-modal');
           showToast('Heslo bolo zmenené.');
+          try { history.replaceState(null, '', location.pathname); } catch (err) {}
           const { data } = await sb.auth.getSession();
           await applySession(data.session);
         });
@@ -3941,6 +3945,12 @@
           setupAuthEvents();
           const { data: sess } = await sb.auth.getSession();
           await applySession(sess.session);
+          if (RECOVERY_IN_URL && sess.session) {
+            closeModal('profile-modal');
+            openModal('reset-modal');
+          } else if (AUTH_ERROR_IN_URL) {
+            showToast('Odkaz z e-mailu je neplatný alebo vypršal. Pošli si nový cez „Zabudnuté heslo“.');
+          }
           if (getActiveGasUrl()) {
             const synced = await pullSharedDbFromGas();
             if (synced) {
