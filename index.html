@@ -59,17 +59,27 @@
     body.dark-chess #leaderboard-body tr:hover {
       background-color: rgba(255, 255, 255, 0.03);
     }
+    body:not(.dark-chess) #controls-panel, body:not(.dark-chess) #leaderboard-section {
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 28px rgba(15, 23, 42, 0.07);
+    }
     @media (max-width: 639px) {
       #leaderboard-body td, #leaderboard-section thead th { padding-left: 0.5rem; padding-right: 0.5rem; }
       #leaderboard-body td button[data-open-profile] { font-size: 0.8rem; }
     }
+    .sm-col { display: none; }
+    .mobile-only { display: inline; }
+    @media (min-width: 640px) {
+      .sm-col { display: table-cell; }
+      .mobile-only { display: none; }
+    }
+    .tip-wrap .tip-box { display: none; }
+    .tip-wrap:hover .tip-box, .tip-wrap:focus-within .tip-box { display: block; }
     #user-menu-panel { min-width: 14rem; }
     #user-menu-panel button { white-space: nowrap; }
     #leaderboard-section thead th { position: sticky; top: 0; z-index: 5; background-color: #ffffff; }
     body.dark-chess #leaderboard-section thead th { background-color: #312e2b; }
     body.dark-chess #user-menu-panel { background-color: #312e2b; border-color: #45423e; color: #e7e5e4; }
     body.dark-chess #user-menu-panel .menu-sep { border-color: #45423e; }
-    body.dark-chess .podium-card { background-color: #3a3733; border-color: #4a4642; color: #e7e5e4; }
     body.dark-chess #profile-progress-chart { background-color: #312e2b; border-color: #45423e; color: #e7e5e4; }
     body.dark-chess #my-rank-banner { border-color: #45423e; }
     body.dark-chess #pagination-bar {
@@ -201,7 +211,7 @@
     }
   </style>
 <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.sticky{position:sticky}.inset-0{inset:0px}.bottom-4{bottom:1rem}.left-0{left:0px}.right-0{right:0px}.right-4{right:1rem}.top-0{top:0px}.z-20{z-index:20}.z-30{z-index:30}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:0.25rem}.mb-1\.5{margin-bottom:0.375rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.ml-1\.5{margin-left:0.375rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.aspect-video{aspect-ratio:16 / 9}.h-10{height:2.5rem}.h-8{height:2rem}.h-9{height:2.25rem}.h-7{height:1.75rem}.h-6{height:1.5rem}.h-28{height:7rem}.max-h-44{max-height:11rem}.max-h-60{max-height:15rem}.max-h-72{max-height:18rem}.max-h-80{max-height:20rem}.max-h-\[90vh\]{max-height:90vh}.min-h-screen{min-height:100vh}.w-10{width:2.5rem}.w-8{width:2rem}.w-9{width:2.25rem}.w-full{width:100%}.w-7{width:1.75rem}.min-w-0{min-width:0px}.max-w-2xl{max-width:42rem}.max-w-4xl{max-width:56rem}.max-w-5xl{max-width:64rem}.max-w-7xl{max-width:80rem}.max-w-lg{max-width:32rem}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.cursor-pointer{cursor:pointer}.select-none{-webkit-user-select:none;user-select:none}.auto-cols-\[minmax\(160px\2c 1fr\)\]{grid-auto-columns:minmax(160px,1fr)}.grid-flow-col{grid-auto-flow:column}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-1\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.375rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.375rem * var(--tw-space-y-reverse))}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-2\.5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.625rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.625rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-5 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.25rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.25rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.overflow-hidden{overflow:hidden}.overflow-visible{overflow:visible}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.whitespace-nowrap{white-space:nowrap}.rounded{border-radius:0.25rem}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:0.5rem}.rounded-xl{border-radius:0.75rem}.rounded-md{border-radius:0.375rem}.border{border-width:1px}.border-b{border-bottom-width:1px}.border-t{border-top-width:1px}.border-amber-500\/35{border-color:rgb(245 158 11 / 0.35)}.border-blue-500\/30{border-color:rgb(59 130 246 / 0.3)}.border-blue-500\/35{border-color:rgb(59 130 246 / 0.35)}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-slate-200\/20{border-color:rgb(226 232 240 / 0.2)}.border-slate-200\/70{border-color:rgb(226 232 240 / 0.7)}.border-slate-200\/80{border-color:rgb(226 232 240 / 0.8)}.border-slate-200\/90{border-color:rgb(226 232 240 / 0.9)}.border-slate-300\/70{border-color:rgb(203 213 225 / 0.7)}.border-slate-300\/80{border-color:rgb(203 213 225 / 0.8)}.border-slate-500\/15{border-color:rgb(100 116 139 / 0.15)}.border-slate-500\/20{border-color:rgb(100 116 139 / 0.2)}.border-amber-400\/40{border-color:rgb(251 191 36 / 0.4)}.border-slate-200\/60{border-color:rgb(226 232 240 / 0.6)}.border-\[\#2563eb\]{--tw-border-opacity:1;border-color:rgb(37 99 235 / var(--tw-border-opacity, 1))}.border-rose-500\/35{border-color:rgb(244 63 94 / 0.35)}.border-slate-200\/75{border-color:rgb(226 232 240 / 0.75)}.bg-\[\#f8fafc\]{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-\[\#f8fafc\]\/60{background-color:rgb(248 250 252 / 0.6)}.bg-\[\#f8fafc\]\/70{background-color:rgb(248 250 252 / 0.7)}.bg-amber-500\/10{background-color:rgb(245 158 11 / 0.1)}.bg-amber-600{--tw-bg-opacity:1;background-color:rgb(217 119 6 / var(--tw-bg-opacity, 1))}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-black\/60{background-color:rgb(0 0 0 / 0.6)}.bg-black\/75{background-color:rgb(0 0 0 / 0.75)}.bg-blue-500\/10{background-color:rgb(59 130 246 / 0.1)}.bg-blue-500\/5{background-color:rgb(59 130 246 / 0.05)}.bg-blue-600{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-blue-600\/15{background-color:rgb(37 99 235 / 0.15)}.bg-emerald-600{--tw-bg-opacity:1;background-color:rgb(5 150 105 / var(--tw-bg-opacity, 1))}.bg-purple-500\/15{background-color:rgb(168 85 247 / 0.15)}.bg-rose-500\/15{background-color:rgb(244 63 94 / 0.15)}.bg-slate-500\/10{background-color:rgb(100 116 139 / 0.1)}.bg-slate-500\/5{background-color:rgb(100 116 139 / 0.05)}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42 / var(--tw-bg-opacity, 1))}.bg-slate-950{--tw-bg-opacity:1;background-color:rgb(2 6 23 / var(--tw-bg-opacity, 1))}.bg-transparent{background-color:transparent}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/10{background-color:rgb(255 255 255 / 0.1)}.bg-white\/95{background-color:rgb(255 255 255 / 0.95)}.bg-amber-400\/25{background-color:rgb(251 191 36 / 0.25)}.bg-\[\#2563eb\]{--tw-bg-opacity:1;background-color:rgb(37 99 235 / var(--tw-bg-opacity, 1))}.bg-\[\#dc2626\]{--tw-bg-opacity:1;background-color:rgb(220 38 38 / var(--tw-bg-opacity, 1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.bg-slate-100\/70{background-color:rgb(241 245 249 / 0.7)}.bg-\[\#eff6ff\]\/80{background-color:rgb(239 246 255 / 0.8)}.p-1{padding:0.25rem}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-2{padding-left:0.5rem;padding-right:0.5rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.py-0\.5{padding-top:0.125rem;padding-bottom:0.125rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.py-4{padding-top:1rem;padding-bottom:1rem}.pb-1{padding-bottom:0.25rem}.pb-3{padding-bottom:0.75rem}.pt-1{padding-top:0.25rem}.pt-2{padding-top:0.5rem}.pt-3{padding-top:0.75rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.font-mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xs{font-size:0.75rem;line-height:1rem}.text-\[10px\]{font-size:10px}.text-\[9px\]{font-size:9px}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.font-normal{font-weight:400}.uppercase{text-transform:uppercase}.tabular-nums{--tw-numeric-spacing:tabular-nums;font-variant-numeric:var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction)}.leading-tight{line-height:1.25}.tracking-\[0\.06em\]{letter-spacing:0.06em}.tracking-tight{letter-spacing:-0.025em}.tracking-wider{letter-spacing:0.05em}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9 / var(--tw-text-opacity, 1))}.text-blue-600{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-blue-700{--tw-text-opacity:1;color:rgb(29 78 216 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234 / var(--tw-text-opacity, 1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14 / var(--tw-text-opacity, 1))}.text-\[\#2563eb\]{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.text-rose-600{--tw-text-opacity:1;color:rgb(225 29 72 / var(--tw-text-opacity, 1))}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-purple-700{--tw-text-opacity:1;color:rgb(126 34 206 / var(--tw-text-opacity, 1))}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.opacity-70{opacity:0.7}.opacity-75{opacity:0.75}.opacity-80{opacity:0.8}.opacity-65{opacity:0.65}.opacity-55{opacity:0.55}.opacity-60{opacity:0.6}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgb(0 0 0 / 0.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color), 0 8px 10px -6px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.outline-none{outline:2px solid transparent;outline-offset:2px}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-\[\#2563eb\]\/20{--tw-ring-color:rgb(37 99 235 / 0.2)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.transition-colors{transition-property:color, background-color, border-color, fill, stroke, -webkit-text-decoration-color;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, -webkit-text-decoration-color;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.last\:border-b-0:last-child{border-bottom-width:0px}.hover\:border-blue-500\/40:hover{border-color:rgb(59 130 246 / 0.4)}.hover\:border-slate-300:hover{--tw-border-opacity:1;border-color:rgb(203 213 225 / var(--tw-border-opacity, 1))}.hover\:bg-amber-500\/20:hover{background-color:rgb(245 158 11 / 0.2)}.hover\:bg-amber-700:hover{--tw-bg-opacity:1;background-color:rgb(180 83 9 / var(--tw-bg-opacity, 1))}.hover\:bg-blue-500\/20:hover{background-color:rgb(59 130 246 / 0.2)}.hover\:bg-blue-600\/25:hover{background-color:rgb(37 99 235 / 0.25)}.hover\:bg-blue-700:hover{--tw-bg-opacity:1;background-color:rgb(29 78 216 / var(--tw-bg-opacity, 1))}.hover\:bg-emerald-700:hover{--tw-bg-opacity:1;background-color:rgb(4 120 87 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-100:hover{--tw-bg-opacity:1;background-color:rgb(241 245 249 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50:hover{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-500\/20:hover{background-color:rgb(100 116 139 / 0.2)}.hover\:bg-blue-500\/15:hover{background-color:rgb(59 130 246 / 0.15)}.hover\:bg-blue-500\/5:hover{background-color:rgb(59 130 246 / 0.05)}.hover\:bg-\[\#b91c1c\]:hover{--tw-bg-opacity:1;background-color:rgb(185 28 28 / var(--tw-bg-opacity, 1))}.hover\:bg-slate-50\/60:hover{background-color:rgb(248 250 252 / 0.6)}.hover\:bg-slate-50\/80:hover{background-color:rgb(248 250 252 / 0.8)}.hover\:text-blue-600:hover{--tw-text-opacity:1;color:rgb(37 99 235 / var(--tw-text-opacity, 1))}.hover\:opacity-100:hover{opacity:1}.focus\:border-blue-500:focus{--tw-border-opacity:1;border-color:rgb(59 130 246 / var(--tw-border-opacity, 1))}@media (min-width: 640px){.sm\:col-span-2{grid-column:span 2 / span 2}.sm\:h-32{height:8rem}.sm\:w-64{width:16rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:grid-cols-4{grid-template-columns:repeat(4, minmax(0, 1fr))}.sm\:items-center{align-items:center}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}.sm\:text-xs{font-size:0.75rem;line-height:1rem}}@media (min-width: 768px){.md\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.md\:grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}}@media (min-width: 1024px){.lg\:col-span-6{grid-column:span 6 / span 6}.lg\:grid-cols-6{grid-template-columns:repeat(6, minmax(0, 1fr))}.lg\:flex-row{flex-direction:row}.lg\:items-center{align-items:center}.lg\:px-8{padding-left:2rem;padding-right:2rem}}</style></head>
-<body class="bg-[#f8fafc] text-slate-800 antialiased min-h-screen transition-colors duration-200">
+<body class="bg-[#eef2f7] text-slate-800 antialiased min-h-screen transition-colors duration-200">
   <!-- Horná navigačná lišta -->
   <header id="main-header" class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur-md">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-3">
@@ -245,12 +255,14 @@
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
     <!-- Ovládací panel pre rebríček -->
     <section id="controls-panel" class="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm space-y-4">
+      <div id="sport-chips" class="flex gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-1"></div>
+
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-2.5 flex-1">
-          <label for="header-sport-select" class="text-xs font-bold uppercase tracking-wider opacity-70">
+          <label for="header-sport-select" class="hidden text-xs font-bold uppercase tracking-wider opacity-70">
             Disciplína:
           </label>
-          <select id="header-sport-select" class="px-3.5 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm font-semibold outline-none focus:border-blue-500 cursor-pointer"><option value="biceps_1m">Biceps 1 minúta</option><option value="squats_1m">Drepy 1 minúta</option><option value="bench_1m">Benchpress 1 minúta</option><option value="treadmill_10m">Bežecký pás 10 minút</option><option value="treadmill_20m">Bežecký pás 20 minút</option><option value="treadmill_30m">Bežecký pás 30 minút</option><option value="treadmill_1h">Beh na páse 1 hodina</option><option value="swim_25m_25">Plávanie 25m (25)</option><option value="swim_50m_25">Plávanie 50m (25)</option><option value="swim_50m_50">Plávanie 50m (50)</option><option value="hb_sequence">HB Sequence</option><option value="hb_number">HB Number Memory</option></select>
+          <select id="header-sport-select" class="hidden px-3.5 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm font-semibold outline-none focus:border-blue-500 cursor-pointer"><option value="biceps_1m">Biceps 1 minúta</option><option value="squats_1m">Drepy 1 minúta</option><option value="bench_1m">Benchpress 1 minúta</option><option value="treadmill_10m">Bežecký pás 10 minút</option><option value="treadmill_20m">Bežecký pás 20 minút</option><option value="treadmill_30m">Bežecký pás 30 minút</option><option value="treadmill_1h">Beh na páse 1 hodina</option><option value="swim_25m_25">Plávanie 25m (25)</option><option value="swim_50m_25">Plávanie 50m (25)</option><option value="swim_50m_50">Plávanie 50m (50)</option><option value="hb_sequence">HB Sequence</option><option value="hb_number">HB Number Memory</option></select>
 
           <div class="inline-flex rounded-xl p-1 bg-slate-500/10 border border-slate-500/15">
             <button type="button" data-gender="M" class="gender-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-blue-600 text-white shadow-sm">
@@ -264,6 +276,19 @@
           <button id="friends-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">🤝 Len priatelia (0)</button>
 
           <button id="celebrities-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">⭐ Známe osobnosti (1)</button>
+
+          <select id="weight-filter" title="Váhová kategória" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
+            <option value="">⚖️ Všetky váhy</option>
+            <option value="u60">do 60 kg</option>
+            <option value="60-70">60 – 70 kg</option>
+            <option value="70-80">70 – 80 kg</option>
+            <option value="80-90">80 – 90 kg</option>
+            <option value="90-100">90 – 100 kg</option>
+            <option value="o100">nad 100 kg</option>
+          </select>
+          <select id="year-filter" title="Rok výkonu" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
+            <option value="">📅 Všetky roky</option>
+          </select>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
@@ -278,7 +303,7 @@
       </div>
 
       <!-- Dynamické záložky krajín -->
-      <div id="country-tabs" class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-1"><button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20">🌍 Svet (1)</button><button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition cursor-pointer bg-blue-600 text-white shadow-sm">🇸🇰 Slovensko (1)</button></div>
+      <div id="country-tabs" class="flex items-center flex-wrap gap-2 pt-1"><button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20">🌍 Svet (1)</button><button type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition cursor-pointer bg-blue-600 text-white shadow-sm">🇸🇰 Slovensko (1)</button></div>
     </section>
 
     <!-- Hlavný rebríček -->
@@ -296,18 +321,17 @@
 
       <div id="my-rank-banner" class="hidden px-4 sm:px-6 py-2.5 border-b border-blue-500/25 bg-blue-500/10 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"></div>
 
-      <div id="podium" class="hidden px-4 sm:px-6 pt-4 pb-3 border-b border-slate-200/60"></div>
-
       <div class="overflow-auto sm:max-h-[75vh]">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-200/70 text-[11px] font-bold uppercase tracking-wider opacity-70">
               <th class="py-3 px-4">Poradie</th>
               <th class="py-3 px-4">Priezvisko Meno</th>
-              <th class="py-3 px-4 hidden sm:table-cell">Vlajka</th>
-              <th class="py-3 px-4 hidden sm:table-cell">Krajina</th>
+              <th class="py-3 px-4 sm-col">Vlajka</th>
+              <th class="py-3 px-4 sm-col">Krajina</th>
               <th class="py-3 px-4">Výsledok (počet meraní)</th>
-              <th class="py-3 px-4 hidden sm:table-cell">Vek pri výkone</th>
+              <th class="py-3 px-4 sm-col">Vek pri výkone</th>
+              <th id="pct-th" class="py-3 px-4 sm-col">Percentil</th>
               <th class="py-3 px-4 text-right">Akcie</th>
             </tr>
           </thead>
@@ -604,6 +628,11 @@
       </div>
 
       <!-- Formulár pre pridanie nového výkonu -->
+      <div id="profile-first-record-hint" class="hidden rounded-2xl border border-blue-500/30 bg-blue-500/10 px-5 py-4 flex items-center justify-between gap-3 flex-wrap text-sm">
+        <span>🚀 <strong>Zatiaľ nemáš žiadny výkon.</strong> Pridaj prvý a objavíš sa v rebríčku.</span>
+        <button id="profile-first-record-btn" type="button" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Pridať prvý výkon</button>
+      </div>
+
       <div id="profile-add-record-box" class="rounded-2xl border border-slate-200/90 bg-white p-5 sm:p-6 shadow-sm space-y-4">
         <div class="flex items-center justify-between gap-2 flex-wrap">
           <h3 class="text-sm sm:text-base font-bold">Pridať nový výkon</h3>
@@ -633,11 +662,11 @@
             <input id="rec-city-input" type="text" placeholder="napr. Bratislava" class="w-full px-3 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm outline-none">
           </div>
           <div>
-            <div class="flex items-center gap-1.5 mb-1">
+            <div class="flex items-center gap-1.5 mb-1" style="height:1rem;line-height:1rem">
               <label for="rec-video-input" class="block text-xs font-semibold opacity-75">Odkaz na video (YouTube)</label>
-              <span class="relative group inline-block">
-                <span tabindex="0" role="button" aria-label="Informácia o videu" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-500/20 text-[10px] font-bold cursor-help outline-none">i</span>
-                <span role="tooltip" class="hidden group-hover:block group-focus-within:block absolute left-0 top-5 z-20 w-64 p-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-normal leading-snug shadow-lg">Výkon môžeš doložiť videom. Nahraj ho na YouTube (môže byť aj neverejné) alebo na inú stránku (Instagram, TikTok, Vimeo…) a sem vlož odkaz.</span>
+              <span class="tip-wrap relative flex items-center" style="height:1rem">
+                <span tabindex="0" role="button" aria-label="Informácia o videu" class="inline-flex items-center justify-center rounded-full bg-slate-500/20 text-[10px] font-bold cursor-help outline-none" style="width:14px;height:14px;line-height:1">i</span>
+                <span role="tooltip" class="tip-box absolute z-20 p-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-normal leading-snug shadow-lg" style="left:0;top:20px;width:16rem">Výkon môžeš doložiť videom. Nahraj ho na YouTube (môže byť aj neverejné) alebo na inú stránku (Instagram, TikTok, Vimeo…) a sem vlož odkaz.</span>
               </span>
             </div>
             <input id="rec-video-input" type="url" placeholder="https://youtube.com/..." class="w-full px-3 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm outline-none">
@@ -1134,6 +1163,17 @@
       let selectedGender = 'M';
       let onlyFriends = false;
       let onlyCelebrities = false;
+      let selectedWeight = '';
+      let selectedYear = '';
+      let leaderboardScope = false;
+      const WEIGHT_BANDS = {
+        'u60': { label: 'do 60 kg', min: 0, max: 60 },
+        '60-70': { label: '60 – 70 kg', min: 60, max: 70 },
+        '70-80': { label: '70 – 80 kg', min: 70, max: 80 },
+        '80-90': { label: '80 – 90 kg', min: 80, max: 90 },
+        '90-100': { label: '90 – 100 kg', min: 90, max: 100 },
+        'o100': { label: 'nad 100 kg', min: 100, max: Infinity }
+      };
       let userMenuBound = false;
       let selectedAgeAtRecord = null;
       let searchQuery = '';
@@ -1672,6 +1712,12 @@
       }
 
       function renderCountryTabs() {
+        const prev = leaderboardScope;
+        leaderboardScope = true;
+        try { renderCountryTabsInner(); } finally { leaderboardScope = prev; }
+      }
+
+      function renderCountryTabsInner() {
         const container = document.getElementById('country-tabs');
         if (!container) return;
 
@@ -1680,6 +1726,7 @@
 
         const matchingAthletes = db.athletes.filter(a => {
           if (a.gender !== selectedGender) return false;
+          if (!passesWeight(a)) return false;
           if (onlyFriends && !a.isFriend) return false;
           if (onlyCelebrities && !a.isCelebrity) return false;
           if (q && !(a.name || '').toLowerCase().includes(q) && !(a.country || '').toLowerCase().includes(q)) return false;
@@ -1715,7 +1762,7 @@
           const active = selectedCountry === item.code;
           const btn = document.createElement('button');
           btn.type = 'button';
-          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold shrink-0 transition cursor-pointer ' +
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ' +
             (active
               ? 'bg-blue-600 text-white shadow-sm'
               : 'bg-slate-500/10 hover:bg-slate-500/20');
@@ -1731,6 +1778,7 @@
 
         const baseFilterPool = db.athletes.filter(a => {
           if (a.gender !== selectedGender) return false;
+          if (!passesWeight(a)) return false;
           if (selectedCountry !== 'ALL' && a.country !== selectedCountry) return false;
           if (q && !(a.name || '').toLowerCase().includes(q) && !(a.country || '').toLowerCase().includes(q)) return false;
           return sport ? getAthleteBestInSport(a, sport.id) !== null : true;
@@ -1743,12 +1791,28 @@
         if (celebsBtn) celebsBtn.textContent = `⭐ Známe osobnosti (${baseFilterPool.filter(a => a.isCelebrity).length})`;
       }
 
+      function passesWeight(a) {
+        if (!selectedWeight) return true;
+        const band = WEIGHT_BANDS[selectedWeight];
+        const w = Number(a.weightKg);
+        if (!band || a.weightKg === null || a.weightKg === undefined || Number.isNaN(w)) return false;
+        return w >= band.min && w < band.max;
+      }
+
+      function recInScope(r) {
+        return !leaderboardScope || !selectedYear || String(r.date || '').slice(0, 4) === selectedYear;
+      }
+
+      function safeColor(c) {
+        return /^#[0-9a-fA-F]{3,8}$/.test(String(c || '')) ? c : '#2563eb';
+      }
+
       function getAthleteBestInSport(athlete, sportId) {
         if (!athlete || !Array.isArray(athlete.records)) return null;
         const sport = getSportById(sportId);
         if (!sport) return null;
         const vals = athlete.records
-          .filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value))
+          .filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value) && recInScope(r))
           .map(r => r.value);
         if (vals.length === 0) return null;
         return sport.lowerIsBetter ? Math.min(...vals) : Math.max(...vals);
@@ -1758,7 +1822,7 @@
         if (!athlete || !Array.isArray(athlete.records)) return null;
         const sport = getSportById(sportId);
         if (!sport) return null;
-        const matching = athlete.records.filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value));
+        const matching = athlete.records.filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value) && recInScope(r));
         if (matching.length === 0) return null;
         const bestVal = sport.lowerIsBetter
           ? Math.min(...matching.map(r => r.value))
@@ -1858,18 +1922,77 @@
         controlsEl.appendChild(makeBtn('Ďalšia →', currentPage + 1, currentPage >= totalPages, false));
       }
 
+      function resetLeaderboardFilters() {
+        onlyFriends = false; onlyCelebrities = false; selectedAgeAtRecord = null;
+        searchQuery = ''; selectedWeight = ''; selectedYear = ''; selectedCountry = 'ALL'; currentPage = 1;
+        const base = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20';
+        ['friends-filter-btn', 'celebrities-filter-btn'].forEach(id => { const b = document.getElementById(id); if (b) b.className = base; });
+        const si = document.getElementById('search-input'); if (si) si.value = '';
+        const w = document.getElementById('weight-filter'); if (w) w.value = '';
+        const y = document.getElementById('year-filter'); if (y) y.value = '';
+        renderLeaderboard();
+      }
+
+      function renderSportChips() {
+        const box = document.getElementById('sport-chips');
+        if (!box) return;
+        box.innerHTML = '';
+        db.sports.forEach(sp => {
+          const active = sp.id === selectedSportId;
+          const color = safeColor(sp.accent);
+          const b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer inline-flex items-center gap-1.5 ' +
+            (active ? 'text-white border-transparent shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/15');
+          if (active) b.style.backgroundColor = color;
+          b.innerHTML = `<span class="rounded-full" style="width:8px;height:8px;background:${active ? '#fff' : color}"></span>${escapeHtml(sp.name)}`;
+          b.addEventListener('click', () => {
+            selectedSportId = sp.id;
+            const sel = document.getElementById('header-sport-select');
+            if (sel) sel.value = sp.id;
+            currentPage = 1;
+            renderLeaderboard();
+          });
+          box.appendChild(b);
+        });
+      }
+
+      function populateYearFilter() {
+        const sel = document.getElementById('year-filter');
+        if (!sel) return;
+        const years = new Set();
+        db.athletes.forEach(a => (a.records || []).forEach(r => { const y = String(r.date || '').slice(0, 4); if (/^\d{4}$/.test(y)) years.add(y); }));
+        const list = Array.from(years).sort().reverse();
+        if (selectedYear && !years.has(selectedYear)) selectedYear = '';
+        sel.innerHTML = '<option value="">📅 Všetky roky</option>' + list.map(y => `<option value="${y}">${y}</option>`).join('');
+        sel.value = selectedYear;
+      }
+
       function renderLeaderboard() {
+        const prev = leaderboardScope;
+        leaderboardScope = true;
+        try { renderLeaderboardInner(); } finally { leaderboardScope = prev; }
+      }
+
+      function renderLeaderboardInner() {
         const tbody = document.getElementById('leaderboard-body');
         const titleEl = document.getElementById('leaderboard-title');
         const countEl = document.getElementById('leaderboard-count');
         const logoEl = document.getElementById('leaderboard-sport-logo');
         if (!tbody) return;
 
+        renderSportChips();
+        populateYearFilter();
         renderCountryTabs();
         syncAgeFilterBadge();
 
         const sport = getSportById(selectedSportId);
         if (!sport) return;
+
+        const lbSection = document.getElementById('leaderboard-section');
+        if (lbSection) lbSection.style.borderTop = '3px solid ' + safeColor(sport.accent);
+        const pctTh = document.getElementById('pct-th');
+        if (pctTh) pctTh.textContent = selectedAgeAtRecord !== null ? `Percentil (vek ${selectedAgeAtRecord})` : 'Percentil';
 
         if (logoEl) logoEl.innerHTML = getSportMiniLogoHtml(sport);
         if (titleEl) {
@@ -1880,59 +2003,37 @@
 
         const q = searchQuery.trim().toLowerCase();
 
-        const rows = db.athletes
-          .filter(a => {
-            if (a.gender !== selectedGender) return false;
-            if (selectedCountry !== 'ALL' && a.country !== selectedCountry) return false;
-            if (onlyFriends && !a.isFriend) return false;
-            if (onlyCelebrities && !a.isCelebrity) return false;
-            if (q && !(a.name || '').toLowerCase().includes(q) && !(a.country || '').toLowerCase().includes(q)) return false;
-            const bestRec = getAthleteBestRecordInSport(a, sport.id);
-            if (!bestRec) return false;
-            if (selectedAgeAtRecord !== null) {
-              const ageAtRec = getAgeAtRecord(a, bestRec);
-              if (ageAtRec !== selectedAgeAtRecord) return false;
-            }
+        // Skupina, voči ktorej sa počíta percentil: pohlavie, krajina, váha, rok a (ak je zvolený) vek.
+        // Vyhľadávanie, priatelia a známe osobnosti percentil neovplyvňujú.
+        const pool = db.athletes
+          .filter(a => a.gender === selectedGender && (selectedCountry === 'ALL' || a.country === selectedCountry) && passesWeight(a))
+          .map(a => ({ a, bestRec: getAthleteBestRecordInSport(a, sport.id) }))
+          .filter(x => x.bestRec)
+          .filter(x => selectedAgeAtRecord === null || getAgeAtRecord(x.a, x.bestRec) === selectedAgeAtRecord);
+        const poolVals = pool.map(x => x.bestRec.value);
+        const pctOf = (v) => {
+          if (poolVals.length === 0) return null;
+          let worse = 0, equal = 0;
+          poolVals.forEach(o => { if (o === v) equal++; else if (sport.lowerIsBetter ? o > v : o < v) worse++; });
+          return Math.max(0, Math.min(99.9, ((worse + equal / 2) / poolVals.length) * 100));
+        };
+
+        const rows = pool
+          .filter(x => {
+            if (onlyFriends && !x.a.isFriend) return false;
+            if (onlyCelebrities && !x.a.isCelebrity) return false;
+            if (q && !(x.a.name || '').toLowerCase().includes(q) && !(x.a.country || '').toLowerCase().includes(q)) return false;
             return true;
           })
-          .map(a => {
-            const bestRec = getAthleteBestRecordInSport(a, sport.id);
-            return {
-              athlete: a,
-              best: bestRec ? bestRec.value : null,
-              bestRecord: bestRec,
-              ageAtRecord: getAgeAtRecord(a, bestRec)
-            };
-          })
+          .map(x => ({
+            athlete: x.a,
+            best: x.bestRec.value,
+            bestRecord: x.bestRec,
+            ageAtRecord: getAgeAtRecord(x.a, x.bestRec)
+          }))
           .sort((x, y) => sport.lowerIsBetter ? x.best - y.best : y.best - x.best);
 
         if (countEl) countEl.textContent = `${rows.length} účastníkov`;
-
-        const podium = document.getElementById('podium');
-        if (podium) {
-          const top = rows.slice(0, 3);
-          if (currentPage !== 1 || top.length === 0) {
-            podium.classList.add('hidden');
-            podium.innerHTML = '';
-          } else {
-            const medals = ['🥇', '🥈', '🥉'];
-            const order = top.length >= 3 ? [1, 0, 2] : top.map((_, i) => i);
-            podium.classList.remove('hidden');
-            podium.innerHTML = `<div class="grid gap-2 sm:gap-3 items-end" style="grid-template-columns: repeat(${top.length}, minmax(0, 1fr)); max-width: 640px; margin: 0 auto;">` +
-              order.map(i => {
-                const e = top[i];
-                const own = currentUserId && String(e.athlete.id) === String(currentUserId);
-                return `<button type="button" data-podium-profile="${escapeHtml(e.athlete.id)}" class="podium-card min-w-0 text-center rounded-2xl border bg-white ${i === 0 ? 'pt-4 pb-5 border-amber-400/60 shadow-md' : 'pt-3 pb-3.5 border-slate-200'} px-2 hover:shadow-md transition cursor-pointer ${own ? 'ring-2 ring-blue-500' : ''}">
-                  <div class="${i === 0 ? 'text-3xl' : 'text-2xl'}">${medals[i]}</div>
-                  <div class="mt-1 font-bold text-xs sm:text-sm truncate">${escapeHtml(e.athlete.name)}</div>
-                  <div class="text-[11px] opacity-70 truncate">${getFlag(e.athlete.country)} ${escapeHtml(e.athlete.country)}</div>
-                  <div class="mt-1 font-extrabold text-sm text-blue-600">${escapeHtml(formatVal(e.best, sport.unit))}</div>
-                </button>`;
-              }).join('') + '</div>';
-            podium.querySelectorAll('[data-podium-profile]').forEach(b =>
-              b.addEventListener('click', () => openAthleteProfile(b.getAttribute('data-podium-profile'))));
-          }
-        }
 
         const banner = document.getElementById('my-rank-banner');
         if (banner) {
@@ -1943,7 +2044,19 @@
           } else {
             const mine = rows[myIdx];
             banner.classList.remove('hidden');
-            banner.innerHTML = `<span>📍 <strong>Tvoja pozícia: #${myIdx + 1}</strong> z ${rows.length} · ${escapeHtml(formatVal(mine.best, sport.unit))}</span>
+            const myPct = poolVals.length >= 2 ? pctOf(mine.best) : null;
+            let pctSentence = '';
+            if (myPct !== null) {
+              const whoLabel = selectedGender === 'Z' ? 'žien' : 'mužov';
+              const betterLabel = selectedGender === 'Z' ? 'lepšia' : 'lepší';
+              const parts = [];
+              if (selectedAgeAtRecord !== null) parts.push(`vo veku ${selectedAgeAtRecord} r.`);
+              if (selectedWeight && WEIGHT_BANDS[selectedWeight]) parts.push(`s váhou ${WEIGHT_BANDS[selectedWeight].label}`);
+              if (selectedYear) parts.push(`v roku ${selectedYear}`);
+              const place = selectedCountry === 'ALL' ? 'na svete' : `v krajine ${selectedCountry}`;
+              pctSentence = ` · ${betterLabel} ako <strong>${Math.round(myPct)} %</strong> ${whoLabel} ${parts.join(' ')} ${place}`.replace(/\s+/g, ' ');
+            }
+            banner.innerHTML = `<span>📍 <strong>Tvoja pozícia: #${myIdx + 1}</strong> z ${rows.length} · ${escapeHtml(formatVal(mine.best, sport.unit))}${pctSentence}</span>
               <button type="button" id="my-rank-jump" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Ukázať v tabuľke</button>`;
             banner.querySelector('#my-rank-jump').addEventListener('click', () => {
               currentPage = Math.floor(myIdx / PAGE_SIZE) + 1;
@@ -1966,7 +2079,9 @@
 
         tbody.innerHTML = '';
         if (pageRows.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="7" class="py-10 px-4 text-center text-sm opacity-70">Pre zvolené filtre sa nenašli žiadne výsledky.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="8" class="py-10 px-4 text-center text-sm"><div class="opacity-70">Pre zvolené filtre sa nenašli žiadne výsledky.</div><button type="button" id="reset-filters-btn" class="mt-3 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Zruš filtre</button></td></tr>`;
+          const rb = document.getElementById('reset-filters-btn');
+          if (rb) rb.addEventListener('click', resetLeaderboardFilters);
           return;
         }
 
@@ -1995,7 +2110,8 @@
                 : 'bg-slate-500/10 text-current border-slate-500/15';
 
           const videoUrl = entry.bestRecord && entry.bestRecord.videoUrl ? entry.bestRecord.videoUrl : '';
-          const worldPct = calculateGenderPercentile(ath, sport.id, db.athletes);
+          const rowPct = pctOf(entry.best);
+          const rowPctText = rowPct !== null ? rowPct.toFixed(1) : '—';
           const isRecentBest = entry.bestRecord && entry.bestRecord.date &&
             (Date.now() - new Date(entry.bestRecord.date).getTime()) < 90 * 86400000;
           const ageLabel = entry.ageAtRecord !== null ? `${entry.ageAtRecord} r.` : '—';
@@ -2006,32 +2122,37 @@
               <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-extrabold border ${rankBadgeClass}">#${idx + 1}</span>
             </td>
             <td class="py-3 px-4">
-              <span class="sm:hidden mr-1">${getFlag(ath.country)}</span><button type="button" data-open-profile="${escapeHtml(ath.id)}" class="font-bold text-sm hover:text-blue-600 transition cursor-pointer text-left">
+              <span class="mobile-only mr-1">${getFlag(ath.country)}</span><button type="button" data-open-profile="${escapeHtml(ath.id)}" class="font-bold text-sm hover:text-blue-600 transition cursor-pointer text-left">
                 ${escapeHtml(ath.name)}
               </button>
               ${ath.isCelebrity ? '<span class="ml-1.5 text-xs" title="Známa osobnosť">⭐</span>' : ''}
               ${isOwnRow ? '<span class="ml-1.5 px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold align-middle">TY</span>' : ''}
             </td>
-            <td class="py-3 px-4 text-base hidden sm:table-cell">${getFlag(ath.country)}</td>
-            <td class="py-3 px-4 text-xs sm:text-sm font-medium hidden sm:table-cell">${escapeHtml(ath.country)}</td>
+            <td class="py-3 px-4 text-base sm-col">${getFlag(ath.country)}</td>
+            <td class="py-3 px-4 text-xs sm:text-sm font-medium sm-col">${escapeHtml(ath.country)}</td>
             <td class="py-3 px-4">
               <div class="inline-flex items-center gap-2 flex-wrap">
-                <span class="font-extrabold text-sm text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
+                <span class="font-extrabold text-base text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
                 <span class="text-xs opacity-65 hidden sm:inline" title="Počet meraní tohto športovca v disciplíne">(${recCount}× merané)</span>
-                ${worldPct !== null ? `<span class="px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums" title="Percentil vo svete pre dané pohlavie">${escapeHtml(worldPct.toFixed(1))}</span>` : ''}
+                ${rowPct !== null ? `<span class="mobile-only px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums" title="Percentil">${escapeHtml(rowPctText)}</span>` : ''}
                 ${isRecentBest ? '<span class="text-emerald-600 text-xs font-bold" title="Najlepší výkon z posledných 90 dní">▲</span>' : ''}
                 ${videoUrl
                   ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="Prehrať video záznam" class="w-7 h-6 rounded-md bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
                   : ''}
               </div>
             </td>
-            <td class="py-3 px-4 hidden sm:table-cell">
+            <td class="py-3 px-4 sm-col">
               ${entry.ageAtRecord !== null
                 ? `<button type="button" data-filter-age="${escapeHtml(String(entry.ageAtRecord))}" title="Filtrovať účastníkov s vekom ${escapeHtml(String(entry.ageAtRecord))} r." class="px-2.5 py-1 rounded-lg text-xs font-bold border transition cursor-pointer ${
                     isAgeActive
                       ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                       : 'bg-slate-500/10 hover:bg-blue-500/15 hover:border-blue-500/40 border-slate-500/20'
                   }">${escapeHtml(ageLabel)}</button>`
+                : `<span class="text-xs opacity-50">—</span>`}
+            </td>
+            <td class="py-3 px-4 sm-col">
+              ${rowPct !== null
+                ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold border bg-slate-500/10 border-slate-500/20 tabular-nums" title="Lepší ako ${escapeHtml(String(Math.round(rowPct)))} % v aktuálnom filtri${selectedAgeAtRecord !== null ? ' (vekovej skupine ' + escapeHtml(String(selectedAgeAtRecord)) + ' r.)' : ''}">${escapeHtml(rowPctText)}</span>`
                 : `<span class="text-xs opacity-50">—</span>`}
             </td>
             <td class="py-3 px-4 text-right">
@@ -2182,6 +2303,7 @@
         const matchingValues = [];
         for (const rec of athlete.records) {
           if (rec.sportId !== sportId || typeof rec.value !== 'number' || Number.isNaN(rec.value)) continue;
+          if (!recInScope(rec)) continue;
           const recAge = getAgeAtRecord(athlete, rec);
           if (recAge === targetAge) {
             matchingValues.push(rec.value);
@@ -2717,6 +2839,8 @@
         if (addBox) {
           addBox.classList.toggle('hidden', !isOwnProfile);
         }
+        const firstHint = document.getElementById('profile-first-record-hint');
+        if (firstHint) firstHint.classList.toggle('hidden', !(isOwnProfile && records.length === 0));
 
         const tagsContainer = document.getElementById('profile-records-filter-tags');
         if (tagsContainer) {
@@ -3335,6 +3459,12 @@
       function bindEvents() {
         document.getElementById('brand-home-btn').addEventListener('click', closeAthleteProfile);
         document.getElementById('back-to-leaderboard-btn').addEventListener('click', closeAthleteProfile);
+        document.getElementById('profile-first-record-btn').addEventListener('click', () => {
+          const box = document.getElementById('profile-add-record-box');
+          if (box && box.scrollIntoView) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const inp = document.getElementById('rec-value-input');
+          if (inp) setTimeout(() => inp.focus(), 350);
+        });
         document.getElementById('profile-share-btn').addEventListener('click', async () => {
           if (activeProfileAthleteId == null) return;
           const url = profileLink(activeProfileAthleteId);
@@ -3468,6 +3598,17 @@
           currentPage = 1;
           this.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ' +
             (onlyFriends ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
+          renderLeaderboard();
+        });
+
+        document.getElementById('weight-filter').addEventListener('change', (e) => {
+          selectedWeight = e.target.value || '';
+          currentPage = 1;
+          renderLeaderboard();
+        });
+        document.getElementById('year-filter').addEventListener('change', (e) => {
+          selectedYear = e.target.value || '';
+          currentPage = 1;
           renderLeaderboard();
         });
 
