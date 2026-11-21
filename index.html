@@ -244,7 +244,6 @@
           <button id="friends-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">🤝 Len priatelia (0)</button>
 
           <button id="celebrities-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">⭐ Známe osobnosti (1)</button>
-          <button id="verified-filter-btn" type="button" title="Zobraziť len výkony, ktoré overil admin (alebo zadal dôveryhodný člen)" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">✓ Len overené</button>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
@@ -608,9 +607,14 @@
             <input id="rec-city-input" type="text" placeholder="napr. Bratislava" class="w-full px-3 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm outline-none">
           </div>
           <div>
-            <label for="rec-video-input" class="block text-xs font-semibold opacity-75 mb-1">Odkaz na video (YouTube)</label>
+            <div class="flex items-center gap-1.5 mb-1">
+              <label for="rec-video-input" class="block text-xs font-semibold opacity-75">Odkaz na video (YouTube)</label>
+              <span class="relative group inline-block">
+                <span tabindex="0" role="button" aria-label="Informácia o videu" class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-500/20 text-[10px] font-bold cursor-help outline-none">i</span>
+                <span role="tooltip" class="hidden group-hover:block group-focus-within:block absolute left-0 top-5 z-20 w-64 p-2.5 rounded-xl bg-slate-900 text-white text-[11px] font-normal leading-snug shadow-lg">Výkon môžeš doložiť videom. Nahraj ho na YouTube (môže byť aj neverejné) alebo na inú stránku (Instagram, TikTok, Vimeo…) a sem vlož odkaz.</span>
+              </span>
+            </div>
             <input id="rec-video-input" type="url" placeholder="https://youtube.com/..." class="w-full px-3 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm outline-none">
-            <p class="text-[11px] opacity-65 mt-1 leading-snug">Nahraj video na YouTube (môže byť aj neverejné) alebo inú stránku (Instagram, TikTok, Vimeo…) a vlož odkaz. Výkon s videom môže admin overiť a dostane značku ✓ overené. Bez videa ostane neoverený.</p>
           </div>
           <div class="sm:col-span-2 lg:col-span-6 flex justify-end pt-1">
             <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition cursor-pointer">
@@ -754,7 +758,6 @@
           <div>
             <label for="edit-rec-video" class="block text-xs font-semibold mb-1">Odkaz na video (YouTube)</label>
             <input id="edit-rec-video" type="url" placeholder="https://youtube.com/..." class="w-full px-3 py-2 rounded-xl border text-sm">
-            <p class="text-[11px] opacity-65 mt-1 leading-snug">Po zmene hodnoty, dátumu alebo videa sa overenie zruší a admin ho musí potvrdiť znova.</p>
           </div>
         </div>
         <div class="flex justify-end gap-2 pt-2">
@@ -964,7 +967,6 @@
         <div class="flex gap-2 flex-wrap border-b pb-3">
           <button data-admin-tab="athletes" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Športovci</button>
           <button data-admin-tab="sports" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Disciplíny</button>
-          <button data-admin-tab="verify" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Overovanie výkonov</button>
           <button data-admin-tab="requests" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Žiadosti o zmazanie</button>
           <button id="admin-super-tab-btn" data-admin-tab="super" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Roly a audit log</button>
         </div>
@@ -983,8 +985,6 @@
           </form>
           <div id="admin-sports-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
         </div>
-
-        <div id="admin-panel-verify" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
 
         <div id="admin-panel-requests" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
 
@@ -1108,7 +1108,6 @@
       let selectedGender = 'M';
       let onlyFriends = false;
       let onlyCelebrities = false;
-      let onlyVerified = false;
       let selectedAgeAtRecord = null;
       let searchQuery = '';
       let currentPage = 1;
@@ -1319,15 +1318,14 @@
           const athletes = pr.map(p => {
             const a = { id: p.id, name: p.display_name, country: p.country || '', gender: p.gender || 'M',
               birthYear: p.birth_year, weightKg: p.weight_kg, heightCm: p.height_cm,
-              isFriend: false, isCelebrity: !!p.is_celebrity, isTrusted: !!p.is_trusted, records: [] };
+              isFriend: false, isCelebrity: !!p.is_celebrity, records: [] };
             byId.set(p.id, a);
             return a;
           });
           rc.forEach(r => {
             const a = byId.get(r.user_id);
             if (a) a.records.push({ id: r.id, sportId: r.sport_id, value: Number(r.value), date: r.record_date,
-              country: r.country || '', city: r.city || '', videoUrl: r.video_url || '',
-              verified: !!r.verified || !!a.isTrusted });
+              country: r.country || '', city: r.city || '', videoUrl: r.video_url || '' });
           });
           db = {
             sports: sp.map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent })),
@@ -1723,30 +1721,22 @@
         const sport = getSportById(sportId);
         if (!sport) return null;
         const vals = athlete.records
-          .filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value) && (!onlyVerified || r.verified))
+          .filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value))
           .map(r => r.value);
         if (vals.length === 0) return null;
         return sport.lowerIsBetter ? Math.min(...vals) : Math.max(...vals);
-      }
-
-      function recordBadgeHtml(rec) {
-        if (!rec) return '';
-        if (rec.verified) return '<span class="px-1.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 text-[11px] font-bold" title="Výkon overil admin alebo ho zadal dôveryhodný člen">✓ overené</span>';
-        if (rec.videoUrl) return '<span class="px-1.5 py-0.5 rounded-md bg-amber-500/15 text-amber-700 text-[11px] font-semibold" title="Výkon má video a čaká na kontrolu">čaká na kontrolu</span>';
-        return '<span class="text-[11px] opacity-55" title="Výkon bez videa, zatiaľ neoverený">neoverené</span>';
       }
 
       function getAthleteBestRecordInSport(athlete, sportId) {
         if (!athlete || !Array.isArray(athlete.records)) return null;
         const sport = getSportById(sportId);
         if (!sport) return null;
-        const matching = athlete.records.filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value) && (!onlyVerified || r.verified));
+        const matching = athlete.records.filter(r => r.sportId === sportId && typeof r.value === 'number' && !Number.isNaN(r.value));
         if (matching.length === 0) return null;
         const bestVal = sport.lowerIsBetter
           ? Math.min(...matching.map(r => r.value))
           : Math.max(...matching.map(r => r.value));
-        const top = matching.filter(r => r.value === bestVal);
-        return top.find(r => r.verified && r.videoUrl) || top.find(r => r.verified) || top.find(r => r.videoUrl) || top[0] || null;
+        return matching.find(r => r.value === bestVal && r.videoUrl) || matching.find(r => r.value === bestVal) || null;
       }
 
       function getAgeAtRecord(athlete, record) {
@@ -1947,7 +1937,6 @@
               <div class="inline-flex items-center gap-2 flex-wrap">
                 <span class="font-extrabold text-sm text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
                 <span class="text-xs opacity-65" title="Počet meraní tohto športovca v disciplíne">(${recCount}× merané)</span>
-                ${recordBadgeHtml(entry.bestRecord)}
                 ${worldPct !== null ? `<span class="text-xs font-semibold opacity-75" title="Percentil vo svete pre dané pohlavie">perc. ${escapeHtml(worldPctText)}</span>` : ''}
                 ${videoUrl
                   ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="Prehrať video záznam" class="w-7 h-6 rounded-md bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
@@ -2048,13 +2037,15 @@
           .map(a => getAthleteBestInSport(a, sportId))
           .filter(v => v !== null);
 
-        if (scores.length <= 1) return null;
+        if (scores.length === 0) return null;
 
-        let worse = 0;
+        // Percentil s polovičným započítaním zhôd (aj samého seba): pri jedinom účastníkovi vyjde 50.
+        let worse = 0, equal = 0;
         scores.forEach(v => {
-          if (sport.lowerIsBetter ? v > myBest : v < myBest) worse++;
+          if (v === myBest) equal++;
+          else if (sport.lowerIsBetter ? v > myBest : v < myBest) worse++;
         });
-        const pct = Math.max(0, Math.min(99.9, (worse / scores.length) * 100));
+        const pct = Math.max(0, Math.min(99.9, ((worse + equal / 2) / scores.length) * 100));
         return Number(pct.toFixed(1));
       }
 
@@ -2109,7 +2100,6 @@
         const matchingValues = [];
         for (const rec of athlete.records) {
           if (rec.sportId !== sportId || typeof rec.value !== 'number' || Number.isNaN(rec.value)) continue;
-          if (onlyVerified && !rec.verified) continue;
           const recAge = getAgeAtRecord(athlete, rec);
           if (recAge === targetAge) {
             matchingValues.push(rec.value);
@@ -2671,7 +2661,7 @@
           tr.innerHTML = `
             <td class="py-3 px-3.5 font-bold text-slate-900 whitespace-nowrap">${escapeHtml(rec.date || '—')}</td>
             <td class="py-3 px-3.5 font-semibold text-slate-800">${escapeHtml(sp ? sp.name : rec.sportId)}</td>
-            <td class="py-3 px-3.5 font-extrabold text-[#2563eb] whitespace-nowrap">${escapeHtml(formatVal(rec.value, sp ? sp.unit : ''))} ${recordBadgeHtml(rec)}</td>
+            <td class="py-3 px-3.5 font-extrabold text-[#2563eb] whitespace-nowrap">${escapeHtml(formatVal(rec.value, sp ? sp.unit : ''))}</td>
             <td class="py-3 px-3.5 font-medium text-slate-700 whitespace-nowrap">${getFlag(recCountry)} ${escapeHtml(recCountry)}</td>
             <td class="py-3 px-3.5 text-slate-500">${escapeHtml(rec.city || '—')}</td>
             <td class="py-3 px-3.5 text-center">
@@ -2781,7 +2771,7 @@
           const active = b.getAttribute('data-admin-tab') === activeAdminTab;
           b.className = 'admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ' + (active ? 'bg-blue-600 text-white' : 'bg-slate-500/10');
         });
-        ['athletes', 'sports', 'verify', 'requests', 'super'].forEach(tab => {
+        ['athletes', 'sports', 'requests', 'super'].forEach(tab => {
           const panel = document.getElementById(`admin-panel-${tab}`);
           if (panel) panel.classList.toggle('hidden', activeAdminTab !== tab);
         });
@@ -2805,12 +2795,11 @@
         const btnBase = 'px-2.5 py-1 rounded-lg font-semibold cursor-pointer ';
         document.getElementById('admin-athletes-list').innerHTML = profiles.length ? profiles.map(p => `
           <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs">
-            <div><strong>${escapeHtml(p.display_name)}</strong> · ${getFlag(p.country)} ${escapeHtml(p.country || '—')} ${p.is_celebrity ? '⭐' : ''} ${p.is_trusted ? '<span title="Dôveryhodný člen" class="text-emerald-600">✓</span>' : ''}
+            <div><strong>${escapeHtml(p.display_name)}</strong> · ${getFlag(p.country)} ${escapeHtml(p.country || '—')} ${p.is_celebrity ? '⭐' : ''}
               ${p.role !== 'user' ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 font-semibold">${escapeHtml(roleLabel(p.role))}</span>` : ''}
               ${p.consent_at ? '' : '<span class="ml-1 opacity-60">(profil nedokončený)</span>'}</div>
             <div class="flex items-center gap-1.5">
               <button type="button" data-adm-celeb="${escapeHtml(p.id)}" data-flag="${p.is_celebrity ? '0' : '1'}" class="${btnBase}bg-purple-500/15 text-purple-700">${p.is_celebrity ? 'Zrušiť ★' : 'Označiť ★'}</button>
-              ${isSuper ? `<button type="button" data-adm-trust="${escapeHtml(p.id)}" data-flag="${p.is_trusted ? '0' : '1'}" title="Výkony dôveryhodného člena sa berú ako overené aj bez videa" class="${btnBase}bg-emerald-500/15 text-emerald-700">${p.is_trusted ? 'Zrušiť dôveryhodného' : 'Dôveryhodný ✓'}</button>` : ''}
               ${isSuper && p.id !== currentAdmin.id ? `<button type="button" data-adm-del-ath="${escapeHtml(p.id)}" data-name="${escapeHtml(p.display_name)}" class="${btnBase}bg-rose-500/15 text-rose-700">Zmazať</button>` : ''}
             </div>
           </div>`).join('') : '<div class="text-xs opacity-70 py-3">Žiadni športovci.</div>';
@@ -2820,27 +2809,6 @@
             <div><strong>${escapeHtml(sp.name)}</strong> (${escapeHtml(sp.unit)})</div>
             ${isSuper ? `<button type="button" data-adm-del-sp="${escapeHtml(sp.id)}" data-name="${escapeHtml(sp.name)}" class="${btnBase}bg-rose-500/15 text-rose-700">Odstrániť</button>` : ''}
           </div>`).join('');
-
-        const verifyRows = [];
-        db.athletes.forEach(a => a.records.forEach(r => {
-          if (a.isTrusted || (!r.videoUrl && !r.verified)) return;
-          verifyRows.push({ a, r });
-        }));
-        verifyRows.sort((x, y) => (x.r.verified ? 1 : 0) - (y.r.verified ? 1 : 0) || String(y.r.date).localeCompare(String(x.r.date)));
-        document.getElementById('admin-panel-verify').innerHTML = (verifyRows.length
-          ? '<p class="text-xs opacity-70">Výkony s videom. Pozri si video a klikni na Overiť. Výkony dôveryhodných členov sú overené automaticky.</p>' + verifyRows.map(({ a, r }) => {
-              const sp = getSportById(r.sportId);
-              const url = safeHttpUrl(r.videoUrl);
-              return `<div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs flex-wrap">
-                <div><strong>${escapeHtml(a.name)}</strong> · ${escapeHtml(sp ? sp.name : r.sportId)} · ${escapeHtml(formatVal(r.value, sp ? sp.unit : ''))} · ${escapeHtml(r.date || '')}
-                  ${r.verified ? '<span class="ml-1 text-emerald-700 font-semibold">✓ overené</span>' : '<span class="ml-1 text-amber-700 font-semibold">čaká</span>'}</div>
-                <div class="flex items-center gap-1.5">
-                  ${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="${btnBase}bg-red-600 text-white">▶ Video</a>` : ''}
-                  <button type="button" data-adm-verify="${escapeHtml(r.id)}" data-flag="${r.verified ? '0' : '1'}" class="${btnBase}${r.verified ? 'bg-slate-500/15' : 'bg-emerald-600 text-white'}">${r.verified ? 'Zrušiť overenie' : 'Overiť'}</button>
-                </div>
-              </div>`;
-            }).join('')
-          : '<div class="text-xs opacity-70 py-4">Zatiaľ nie sú žiadne výkony s videom.</div>');
 
         document.getElementById('admin-panel-requests').innerHTML = requests.length ? requests.map(r => `
           <div class="p-3 rounded-xl border flex items-center justify-between gap-2 text-xs">
@@ -2894,12 +2862,6 @@
             if (btn.hasAttribute('data-adm-celeb')) {
               await rpcOrThrow('set_celebrity', { p_user: g('data-adm-celeb'), p_flag: g('data-flag') === '1' });
               showToast('Hotovo.');
-            } else if (btn.hasAttribute('data-adm-trust')) {
-              await rpcOrThrow('set_trusted', { p_user: g('data-adm-trust'), p_flag: g('data-flag') === '1' });
-              showToast('Hotovo.');
-            } else if (btn.hasAttribute('data-adm-verify')) {
-              await rpcOrThrow('set_record_verified', { p_record: g('data-adm-verify'), p_flag: g('data-flag') === '1' });
-              showToast(g('data-flag') === '1' ? 'Výkon bol overený.' : 'Overenie bolo zrušené.');
             } else if (btn.hasAttribute('data-adm-del-ath')) {
               if (!confirm(`Naozaj zmazať športovca ${g('data-name')} aj s jeho výkonmi? Nedá sa to vrátiť.`)) return;
               await rpcOrThrow('admin_delete_athlete', { p_user: g('data-adm-del-ath') });
@@ -3344,14 +3306,6 @@
           currentPage = 1;
           this.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ' +
             (onlyFriends ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
-          renderLeaderboard();
-        });
-
-        document.getElementById('verified-filter-btn').addEventListener('click', function () {
-          onlyVerified = !onlyVerified;
-          currentPage = 1;
-          this.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ' +
-            (onlyVerified ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
           renderLeaderboard();
         });
 
