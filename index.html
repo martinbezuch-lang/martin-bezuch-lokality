@@ -9,6 +9,13 @@
   <meta property="og:locale" content="sk_SK">
   <meta property="og:title" content="Biceps 1 minúta — Databáza amatérskych športovcov">
   <meta property="og:description" content="Národné a svetové rebríčky, porovnávanie výkonov a osobný profil amatérskych športovcov.">
+  <meta property="og:url" content="https://martinbezuch-lang.github.io/martin-bezuch-lokality/">
+  <meta property="og:image" content="https://martinbezuch-lang.github.io/martin-bezuch-lokality/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Biceps 1 minúta — Databáza amatérskych športovcov">
+  <meta name="twitter:image" content="https://martinbezuch-lang.github.io/martin-bezuch-lokality/og-image.png">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://khduswpbhozkqjxnqufk.supabase.co; frame-src https://www.youtube.com https://www.youtube-nocookie.com; object-src 'none'; base-uri 'self'; form-action 'self'">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='66' font-size='46' font-weight='800' text-anchor='middle' fill='white' font-family='Arial,sans-serif'%3EB1%3C/text%3E%3C/svg%3E">
@@ -52,6 +59,19 @@
     body.dark-chess #leaderboard-body tr:hover {
       background-color: rgba(255, 255, 255, 0.03);
     }
+    @media (max-width: 639px) {
+      #leaderboard-body td, #leaderboard-section thead th { padding-left: 0.5rem; padding-right: 0.5rem; }
+      #leaderboard-body td button[data-open-profile] { font-size: 0.8rem; }
+    }
+    #user-menu-panel { min-width: 14rem; }
+    #user-menu-panel button { white-space: nowrap; }
+    #leaderboard-section thead th { position: sticky; top: 0; z-index: 5; background-color: #ffffff; }
+    body.dark-chess #leaderboard-section thead th { background-color: #312e2b; }
+    body.dark-chess #user-menu-panel { background-color: #312e2b; border-color: #45423e; color: #e7e5e4; }
+    body.dark-chess #user-menu-panel .menu-sep { border-color: #45423e; }
+    body.dark-chess .podium-card { background-color: #3a3733; border-color: #4a4642; color: #e7e5e4; }
+    body.dark-chess #profile-progress-chart { background-color: #312e2b; border-color: #45423e; color: #e7e5e4; }
+    body.dark-chess #my-rank-banner { border-color: #45423e; }
     body.dark-chess #pagination-bar {
       border-color: #413e3a;
     }
@@ -276,16 +296,18 @@
 
       <div id="my-rank-banner" class="hidden px-4 sm:px-6 py-2.5 border-b border-blue-500/25 bg-blue-500/10 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"></div>
 
-      <div class="overflow-x-auto">
+      <div id="podium" class="hidden px-4 sm:px-6 pt-4 pb-3 border-b border-slate-200/60"></div>
+
+      <div class="overflow-auto sm:max-h-[75vh]">
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="border-b border-slate-200/70 text-[11px] font-bold uppercase tracking-wider opacity-70">
               <th class="py-3 px-4">Poradie</th>
               <th class="py-3 px-4">Priezvisko Meno</th>
-              <th class="py-3 px-4">Vlajka</th>
-              <th class="py-3 px-4">Krajina</th>
+              <th class="py-3 px-4 hidden sm:table-cell">Vlajka</th>
+              <th class="py-3 px-4 hidden sm:table-cell">Krajina</th>
               <th class="py-3 px-4">Výsledok (počet meraní)</th>
-              <th class="py-3 px-4">Vek pri výkone</th>
+              <th class="py-3 px-4 hidden sm:table-cell">Vek pri výkone</th>
               <th class="py-3 px-4 text-right">Akcie</th>
             </tr>
           </thead>
@@ -397,6 +419,8 @@
         </div>
 
         <!-- Riadok vybranej disciplíny -->
+        <div id="profile-progress-chart" class="hidden rounded-2xl border border-slate-200/90 bg-white px-4 py-3.5 text-slate-800"></div>
+
         <div id="profile-selected-sport-banner" class="rounded-2xl border border-slate-200/90 bg-white px-4 py-3.5 flex items-center gap-4 flex-wrap text-xs sm:text-sm text-slate-800">
           <span class="font-bold text-slate-900">Benchpress 1 minúta:</span>
           
@@ -1110,6 +1134,7 @@
       let selectedGender = 'M';
       let onlyFriends = false;
       let onlyCelebrities = false;
+      let userMenuBound = false;
       let selectedAgeAtRecord = null;
       let searchQuery = '';
       let currentPage = 1;
@@ -1883,6 +1908,32 @@
 
         if (countEl) countEl.textContent = `${rows.length} účastníkov`;
 
+        const podium = document.getElementById('podium');
+        if (podium) {
+          const top = rows.slice(0, 3);
+          if (currentPage !== 1 || top.length === 0) {
+            podium.classList.add('hidden');
+            podium.innerHTML = '';
+          } else {
+            const medals = ['🥇', '🥈', '🥉'];
+            const order = top.length >= 3 ? [1, 0, 2] : top.map((_, i) => i);
+            podium.classList.remove('hidden');
+            podium.innerHTML = `<div class="grid gap-2 sm:gap-3 items-end" style="grid-template-columns: repeat(${top.length}, minmax(0, 1fr)); max-width: 640px; margin: 0 auto;">` +
+              order.map(i => {
+                const e = top[i];
+                const own = currentUserId && String(e.athlete.id) === String(currentUserId);
+                return `<button type="button" data-podium-profile="${escapeHtml(e.athlete.id)}" class="podium-card min-w-0 text-center rounded-2xl border bg-white ${i === 0 ? 'pt-4 pb-5 border-amber-400/60 shadow-md' : 'pt-3 pb-3.5 border-slate-200'} px-2 hover:shadow-md transition cursor-pointer ${own ? 'ring-2 ring-blue-500' : ''}">
+                  <div class="${i === 0 ? 'text-3xl' : 'text-2xl'}">${medals[i]}</div>
+                  <div class="mt-1 font-bold text-xs sm:text-sm truncate">${escapeHtml(e.athlete.name)}</div>
+                  <div class="text-[11px] opacity-70 truncate">${getFlag(e.athlete.country)} ${escapeHtml(e.athlete.country)}</div>
+                  <div class="mt-1 font-extrabold text-sm text-blue-600">${escapeHtml(formatVal(e.best, sport.unit))}</div>
+                </button>`;
+              }).join('') + '</div>';
+            podium.querySelectorAll('[data-podium-profile]').forEach(b =>
+              b.addEventListener('click', () => openAthleteProfile(b.getAttribute('data-podium-profile'))));
+          }
+        }
+
         const banner = document.getElementById('my-rank-banner');
         if (banner) {
           const myIdx = currentUserId ? rows.findIndex(r => String(r.athlete.id) === String(currentUserId)) : -1;
@@ -1944,6 +1995,9 @@
                 : 'bg-slate-500/10 text-current border-slate-500/15';
 
           const videoUrl = entry.bestRecord && entry.bestRecord.videoUrl ? entry.bestRecord.videoUrl : '';
+          const worldPct = calculateGenderPercentile(ath, sport.id, db.athletes);
+          const isRecentBest = entry.bestRecord && entry.bestRecord.date &&
+            (Date.now() - new Date(entry.bestRecord.date).getTime()) < 90 * 86400000;
           const ageLabel = entry.ageAtRecord !== null ? `${entry.ageAtRecord} r.` : '—';
           const isAgeActive = selectedAgeAtRecord !== null && entry.ageAtRecord === selectedAgeAtRecord;
 
@@ -1952,24 +2006,26 @@
               <span class="inline-flex items-center justify-center px-2.5 py-1 rounded-lg text-xs font-extrabold border ${rankBadgeClass}">#${idx + 1}</span>
             </td>
             <td class="py-3 px-4">
-              <button type="button" data-open-profile="${escapeHtml(ath.id)}" class="font-bold text-sm hover:text-blue-600 transition cursor-pointer text-left">
+              <span class="sm:hidden mr-1">${getFlag(ath.country)}</span><button type="button" data-open-profile="${escapeHtml(ath.id)}" class="font-bold text-sm hover:text-blue-600 transition cursor-pointer text-left">
                 ${escapeHtml(ath.name)}
               </button>
               ${ath.isCelebrity ? '<span class="ml-1.5 text-xs" title="Známa osobnosť">⭐</span>' : ''}
               ${isOwnRow ? '<span class="ml-1.5 px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold align-middle">TY</span>' : ''}
             </td>
-            <td class="py-3 px-4 text-base">${getFlag(ath.country)}</td>
-            <td class="py-3 px-4 text-xs sm:text-sm font-medium">${escapeHtml(ath.country)}</td>
+            <td class="py-3 px-4 text-base hidden sm:table-cell">${getFlag(ath.country)}</td>
+            <td class="py-3 px-4 text-xs sm:text-sm font-medium hidden sm:table-cell">${escapeHtml(ath.country)}</td>
             <td class="py-3 px-4">
               <div class="inline-flex items-center gap-2 flex-wrap">
                 <span class="font-extrabold text-sm text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
-                <span class="text-xs opacity-65" title="Počet meraní tohto športovca v disciplíne">(${recCount}× merané)</span>
+                <span class="text-xs opacity-65 hidden sm:inline" title="Počet meraní tohto športovca v disciplíne">(${recCount}× merané)</span>
+                ${worldPct !== null ? `<span class="px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums" title="Percentil vo svete pre dané pohlavie">${escapeHtml(worldPct.toFixed(1))}</span>` : ''}
+                ${isRecentBest ? '<span class="text-emerald-600 text-xs font-bold" title="Najlepší výkon z posledných 90 dní">▲</span>' : ''}
                 ${videoUrl
                   ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="Prehrať video záznam" class="w-7 h-6 rounded-md bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
                   : ''}
               </div>
             </td>
-            <td class="py-3 px-4">
+            <td class="py-3 px-4 hidden sm:table-cell">
               ${entry.ageAtRecord !== null
                 ? `<button type="button" data-filter-age="${escapeHtml(String(entry.ageAtRecord))}" title="Filtrovať účastníkov s vekom ${escapeHtml(String(entry.ageAtRecord))} r." class="px-2.5 py-1 rounded-lg text-xs font-bold border transition cursor-pointer ${
                     isAgeActive
@@ -2452,11 +2508,56 @@
         renderLeaderboard();
       }
 
+      function renderProgressChart(athlete) {
+        const box = document.getElementById('profile-progress-chart');
+        if (!box) return;
+        const sport = selectedProfileSportId ? getSportById(selectedProfileSportId) : null;
+        if (!sport) { box.classList.add('hidden'); box.innerHTML = ''; return; }
+        const pts = (athlete.records || [])
+          .filter(r => r.sportId === sport.id && typeof r.value === 'number' && r.date)
+          .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+        box.classList.remove('hidden');
+        const title = `<div class="text-sm font-extrabold mb-2">Vývoj výkonov — ${escapeHtml(sport.name)}</div>`;
+        if (pts.length < 2) {
+          box.innerHTML = title + '<div class="text-xs opacity-70">Na graf sú potrebné aspoň 2 merania v tejto disciplíne.</div>';
+          return;
+        }
+        const W = 640, H = 200, L = 56, R = 16, T = 14, B = 30;
+        const vals = pts.map(p => p.value);
+        let lo = Math.min(...vals), hi = Math.max(...vals);
+        if (hi === lo) { hi += 1; lo -= 1; }
+        const padV = (hi - lo) * 0.1; lo -= padV; hi += padV;
+        const t0 = new Date(pts[0].date).getTime(), t1 = new Date(pts[pts.length - 1].date).getTime();
+        const span = Math.max(1, t1 - t0);
+        const x = p => L + ((new Date(p.date).getTime() - t0) / span) * (W - L - R);
+        const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+        const bestVal = sport.lowerIsBetter ? Math.min(...vals) : Math.max(...vals);
+        const color = sport.accent || '#2563eb';
+        const line = pts.map(p => `${x(p).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
+        const dots = pts.map(p => {
+          const isBest = p.value === bestVal;
+          return `<circle cx="${x(p).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="${isBest ? 6 : 4}" fill="${color}" ${isBest ? 'stroke="#f59e0b" stroke-width="3"' : ''}><title>${escapeHtml(formatVal(p.value, sport.unit))} · ${escapeHtml(p.date)}</title></circle>`;
+        }).join('');
+        const fmt = v => formatVal(Math.round(v * 10) / 10, sport.unit);
+        box.innerHTML = title + `<svg viewBox="0 0 ${W} ${H}" class="w-full h-auto" role="img" aria-label="Graf vývoja výkonov">
+          <line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="currentColor" stroke-opacity="0.2"/>
+          <line x1="${L}" y1="${T}" x2="${L}" y2="${H - B}" stroke="currentColor" stroke-opacity="0.2"/>
+          <text x="${L - 6}" y="${T + 8}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(hi))}</text>
+          <text x="${L - 6}" y="${H - B}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(lo))}</text>
+          <text x="${L}" y="${H - 8}" text-anchor="start" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(pts[0].date)}</text>
+          <text x="${W - R}" y="${H - 8}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(pts[pts.length - 1].date)}</text>
+          <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+          ${dots}
+        </svg>
+        <div class="text-[11px] opacity-65 mt-1">Zlatý okraj = najlepší výkon. Po prejdení kurzorom na bod uvidíš hodnotu a dátum.</div>`;
+      }
+
       function renderSelectedSportBanner(athlete) {
         const banner = document.getElementById('profile-selected-sport-banner');
         if (!banner) return;
 
         renderAgeBestsForSelectedSport(athlete);
+        renderProgressChart(athlete);
 
         if (!selectedProfileSportId) {
           banner.classList.add('hidden');
@@ -2745,16 +2846,51 @@
         const btnCls = 'px-3 py-2 rounded-xl text-xs font-semibold border border-slate-300/70 cursor-pointer';
         const user = getCurrentUser();
         if (user) {
+          const itemCls = 'w-full text-left px-3 py-2 rounded-lg hover:bg-slate-500/10 cursor-pointer';
           box.innerHTML = `
-            <button id="my-profile-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600/15 text-blue-700 cursor-pointer">
-              👤 ${escapeHtml(user.name)}
-            </button>
-            <button id="user-logout-btn" type="button" class="${btnCls}">Odhlásiť</button>
-            <button id="delete-account-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-semibold border border-rose-400/50 text-rose-700 cursor-pointer">Zmazať účet</button>
+            <div class="relative" id="user-menu-wrap">
+              <button id="my-profile-btn" type="button" aria-haspopup="true" aria-expanded="false" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600/15 text-blue-700 cursor-pointer">
+                👤 ${escapeHtml(user.name)} <span aria-hidden="true">▾</span>
+              </button>
+              <div id="user-menu-panel" role="menu" class="hidden absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-slate-200 bg-white text-slate-900 shadow-lg p-1.5 z-50 text-xs font-semibold">
+                <button type="button" role="menuitem" data-menu="profile" class="${itemCls}">👤 Môj profil</button>
+                <button type="button" role="menuitem" data-menu="edit" class="${itemCls}">✏️ Upraviť údaje</button>
+                <button type="button" role="menuitem" data-menu="logout" class="${itemCls}">↩️ Odhlásiť</button>
+                <div class="menu-sep my-1 border-t border-slate-200"></div>
+                <button type="button" role="menuitem" data-menu="delete" class="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-500/10 text-rose-700 cursor-pointer">🗑️ Zmazať účet</button>
+              </div>
+            </div>
           `;
-          document.getElementById('my-profile-btn').addEventListener('click', () => openAthleteProfile(user.id));
-          document.getElementById('user-logout-btn').addEventListener('click', doLogout);
-          document.getElementById('delete-account-btn').addEventListener('click', doDeleteAccount);
+          const menuBtn = document.getElementById('my-profile-btn');
+          const menuPanel = document.getElementById('user-menu-panel');
+          const setMenu = (open) => {
+            menuPanel.classList.toggle('hidden', !open);
+            menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          };
+          menuBtn.addEventListener('click', (ev) => { ev.stopPropagation(); setMenu(menuPanel.classList.contains('hidden')); });
+          menuPanel.addEventListener('click', (ev) => {
+            const it = ev.target.closest ? ev.target.closest('[data-menu]') : null;
+            if (!it) return;
+            setMenu(false);
+            const a = it.getAttribute('data-menu');
+            if (a === 'profile') openAthleteProfile(user.id);
+            else if (a === 'edit') openEditAccountModal(user);
+            else if (a === 'logout') doLogout();
+            else if (a === 'delete') doDeleteAccount();
+          });
+          if (!userMenuBound) {
+            userMenuBound = true;
+            document.addEventListener('click', (ev) => {
+              const w = document.getElementById('user-menu-wrap');
+              const pn = document.getElementById('user-menu-panel');
+              if (pn && w && !w.contains(ev.target)) pn.classList.add('hidden');
+            });
+            document.addEventListener('keydown', (ev) => {
+              if (ev.key !== 'Escape') return;
+              const pn = document.getElementById('user-menu-panel');
+              if (pn) pn.classList.add('hidden');
+            });
+          }
         } else if (pendingProfile) {
           box.innerHTML = `
             <button id="finish-profile-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-bold border border-blue-500/35 bg-blue-500/10 cursor-pointer">Dokončiť profil</button>
