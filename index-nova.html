@@ -1532,6 +1532,17 @@
       let lastAuthUserId = null;
       let ownRole = 'user';
 
+      function setAuthTab(which) {
+        const on = ['bg-blue-600', 'text-white'];
+        const off = ['bg-slate-500/10'];
+        const reg = document.getElementById('switch-to-register-btn');
+        const log = document.getElementById('switch-to-login-btn');
+        const act = which === 'login' ? log : reg;
+        const oth = which === 'login' ? reg : log;
+        act.classList.add(...on); act.classList.remove(...off);
+        oth.classList.remove(...on); oth.classList.add(...off);
+      }
+
       function openModal(id) {
         const m = document.getElementById(id);
         if (!m) return;
@@ -3654,12 +3665,14 @@
           document.getElementById('auth-modal-title').textContent = 'Registrácia športovca';
           document.getElementById('register-athlete-form').classList.remove('hidden');
           document.getElementById('login-athlete-form').classList.add('hidden');
+          setAuthTab('register');
         });
 
         document.getElementById('switch-to-login-btn').addEventListener('click', () => {
           document.getElementById('auth-modal-title').textContent = 'Prihlásenie športovca';
           document.getElementById('register-athlete-form').classList.add('hidden');
           document.getElementById('login-athlete-form').classList.remove('hidden');
+          setAuthTab('login');
         });
 
         document.getElementById('open-admin-btn').addEventListener('click', () => {
