@@ -273,22 +273,7 @@
             </button>
           </div>
 
-          <button id="friends-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">🤝 Len priatelia (0)</button>
-
-          <button id="celebrities-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">⭐ Známe osobnosti (1)</button>
-
-          <select id="weight-filter" title="Váhová kategória" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
-            <option value="">⚖️ Všetky váhy</option>
-            <option value="u60">do 60 kg</option>
-            <option value="60-70">60 – 70 kg</option>
-            <option value="70-80">70 – 80 kg</option>
-            <option value="80-90">80 – 90 kg</option>
-            <option value="90-100">90 – 100 kg</option>
-            <option value="o100">nad 100 kg</option>
-          </select>
-          <select id="year-filter" title="Rok výkonu" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
-            <option value="">📅 Všetky roky</option>
-          </select>
+          <button id="filters-toggle-btn" type="button" aria-expanded="false" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">⚙️ Filtre</button>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
@@ -300,6 +285,34 @@
             ⚖️ Porovnať
           </button>
         </div>
+      </div>
+
+      <div id="extra-filters" class="hidden flex flex-wrap items-center gap-2 p-3 rounded-xl border border-slate-500/15 bg-slate-500/5">
+        <select id="age-group-filter" title="Veková skupina" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
+          <option value="">🎂 Všetky vekové skupiny</option>
+          <option value="u18">do 18 rokov</option>
+          <option value="18-29">18 – 29 rokov</option>
+          <option value="30-39">30 – 39 rokov</option>
+          <option value="40-49">40 – 49 rokov</option>
+          <option value="50-59">50 – 59 rokov</option>
+          <option value="60+">60 a viac rokov</option>
+        </select>
+        <select id="weight-filter" title="Váhová kategória" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
+          <option value="">⚖️ Všetky váhy</option>
+          <option value="u60">do 60 kg</option>
+          <option value="60-70">60 – 70 kg</option>
+          <option value="70-80">70 – 80 kg</option>
+          <option value="80-90">80 – 90 kg</option>
+          <option value="90-100">90 – 100 kg</option>
+          <option value="o100">nad 100 kg</option>
+        </select>
+        <select id="year-filter" title="Rok výkonu" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 cursor-pointer outline-none">
+          <option value="">📅 Všetky roky</option>
+        </select>
+        <button id="friends-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">🤝 Len priatelia (0)</button>
+        <button id="celebrities-filter-btn" type="button" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">⭐ Známe osobnosti (1)</button>
+        <button id="perkg-btn" type="button" title="Zoradiť podľa výkonu na kilogram telesnej váhy (len disciplíny v kg)" class="px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20">🏋️ Na kg váhy tela</button>
+        <button id="clear-extra-filters-btn" type="button" class="hidden px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white cursor-pointer">✕ Zruš filtre</button>
       </div>
 
       <!-- Dynamické záložky krajín -->
@@ -329,9 +342,9 @@
               <th class="py-3 px-4">Priezvisko Meno</th>
               <th class="py-3 px-4 sm-col">Vlajka</th>
               <th class="py-3 px-4 sm-col">Krajina</th>
-              <th class="py-3 px-4">Výsledok (počet meraní)</th>
-              <th class="py-3 px-4 sm-col">Vek pri výkone</th>
+              <th class="py-3 px-4">Výsledok</th>
               <th id="pct-th" class="py-3 px-4 sm-col">Percentil</th>
+              <th class="py-3 px-4 sm-col">Vek pri výkone</th>
               <th class="py-3 px-4 text-right">Akcie</th>
             </tr>
           </thead>
@@ -1165,6 +1178,9 @@
       let onlyCelebrities = false;
       let selectedWeight = '';
       let selectedYear = '';
+      let selectedAgeGroup = '';
+      let perKg = false;
+      let defaultsApplied = false;
       let leaderboardScope = false;
       const WEIGHT_BANDS = {
         'u60': { label: 'do 60 kg', min: 0, max: 60 },
@@ -1730,6 +1746,10 @@
           if (onlyFriends && !a.isFriend) return false;
           if (onlyCelebrities && !a.isCelebrity) return false;
           if (q && !(a.name || '').toLowerCase().includes(q) && !(a.country || '').toLowerCase().includes(q)) return false;
+          if (selectedAgeGroup && sport) {
+            const br = getAthleteBestRecordInSport(a, sport.id);
+            if (!br || !passesAgeGroup(getAgeAtRecord(a, br))) return false;
+          }
           return sport ? getAthleteBestInSport(a, sport.id) !== null : true;
         });
 
@@ -1789,6 +1809,45 @@
 
         const celebsBtn = document.getElementById('celebrities-filter-btn');
         if (celebsBtn) celebsBtn.textContent = `⭐ Známe osobnosti (${baseFilterPool.filter(a => a.isCelebrity).length})`;
+      }
+
+      const AGE_GROUPS = { 'u18': [0, 17, 'do 18 rokov'], '18-29': [18, 29, '18 – 29 rokov'], '30-39': [30, 39, '30 – 39 rokov'], '40-49': [40, 49, '40 – 49 rokov'], '50-59': [50, 59, '50 – 59 rokov'], '60+': [60, 200, '60 a viac rokov'] };
+      function passesAgeGroup(age) {
+        if (!selectedAgeGroup) return true;
+        const g = AGE_GROUPS[selectedAgeGroup];
+        return !!g && age !== null && age >= g[0] && age <= g[1];
+      }
+      function activeFilterCount() {
+        return [selectedAgeAtRecord !== null, !!selectedAgeGroup, !!selectedWeight, !!selectedYear, onlyFriends, onlyCelebrities, perKg].filter(Boolean).length;
+      }
+      function syncFiltersUi() {
+        const n = activeFilterCount();
+        const t = document.getElementById('filters-toggle-btn');
+        if (t) {
+          t.textContent = n ? `⚙️ Filtre (${n})` : '⚙️ Filtre';
+          const open = !document.getElementById('extra-filters').classList.contains('hidden');
+          t.setAttribute('aria-expanded', open ? 'true' : 'false');
+          t.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ' + (n ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20');
+        }
+        const c = document.getElementById('clear-extra-filters-btn'); if (c) c.classList.toggle('hidden', n === 0);
+        const ag = document.getElementById('age-group-filter'); if (ag) ag.value = selectedAgeGroup;
+        const pk = document.getElementById('perkg-btn');
+        if (pk) {
+          const sp = getSportById(selectedSportId);
+          const ok = !!sp && sp.unit === 'kg';
+          pk.disabled = !ok; pk.style.opacity = ok ? '' : '0.45';
+          pk.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition ' + (ok ? 'cursor-pointer ' : 'cursor-not-allowed ') + (perKg && ok ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
+        }
+        const base = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ';
+        const fb = document.getElementById('friends-filter-btn'); if (fb) fb.className = base + (onlyFriends ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
+        const cb = document.getElementById('celebrities-filter-btn'); if (cb) cb.className = base + (onlyCelebrities ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
+      }
+      function clearExtraFilters() {
+        onlyFriends = false; onlyCelebrities = false; selectedAgeAtRecord = null; selectedAgeGroup = '';
+        selectedWeight = ''; selectedYear = ''; perKg = false; currentPage = 1;
+        const w = document.getElementById('weight-filter'); if (w) w.value = '';
+        const y = document.getElementById('year-filter'); if (y) y.value = '';
+        renderLeaderboard();
       }
 
       function passesWeight(a) {
@@ -1923,10 +1982,9 @@
       }
 
       function resetLeaderboardFilters() {
-        onlyFriends = false; onlyCelebrities = false; selectedAgeAtRecord = null;
+        onlyFriends = false; onlyCelebrities = false; selectedAgeAtRecord = null; selectedAgeGroup = ''; perKg = false;
         searchQuery = ''; selectedWeight = ''; selectedYear = ''; selectedCountry = 'ALL'; currentPage = 1;
         const base = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20';
-        ['friends-filter-btn', 'celebrities-filter-btn'].forEach(id => { const b = document.getElementById(id); if (b) b.className = base; });
         const si = document.getElementById('search-input'); if (si) si.value = '';
         const w = document.getElementById('weight-filter'); if (w) w.value = '';
         const y = document.getElementById('year-filter'); if (y) y.value = '';
@@ -1988,11 +2046,13 @@
 
         const sport = getSportById(selectedSportId);
         if (!sport) return;
+        if (perKg && sport.unit !== 'kg') perKg = false;
+        syncFiltersUi();
 
         const lbSection = document.getElementById('leaderboard-section');
         if (lbSection) lbSection.style.borderTop = '3px solid ' + safeColor(sport.accent);
         const pctTh = document.getElementById('pct-th');
-        if (pctTh) pctTh.textContent = selectedAgeAtRecord !== null ? `Percentil (vek ${selectedAgeAtRecord})` : 'Percentil';
+        if (pctTh) pctTh.textContent = selectedAgeAtRecord !== null ? `Percentil (vek ${selectedAgeAtRecord})` : (selectedAgeGroup ? `Percentil (${AGE_GROUPS[selectedAgeGroup][2]})` : 'Percentil');
 
         if (logoEl) logoEl.innerHTML = getSportMiniLogoHtml(sport);
         if (titleEl) {
@@ -2009,8 +2069,11 @@
           .filter(a => a.gender === selectedGender && (selectedCountry === 'ALL' || a.country === selectedCountry) && passesWeight(a))
           .map(a => ({ a, bestRec: getAthleteBestRecordInSport(a, sport.id) }))
           .filter(x => x.bestRec)
-          .filter(x => selectedAgeAtRecord === null || getAgeAtRecord(x.a, x.bestRec) === selectedAgeAtRecord);
-        const poolVals = pool.map(x => x.bestRec.value);
+          .filter(x => selectedAgeAtRecord === null || getAgeAtRecord(x.a, x.bestRec) === selectedAgeAtRecord)
+          .filter(x => passesAgeGroup(getAgeAtRecord(x.a, x.bestRec)))
+          .filter(x => !perKg || Number(x.a.weightKg) > 0);
+        const metricOf = (x) => perKg ? x.bestRec.value / Number(x.a.weightKg) : x.bestRec.value;
+        const poolVals = pool.map(metricOf);
         const pctOf = (v) => {
           if (poolVals.length === 0) return null;
           let worse = 0, equal = 0;
@@ -2028,10 +2091,11 @@
           .map(x => ({
             athlete: x.a,
             best: x.bestRec.value,
+            metric: metricOf(x),
             bestRecord: x.bestRec,
             ageAtRecord: getAgeAtRecord(x.a, x.bestRec)
           }))
-          .sort((x, y) => sport.lowerIsBetter ? x.best - y.best : y.best - x.best);
+          .sort((x, y) => sport.lowerIsBetter ? x.metric - y.metric : y.metric - x.metric);
 
         if (countEl) countEl.textContent = `${rows.length} účastníkov`;
 
@@ -2044,13 +2108,14 @@
           } else {
             const mine = rows[myIdx];
             banner.classList.remove('hidden');
-            const myPct = poolVals.length >= 2 ? pctOf(mine.best) : null;
+            const myPct = poolVals.length >= 2 ? pctOf(mine.metric) : null;
             let pctSentence = '';
             if (myPct !== null) {
               const whoLabel = selectedGender === 'Z' ? 'žien' : 'mužov';
               const betterLabel = selectedGender === 'Z' ? 'lepšia' : 'lepší';
               const parts = [];
               if (selectedAgeAtRecord !== null) parts.push(`vo veku ${selectedAgeAtRecord} r.`);
+              else if (selectedAgeGroup) parts.push(`vo veku ${AGE_GROUPS[selectedAgeGroup][2]}`);
               if (selectedWeight && WEIGHT_BANDS[selectedWeight]) parts.push(`s váhou ${WEIGHT_BANDS[selectedWeight].label}`);
               if (selectedYear) parts.push(`v roku ${selectedYear}`);
               const place = selectedCountry === 'ALL' ? 'na svete' : `v krajine ${selectedCountry}`;
@@ -2097,9 +2162,6 @@
             tr.setAttribute('data-own-row', '1');
           }
 
-          const recCount = Array.isArray(ath.records)
-            ? ath.records.filter(r => r.sportId === sport.id).length
-            : 0;
 
           const rankBadgeClass = idx === 0
             ? 'bg-amber-400/25 text-amber-800 border-amber-400/40'
@@ -2110,7 +2172,7 @@
                 : 'bg-slate-500/10 text-current border-slate-500/15';
 
           const videoUrl = entry.bestRecord && entry.bestRecord.videoUrl ? entry.bestRecord.videoUrl : '';
-          const rowPct = pctOf(entry.best);
+          const rowPct = pctOf(entry.metric);
           const rowPctText = rowPct !== null ? rowPct.toFixed(1) : '—';
           const isRecentBest = entry.bestRecord && entry.bestRecord.date &&
             (Date.now() - new Date(entry.bestRecord.date).getTime()) < 90 * 86400000;
@@ -2133,7 +2195,7 @@
             <td class="py-3 px-4">
               <div class="inline-flex items-center gap-2 flex-wrap">
                 <span class="font-extrabold text-base text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
-                <span class="text-xs opacity-65 hidden sm:inline" title="Počet meraní tohto športovca v disciplíne">(${recCount}× merané)</span>
+                ${perKg && entry.metric !== entry.best ? `<span class="text-xs opacity-70 tabular-nums" title="Výkon na kg telesnej váhy">(${escapeHtml(entry.metric.toFixed(2).replace('.', ','))} /kg)</span>` : ''}
                 ${rowPct !== null ? `<span class="mobile-only px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums" title="Percentil">${escapeHtml(rowPctText)}</span>` : ''}
                 ${isRecentBest ? '<span class="text-emerald-600 text-xs font-bold" title="Najlepší výkon z posledných 90 dní">▲</span>' : ''}
                 ${videoUrl
@@ -2142,17 +2204,17 @@
               </div>
             </td>
             <td class="py-3 px-4 sm-col">
+              ${rowPct !== null
+                ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold border bg-slate-500/10 border-slate-500/20 tabular-nums" title="Lepší ako ${escapeHtml(String(Math.round(rowPct)))} % v aktuálnom filtri${selectedAgeAtRecord !== null ? ' (vekovej skupine ' + escapeHtml(String(selectedAgeAtRecord)) + ' r.)' : ''}">${escapeHtml(rowPctText)}</span>`
+                : `<span class="text-xs opacity-50">—</span>`}
+            </td>
+            <td class="py-3 px-4 sm-col">
               ${entry.ageAtRecord !== null
                 ? `<button type="button" data-filter-age="${escapeHtml(String(entry.ageAtRecord))}" title="Filtrovať účastníkov s vekom ${escapeHtml(String(entry.ageAtRecord))} r." class="px-2.5 py-1 rounded-lg text-xs font-bold border transition cursor-pointer ${
                     isAgeActive
                       ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
                       : 'bg-slate-500/10 hover:bg-blue-500/15 hover:border-blue-500/40 border-slate-500/20'
                   }">${escapeHtml(ageLabel)}</button>`
-                : `<span class="text-xs opacity-50">—</span>`}
-            </td>
-            <td class="py-3 px-4 sm-col">
-              ${rowPct !== null
-                ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold border bg-slate-500/10 border-slate-500/20 tabular-nums" title="Lepší ako ${escapeHtml(String(Math.round(rowPct)))} % v aktuálnom filtri${selectedAgeAtRecord !== null ? ' (vekovej skupine ' + escapeHtml(String(selectedAgeAtRecord)) + ' r.)' : ''}">${escapeHtml(rowPctText)}</span>`
                 : `<span class="text-xs opacity-50">—</span>`}
             </td>
             <td class="py-3 px-4 text-right">
@@ -2169,14 +2231,15 @@
                 <button
                   type="button"
                   data-toggle-friend="${escapeHtml(ath.id)}"
-                  title="Priateľ"
-                  class="px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ${
+                  title="${ath.isFriend ? 'Odobrať z priateľov' : 'Pridať medzi priateľov'}"
+                  aria-label="${ath.isFriend ? 'Odobrať z priateľov' : 'Pridať medzi priateľov'}"
+                  class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-bold border transition cursor-pointer ${
                     ath.isFriend
                       ? 'bg-amber-500/20 border-amber-500/40 text-amber-700'
                       : 'bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'
                   }"
                 >
-                  ${ath.isFriend ? '✓ Priateľ' : '+ Priateľ'}
+                  ${ath.isFriend ? '✓' : '＋'}
                 </button>
                 `}
               </div>
@@ -2205,6 +2268,7 @@
             const clickedAge = Number(btn.getAttribute('data-filter-age'));
             if (Number.isNaN(clickedAge)) return;
             selectedAgeAtRecord = selectedAgeAtRecord === clickedAge ? null : clickedAge;
+            selectedAgeGroup = '';
             currentPage = 1;
             renderLeaderboard();
           });
@@ -3577,8 +3641,9 @@
           renderLeaderboard();
         });
 
-        document.getElementById('theme-toggle').addEventListener('click', () => applyTheme(!isDarkMode));
-        document.getElementById('profile-theme-toggle').addEventListener('click', () => applyTheme(!isDarkMode));
+        const toggleTheme = () => { applyTheme(!isDarkMode); try { localStorage.setItem('biceps_theme', isDarkMode ? 'dark' : 'light'); } catch (e) {} };
+        document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+        document.getElementById('profile-theme-toggle').addEventListener('click', toggleTheme);
 
         document.querySelectorAll('.gender-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -3601,6 +3666,22 @@
           renderLeaderboard();
         });
 
+        document.getElementById('filters-toggle-btn').addEventListener('click', () => {
+          document.getElementById('extra-filters').classList.toggle('hidden');
+          syncFiltersUi();
+        });
+        document.getElementById('clear-extra-filters-btn').addEventListener('click', clearExtraFilters);
+        document.getElementById('perkg-btn').addEventListener('click', () => {
+          const sp = getSportById(selectedSportId);
+          if (!sp || sp.unit !== 'kg') return;
+          perKg = !perKg; currentPage = 1; renderLeaderboard();
+        });
+        document.getElementById('age-group-filter').addEventListener('change', (e) => {
+          selectedAgeGroup = e.target.value || '';
+          if (selectedAgeGroup) selectedAgeAtRecord = null;
+          currentPage = 1;
+          renderLeaderboard();
+        });
         document.getElementById('weight-filter').addEventListener('change', (e) => {
           selectedWeight = e.target.value || '';
           currentPage = 1;
@@ -3763,11 +3844,24 @@
         try {
           db = loadDb();
           lastInsertedByAthlete = loadLastInsertedMap();
-          applyTheme(false);
+          let savedTheme = null; try { savedTheme = localStorage.getItem('biceps_theme'); } catch (e) {}
+          applyTheme(savedTheme !== 'light');
           restoreSessionState();
           bindEvents();
           refreshAllViews();
           if (await loadFromSupabase()) {
+            if (!defaultsApplied) {
+              defaultsApplied = true;
+              let best = null, bestN = -1;
+              db.sports.forEach(sp => {
+                const n = db.athletes.filter(x => getAthleteBestInSport(x, sp.id) !== null).length;
+                if (n > bestN) { bestN = n; best = sp; }
+              });
+              if (best && bestN > 0) {
+                selectedSportId = best.id;
+                const hs = document.getElementById('header-sport-select'); if (hs) hs.value = best.id;
+              }
+            }
             restoreSessionState();
             refreshAllViews();
           } else {
