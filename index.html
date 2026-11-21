@@ -274,6 +274,8 @@
         <span id="leaderboard-count" class="text-xs font-semibold opacity-70">1 účastníkov</span>
       </div>
 
+      <div id="my-rank-banner" class="hidden px-4 sm:px-6 py-2.5 border-b border-blue-500/25 bg-blue-500/10 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"></div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
@@ -1881,6 +1883,26 @@
 
         if (countEl) countEl.textContent = `${rows.length} účastníkov`;
 
+        const banner = document.getElementById('my-rank-banner');
+        if (banner) {
+          const myIdx = currentUserId ? rows.findIndex(r => String(r.athlete.id) === String(currentUserId)) : -1;
+          if (myIdx === -1) {
+            banner.classList.add('hidden');
+            banner.innerHTML = '';
+          } else {
+            const mine = rows[myIdx];
+            banner.classList.remove('hidden');
+            banner.innerHTML = `<span>📍 <strong>Tvoja pozícia: #${myIdx + 1}</strong> z ${rows.length} · ${escapeHtml(formatVal(mine.best, sport.unit))}</span>
+              <button type="button" id="my-rank-jump" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Ukázať v tabuľke</button>`;
+            banner.querySelector('#my-rank-jump').addEventListener('click', () => {
+              currentPage = Math.floor(myIdx / PAGE_SIZE) + 1;
+              renderLeaderboard();
+              const row = document.querySelector('#leaderboard-body [data-own-row]');
+              if (row && row.scrollIntoView) row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+          }
+        }
+
         const totalPages = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
         if (currentPage > totalPages) currentPage = totalPages;
         if (currentPage < 1) currentPage = 1;
@@ -1901,7 +1923,13 @@
           const idx = startIdx + localIdx;
           const ath = entry.athlete;
           const tr = document.createElement('tr');
-          tr.className = 'border-b border-slate-200/60 hover:bg-blue-500/5 transition';
+          const isOwnRow = currentUserId && String(ath.id) === String(currentUserId);
+          tr.className = 'border-b border-slate-200/60 hover:bg-blue-500/10 transition ' +
+            (isOwnRow ? 'bg-blue-500/15' : (idx % 2 === 1 ? 'bg-slate-500/[0.07]' : ''));
+          if (isOwnRow) {
+            tr.style.boxShadow = 'inset 4px 0 0 #2563eb';
+            tr.setAttribute('data-own-row', '1');
+          }
 
           const recCount = Array.isArray(ath.records)
             ? ath.records.filter(r => r.sportId === sport.id).length
@@ -1918,8 +1946,6 @@
           const videoUrl = entry.bestRecord && entry.bestRecord.videoUrl ? entry.bestRecord.videoUrl : '';
           const ageLabel = entry.ageAtRecord !== null ? `${entry.ageAtRecord} r.` : '—';
           const isAgeActive = selectedAgeAtRecord !== null && entry.ageAtRecord === selectedAgeAtRecord;
-          const worldPct = calculateGenderPercentile(ath, sport.id, db.athletes);
-          const worldPctText = worldPct !== null ? worldPct.toFixed(1) : '—';
 
           tr.innerHTML = `
             <td class="py-3 px-4">
@@ -1930,6 +1956,7 @@
                 ${escapeHtml(ath.name)}
               </button>
               ${ath.isCelebrity ? '<span class="ml-1.5 text-xs" title="Známa osobnosť">⭐</span>' : ''}
+              ${isOwnRow ? '<span class="ml-1.5 px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold align-middle">TY</span>' : ''}
             </td>
             <td class="py-3 px-4 text-base">${getFlag(ath.country)}</td>
             <td class="py-3 px-4 text-xs sm:text-sm font-medium">${escapeHtml(ath.country)}</td>
@@ -1937,7 +1964,6 @@
               <div class="inline-flex items-center gap-2 flex-wrap">
                 <span class="font-extrabold text-sm text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
                 <span class="text-xs opacity-65" title="Počet meraní tohto športovca v disciplíne">(${recCount}× merané)</span>
-                ${worldPct !== null ? `<span class="text-xs font-semibold opacity-75" title="Percentil vo svete pre dané pohlavie">perc. ${escapeHtml(worldPctText)}</span>` : ''}
                 ${videoUrl
                   ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="Prehrať video záznam" class="w-7 h-6 rounded-md bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
                   : ''}
