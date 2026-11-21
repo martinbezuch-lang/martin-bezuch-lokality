@@ -1334,7 +1334,7 @@
 
 
       // ===== Prihlásenie cez Supabase Auth =====
-      const GOOGLE_LOGIN_ENABLED = false; // po nastavení Google v Supabase zmeň na true
+      const GOOGLE_LOGIN_ENABLED = true; // po nastavení Google v Supabase zmeň na true
       const AUTH_REDIRECT = location.origin + location.pathname;
       let authUser = null;
       let pendingProfile = false;
@@ -1511,7 +1511,7 @@
           if (error) { showToast(authErrorText(error)); return; }
           closeModal('auth-modal');
           e.target.reset();
-          if (!data.session) showToast('Poslali sme ti e-mail. Klikni na odkaz v ňom a potvrď registráciu.');
+          if (!data.session) showToast('Poslali sme ti e-mail. Klikni na odkaz v ňom a potvrď registráciu. Ak ho nevidíš, pozri aj do spamu.');
         });
 
         document.getElementById('login-athlete-form').addEventListener('submit', async (e) => {
