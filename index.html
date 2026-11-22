@@ -297,6 +297,8 @@
     body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
     #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
     .m-only { display: none; }
+    #main-header button:not(#brand-home-btn):not(#open-auth-modal-btn):not(#finish-profile-btn) { filter: grayscale(1); }
+    #main-header #user-menu-panel button { filter: none; }
     body.dark-chess *:not(.no-scrollbar) { scrollbar-color: #57534e #2a2826; scrollbar-width: thin; }
     body.dark-chess ::-webkit-scrollbar { width: 10px; height: 10px; }
     body.dark-chess ::-webkit-scrollbar-track { background: #2a2826; }
@@ -570,9 +572,6 @@
         </button>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <button id="edit-account-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-blue-500/35 bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 transition cursor-pointer">
-            ✏️ Upraviť<span class="lbl-long"> údaje účtu</span>
-          </button>
           <button id="profile-share-btn" type="button" title="Zdieľať profil" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
             🔗<span class="lbl-long"> Zdieľať profil</span>
           </button>
@@ -4088,34 +4087,35 @@
 
           let outcome = 'NONE';
           if (hasBoth) {
-            if (bestA === bestB) {
-              outcome = 'TIE';
-              ties++;
-            } else if (sport.lowerIsBetter ? bestA < bestB : bestA > bestB) {
-              outcome = 'A';
-              winsA++;
-            } else {
-              outcome = 'B';
-              winsB++;
-            }
+            // porovnanie podľa percentilu (férové aj pre rôzne pohlavia/skupiny), pri chýbajúcom percentile podľa hodnoty
+            const cmp = (pctA !== null && pctB !== null)
+              ? (pctA === pctB ? 0 : (pctA > pctB ? 1 : -1))
+              : (bestA === bestB ? 0 : ((sport.lowerIsBetter ? bestA < bestB : bestA > bestB) ? 1 : -1));
+            if (cmp === 0) { outcome = 'TIE'; ties++; }
+            else if (cmp > 0) { outcome = 'A'; winsA++; }
+            else { outcome = 'B'; winsB++; }
           }
 
           return { sport, bestA, bestB, hasBoth, pctA, pctB, outcome };
         });
 
+        // poradie: 1) obaja majú záznam a A má vyšší percentil (od najvyššieho percentilu A),
+        // 2) obaja majú záznam a B má vyšší percentil (od najvyššieho percentilu B), 3) rovnosť,
+        // 4) záznam má len A (podľa percentilu A), 5) záznam má len B (podľa percentilu B), 6) nikto
         const groupRank = item => {
-          if (item.outcome === 'A') return 1;
-          if (item.outcome === 'B') return 2;
-          if (item.hasBoth) return 3;
-          return 4;
+          if (item.hasBoth) return item.outcome === 'A' ? 1 : (item.outcome === 'B' ? 2 : 3);
+          if (item.bestA !== null) return 4;
+          if (item.bestB !== null) return 5;
+          return 6;
         };
 
         rowsData.sort((a, b) => {
           const gA = groupRank(a);
           const gB = groupRank(b);
           if (gA !== gB) return gA - gB;
-          if (gA === 1) return (b.pctA ?? -1) - (a.pctA ?? -1);
-          if (gA === 2) return (b.pctB ?? -1) - (a.pctB ?? -1);
+          if (gA === 1 || gA === 4) return (b.pctA ?? -1) - (a.pctA ?? -1);
+          if (gA === 2 || gA === 5) return (b.pctB ?? -1) - (a.pctB ?? -1);
+          if (gA === 3) return (b.pctA ?? -1) - (a.pctA ?? -1);
           return a.sport.name.localeCompare(b.sport.name, 'sk');
         });
 
@@ -4216,11 +4216,6 @@
           }
         });
 
-        document.getElementById('edit-account-btn').addEventListener('click', () => {
-          const user = getCurrentUser();
-          if (!user || String(user.id) !== String(activeProfileAthleteId)) return;
-          openEditAccountModal(user);
-        });
 
         document.getElementById('close-edit-account-btn').addEventListener('click', closeEditAccountModal);
         document.getElementById('cancel-edit-account-btn').addEventListener('click', closeEditAccountModal);
