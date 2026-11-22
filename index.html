@@ -341,6 +341,7 @@
     [class*="auto-cols-"] > div > div:last-child { font-size: 15px !important; margin-top: 2px !important; }
     [class*="auto-cols-"] > div:nth-child(5) { display: none; }
     #profile-name { font-size: 20px; }
+    input[type=date] { width: 100%; min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; text-align: left; min-height: 38px; }
     #app-toast { font-size: 14px !important; }
   }
   </style>
@@ -1708,6 +1709,14 @@
         } catch (e) {}
       })();
 
+
+      function todayIso() {
+        const d = new Date();
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      }
+      function setDateMax() {
+        ['rec-date-input', 'edit-rec-date'].forEach(id => { const el = document.getElementById(id); if (el) el.max = todayIso(); });
+      }
 
       async function handleInvite() {
         if (!sb || !currentUserId) return;
@@ -3192,6 +3201,7 @@
         document.getElementById('edit-rec-sport').value = record.sportId;
         document.getElementById('edit-rec-value').value = record.value;
         document.getElementById('edit-rec-date').value = record.date || '';
+        setDateMax();
         document.getElementById('edit-rec-country').value = record.country || athlete.country || 'Slovensko';
         document.getElementById('edit-rec-city').value = record.city || '';
         document.getElementById('edit-rec-video').value = record.videoUrl || '';
@@ -4230,7 +4240,9 @@
           const videoUrl = document.getElementById('edit-rec-video').value.trim();
           if (!recId || !sportId) return;
           if (!(value > 0)) { showToast('Zadaj hodnotu väčšiu ako 0.'); return; }
+          if (date && date > todayIso()) { showToast('Dátum merania nemôže byť v budúcnosti.'); return; }
           if (!date) { showToast('Zadaj dátum merania.'); return; }
+          if (date > todayIso()) { showToast('Dátum merania nemôže byť v budúcnosti.'); return; }
           if (videoUrl && (!/^https:\/\//i.test(videoUrl) || videoUrl.length > 300)) { showToast('Odkaz na video musí začínať https:// (max. 300 znakov).'); return; }
           const { error } = await sb.from('records').update({
             sport_id: sportId, value, record_date: date, country, city, video_url: videoUrl
@@ -4372,6 +4384,7 @@
           showToast('Skopíroval som posledné vložené údaje (disciplína, dátum, krajina, mesto).');
         });
 
+        setDateMax();
         document.getElementById('profile-add-record-form').addEventListener('submit', async (e) => {
           e.preventDefault();
           const form = e.target;
