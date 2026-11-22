@@ -353,6 +353,30 @@
     [class*="auto-cols-"] > div:nth-child(5) { display: none; }
     #profile-name { font-size: 20px; }
     input[type=date] { width: 100%; min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; text-align: left; min-height: 38px; }
+    html { font-size: 14.5px; }
+    #leaderboard-section { --lbbg: #ffffff; }
+    body.dark-chess #leaderboard-section { --lbbg: #312e2b; }
+    #leaderboard-section table { min-width: 620px; }
+    #leaderboard-section th:nth-child(1) { font-size: 9px; letter-spacing: 0; padding-left: 4px !important; padding-right: 4px !important; }
+    #leaderboard-section .overflow-auto { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+    #leaderboard-section .sm-col { display: table-cell; }
+    #leaderboard-section .mobile-only { display: none; }
+    #leaderboard-section th { padding: 8px 8px !important; font-size: 10px; white-space: nowrap; }
+    #leaderboard-body td { padding: 7px 8px !important; font-size: 12px; white-space: nowrap; }
+    #leaderboard-body td:nth-child(2) button { font-size: 12.5px; }
+    #leaderboard-body td:nth-child(2) .mobile-only { display: none; }
+    #leaderboard-body td span.font-extrabold.text-base { font-size: 14px; }
+    #leaderboard-body td .text-xs { font-size: 11px; }
+    #leaderboard-body td:nth-child(1) span { padding: 2px 6px; font-size: 11px; }
+    #leaderboard-body td:nth-child(5) span, #leaderboard-body td:nth-child(6) button { padding: 2px 7px; font-size: 11px; }
+    #leaderboard-body td:nth-child(7) button { padding: 4px 7px !important; font-size: 11px !important; }
+    #leaderboard-section table th:nth-child(1), #leaderboard-body td:nth-child(1) { position: sticky; left: 0; z-index: 2; width: 48px; min-width: 48px; max-width: 48px; background-color: var(--lbbg); }
+    #leaderboard-section table th:nth-child(2), #leaderboard-body td:nth-child(2) { position: sticky; left: 48px; z-index: 2; background-color: var(--lbbg); box-shadow: 4px 0 6px -4px rgba(0,0,0,.35); }
+    #leaderboard-body tr:nth-child(even) td:nth-child(-n+2) { background-color: color-mix(in srgb, var(--lbbg) 94%, #94a3b8); }
+    #leaderboard-body tr[data-own-row] td:nth-child(-n+2) { background-color: color-mix(in srgb, var(--lbbg) 82%, #2563eb); }
+    #leaderboard-body td:nth-child(2) { max-width: 124px; overflow: hidden; text-overflow: ellipsis; }
+    #leaderboard-body td:nth-child(2) button { max-width: 104px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: middle; }
+    #leaderboard-body td:nth-child(4) > div { flex-wrap: nowrap; }
     #app-toast { font-size: 14px !important; }
   }
   </style>
