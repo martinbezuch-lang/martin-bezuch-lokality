@@ -2863,6 +2863,13 @@
         return sport.lowerIsBetter ? Math.min(...vals) : Math.max(...vals);
       }
 
+      // poradie záznamov: najprv podľa dátumu výkonu, pri rovnakom dni podľa času zápisu
+      function recCmp(a, b) {
+        const d = String(a.date || '').localeCompare(String(b.date || ''));
+        if (d) return d;
+        const c = String(a.createdAt || '').localeCompare(String(b.createdAt || ''));
+        return c || String(a.id).localeCompare(String(b.id));
+      }
       function getAthleteBestRecordInSport(athlete, sportId) {
         if (!athlete || !Array.isArray(athlete.records)) return null;
         const sport = getSportById(sportId);
@@ -3751,7 +3758,7 @@
         if (!sport) { box.classList.add('hidden'); box.innerHTML = ''; return; }
         const pts = (athlete.records || [])
           .filter(r => r.sportId === sport.id && typeof r.value === 'number' && r.date)
-          .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+          .sort(recCmp);
         box.classList.remove('hidden');
         const title = `<div class="text-sm font-extrabold mb-2">Vývoj výkonov — ${escapeHtml(sport.name)}</div>`;
         if (pts.length < 2) {
@@ -4000,7 +4007,7 @@
         const visibleRecords = (profileSportFilterId
           ? records.filter(r => r.sportId === profileSportFilterId)
           : records.slice()
-        ).sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+        ).sort((a, b) => recCmp(b, a));
 
         const countEl = document.getElementById('profile-records-count');
         if (countEl) {
@@ -4028,7 +4035,7 @@
           const same = athlete.records.filter(o => o.sportId === r.sportId);
           const better = (a, b) => spx.lowerIsBetter ? a < b : a > b;
           const best = same.reduce((m, o) => (m === null || better(o.value, m)) ? o.value : m, null);
-          const earlier = same.filter(o => String(o.date || '') < String(r.date || '') || (String(o.date || '') === String(r.date || '') && String(o.id) < String(r.id)));
+          const earlier = same.filter(o => o !== r && recCmp(o, r) < 0);
           const wasPr = earlier.length > 0 && earlier.every(o => better(r.value, o.value));
           prInfo[r.id] = { isBest: r.value === best && same.length > 1, wasPr };
         });
