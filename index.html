@@ -1379,6 +1379,7 @@
           <button data-admin-tab="sports" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Disciplíny</button>
           <button data-admin-tab="requests" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Žiadosti o zmazanie</button>
           <button data-admin-tab="celebs" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Celebrity</button>
+          <button data-admin-tab="records" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Výsledky</button>
           <button data-admin-tab="feedback" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Správy</button>
           <button id="admin-super-tab-btn" data-admin-tab="super" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Roly a audit log</button>
         </div>
@@ -1402,6 +1403,14 @@
         <div id="admin-panel-requests" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
         <div id="admin-panel-celebs" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
         <div id="admin-panel-feedback" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
+        <div id="admin-panel-records" class="hidden space-y-2">
+          <div class="flex items-center gap-2 flex-wrap text-xs">
+            <select id="adm-rec-sport" class="px-2.5 py-1.5 rounded-lg border text-xs"></select>
+            <label class="inline-flex items-center gap-1.5"><input id="adm-rec-susp" type="checkbox"> Len nápadné (percentil ≥ 99)</label>
+            <span id="adm-rec-count" class="opacity-60"></span>
+          </div>
+          <div class="overflow-auto max-h-96 rounded-xl border"><table class="w-full text-xs border-collapse" style="min-width:640px"><thead><tr class="text-left uppercase tracking-wider opacity-70"><th class="py-2 px-2">Pridané</th><th class="py-2 px-2">Dátum výkonu</th><th class="py-2 px-2">Meno</th><th class="py-2 px-2">Krajina</th><th class="py-2 px-2">Disciplína</th><th class="py-2 px-2">Výsledok</th><th class="py-2 px-2">Percentil</th></tr></thead><tbody id="adm-rec-body"></tbody></table></div>
+        </div>
 
         <div id="admin-panel-super" class="hidden space-y-4">
           <div>
@@ -1766,7 +1775,7 @@
           rc.forEach(r => {
             const a = byId.get(r.user_id);
             if (a) a.records.push({ id: r.id, sportId: r.sport_id, value: Number(r.value), date: r.record_date,
-              country: r.country || '', city: r.city || '', videoUrl: r.video_url || '' });
+              country: r.country || '', city: r.city || '', videoUrl: r.video_url || '', createdAt: r.created_at || '' });
           });
           db = {
             sports: sp.map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent })),
@@ -4165,6 +4174,65 @@
         updateAdminBadges();
       }
 
+      // ===== Admin: nové výsledky =====
+      const ADM_REC_KEY = 'porovnajsa_adm_seen_records';
+      let admRecSince = null, admRecSport = '', admRecSusp = false;
+      function admRecSeenGet() { try { let v = localStorage.getItem(ADM_REC_KEY); if (!v) { v = new Date().toISOString(); localStorage.setItem(ADM_REC_KEY, v); } return v; } catch (e) { return new Date().toISOString(); } }
+      function admRecSeenSet() { try { localStorage.setItem(ADM_REC_KEY, new Date().toISOString()); } catch (e) {} }
+      function renderAdminRecords() {
+        const body = document.getElementById('adm-rec-body'), sel = document.getElementById('adm-rec-sport');
+        if (!body || !sel) return;
+        if (activeAdminTab !== 'records') { admRecSince = null; return; }
+        if (!admRecSince) admRecSince = admRecSeenGet();
+        if (!sel.options.length) sel.innerHTML = '<option value="">Všetky disciplíny</option>' + db.sports.map(x => `<option value="${escapeHtml(x.id)}">${escapeHtml(x.name)}</option>`).join('');
+        sel.value = admRecSport;
+        document.getElementById('adm-rec-susp').checked = admRecSusp;
+        // percentil výsledku medzi najlepšími výkonmi všetkých športovcov rovnakého pohlavia v disciplíne
+        const poolKey = {};
+        const pool = (sid, g) => {
+          const k = sid + '|' + g;
+          if (poolKey[k]) return poolKey[k];
+          const sp = getSportById(sid);
+          const vals = [];
+          db.athletes.forEach(a => {
+            if (a.gender !== g) return;
+            const rs = (a.records || []).filter(x => x.sportId === sid && Number.isFinite(x.value));
+            if (!rs.length) return;
+            vals.push(sp && sp.lowerIsBetter ? Math.min(...rs.map(x => x.value)) : Math.max(...rs.map(x => x.value)));
+          });
+          return (poolKey[k] = vals);
+        };
+        const pctOfRec = (sid, g, v) => {
+          const sp = getSportById(sid), vals = pool(sid, g);
+          if (!sp || vals.length < 2) return null;
+          let worse = 0, equal = 0;
+          vals.forEach(o => { if (o === v) equal++; else if (sp.lowerIsBetter ? o > v : o < v) worse++; });
+          return Math.min(99.9, ((worse + equal / 2) / vals.length) * 100);
+        };
+        let all = [];
+        db.athletes.forEach(a => (a.records || []).forEach(rc => { all.push({ a, rc }); }));
+        all.sort((x, y) => String(y.rc.createdAt || y.rc.date || '').localeCompare(String(x.rc.createdAt || x.rc.date || '')));
+        all = all.slice(0, 300).map(x => Object.assign(x, { pct: pctOfRec(x.rc.sportId, x.a.gender, x.rc.value) }));
+        let rows = all.filter(x => (!admRecSport || x.rc.sportId === admRecSport) && (!admRecSusp || (x.pct !== null && x.pct >= 99))).slice(0, 150);
+        document.getElementById('adm-rec-count').textContent = rows.length + ' záznamov (zobrazených najnovších)';
+        body.innerHTML = rows.length ? rows.map(x => {
+          const sp = getSportById(x.rc.sportId);
+          const isNew = x.rc.createdAt && x.rc.createdAt > admRecSince;
+          const when = x.rc.createdAt ? new Date(x.rc.createdAt).toLocaleString('sk-SK', { day: 'numeric', month: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+          const susp = x.pct !== null && x.pct >= 99;
+          return `<tr class="border-t ${isNew ? 'bg-amber-500/10' : ''}">
+            <td class="py-1.5 px-2 whitespace-nowrap">${isNew ? '<span class="text-amber-600 font-bold">NOVÉ </span>' : ''}${escapeHtml(when)}</td>
+            <td class="py-1.5 px-2 whitespace-nowrap">${escapeHtml(fmtDay ? fmtDay(x.rc.date) : x.rc.date)}</td>
+            <td class="py-1.5 px-2"><button type="button" data-adm-rec-prof="${escapeHtml(x.a.id)}" class="font-bold hover:text-blue-600 cursor-pointer text-left">${escapeHtml(x.a.name)}</button></td>
+            <td class="py-1.5 px-2 whitespace-nowrap">${getFlag(x.a.country)} ${escapeHtml(x.a.country || '')}</td>
+            <td class="py-1.5 px-2">${escapeHtml(sp ? sp.name : x.rc.sportId)}</td>
+            <td class="py-1.5 px-2 whitespace-nowrap font-bold">${escapeHtml(sp ? formatVal(x.rc.value, sp.unit) : String(x.rc.value))}${x.rc.videoUrl ? ` <a href="${/^https?:\/\//i.test(x.rc.videoUrl) ? escapeHtml(x.rc.videoUrl) : '#'}" target="_blank" rel="noopener noreferrer" title="Video" class="text-blue-600">▶</a>` : ''}</td>
+            <td class="py-1.5 px-2 whitespace-nowrap">${x.pct === null ? '—' : x.pct.toFixed(1) + (susp ? ' ⚠️' : '')}</td></tr>`;
+        }).join('') : '<tr><td colspan="7" class="py-4 px-2 opacity-70">Žiadne záznamy.</td></tr>';
+        body.querySelectorAll('[data-adm-rec-prof]').forEach(b => b.addEventListener('click', () => { const m = document.getElementById('admin-modal'); m.classList.add('hidden'); m.classList.remove('flex'); openAthleteProfile(b.getAttribute('data-adm-rec-prof')); }));
+        admRecSeenSet();
+      }
+
       // ===== Červené odznaky v admin prostredí =====
       const ADM_SEEN_KEY = 'porovnajsa_adm_seen_athletes';
       function admSeenGet() { try { let v = localStorage.getItem(ADM_SEEN_KEY); if (!v) { v = new Date().toISOString(); localStorage.setItem(ADM_SEEN_KEY, v); } return v; } catch (e) { return new Date().toISOString(); } }
@@ -4182,7 +4250,7 @@
         const modal = document.getElementById('admin-modal');
         const open = modal && !modal.classList.contains('hidden');
         if (open && activeAdminTab === 'athletes') admSeenSet();
-        let nReq = 0, nNew = 0, nCel = 0, nFb = 0;
+        let nReq = 0, nNew = 0, nCel = 0, nFb = 0, nRec = 0;
         try {
           const a = await sb.from('deletion_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
           nReq = (a && a.count) || 0;
@@ -4190,13 +4258,16 @@
           nNew = (b && b.count) || 0;
         } catch (e) {}
         try { const c = await sb.rpc('admin_celebrity_requests'); nCel = (c && Array.isArray(c.data)) ? c.data.length : 0; } catch (e) {}
+        try { const q = sb.from('records').select('id', { count: 'exact', head: true }).gt('created_at', admRecSeenGet()); const rr = await (currentUserId ? q.neq('user_id', currentUserId) : q); nRec = (rr && rr.count) || 0; } catch (e) {}
+        if (open && activeAdminTab === 'records') nRec = 0;
         try { const f = await sb.rpc('admin_feedback_list'); nFb = (f && Array.isArray(f.data)) ? f.data.filter(x => x.status === 'new').length : 0; } catch (e) {}
         if (open && activeAdminTab === 'athletes') nNew = 0;
         setBadge(document.querySelector('[data-admin-tab="requests"]'), nReq);
         setBadge(document.querySelector('[data-admin-tab="athletes"]'), nNew);
         setBadge(document.querySelector('[data-admin-tab="celebs"]'), nCel);
         setBadge(document.querySelector('[data-admin-tab="feedback"]'), nFb);
-        setBadge(hdr, nReq + nNew + nCel + nFb);
+        setBadge(document.querySelector('[data-admin-tab="records"]'), nRec);
+        setBadge(hdr, nReq + nNew + nCel + nFb + nRec);
       }
       setInterval(() => { if (!document.hidden && typeof currentAdmin !== 'undefined' && currentAdmin) updateAdminBadges(); }, 60000);
 
@@ -4218,7 +4289,7 @@
           const active = b.getAttribute('data-admin-tab') === activeAdminTab;
           b.className = 'admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ' + (active ? 'bg-blue-600 text-white' : 'bg-slate-500/10');
         });
-        ['athletes', 'sports', 'requests', 'celebs', 'feedback', 'super'].forEach(tab => {
+        ['athletes', 'sports', 'requests', 'celebs', 'feedback', 'records', 'super'].forEach(tab => {
           const panel = document.getElementById(`admin-panel-${tab}`);
           if (panel) panel.classList.toggle('hidden', activeAdminTab !== tab);
         });
@@ -4282,6 +4353,8 @@
               <button type="button" data-reject-req="${escapeHtml(r.id)}" class="${btnBase}bg-slate-500/15">Zamietnuť</button>
             </div>
           </div>`).join('') : '<div class="text-xs opacity-70 py-4">Žiadne čakajúce žiadosti o zmazanie.</div>';
+
+        renderAdminRecords();
 
         (function renderFeedback() {
           const box = document.getElementById('admin-panel-feedback');
@@ -4861,6 +4934,8 @@
           });
         });
 
+        document.getElementById('adm-rec-sport').addEventListener('change', (e) => { admRecSport = e.target.value; renderAdminRecords(); });
+        document.getElementById('adm-rec-susp').addEventListener('change', (e) => { admRecSusp = e.target.checked; renderAdminRecords(); });
         document.getElementById('help-fab').addEventListener('click', (e) => { e.stopPropagation(); toggleHelp(); });
         document.getElementById('help-close').addEventListener('click', () => toggleHelp(false));
         document.getElementById('help-panel').addEventListener('click', (e) => e.stopPropagation());
