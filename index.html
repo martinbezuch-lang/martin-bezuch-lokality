@@ -288,7 +288,18 @@
       scrollbar-width: none;
     }
 
+    .cn-short { display: none; }
   @media (max-width: 640px) {
+    html, body { overflow-x: hidden; max-width: 100%; }
+    .cn-full { display: none; }
+    .cn-short { display: inline; }
+    #country-tabs button { padding: 6px 9px !important; }
+    #search-input { min-width: 0; }
+    #main-header #user-auth-controls { max-width: 100%; }
+    #my-profile-btn, #header-my-profile-btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    main, section, .max-w-7xl, .max-w-5xl { min-width: 0; max-width: 100%; }
+    section > div, #extra-filters { min-width: 0; }
+    #extra-filters select, #extra-filters button { max-width: 100%; }
     #main-header { position: static; }
     #main-header > div { padding-top: 10px; padding-bottom: 10px; gap: 8px; }
     #main-header h1 + span, #main-header p { display: none; }
@@ -839,6 +850,17 @@
 
   <!-- Modálne okno úpravy používateľského konta -->
   <!-- Pozvať kamaráta -->
+  <div id="invite-welcome-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+    <div class="max-w-sm w-full rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-3">
+      <h3 class="text-lg font-extrabold">👋 Vitaj!</h3>
+      <p id="invite-welcome-text" class="text-sm"></p>
+      <div class="flex gap-2 justify-end">
+        <button id="invite-welcome-no" type="button" class="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-300/70 cursor-pointer">Nie, ďakujem</button>
+        <button id="invite-welcome-add" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white cursor-pointer">🤝 Pridať priateľa</button>
+      </div>
+    </div>
+  </div>
+
   <div id="invite-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
     <div class="max-w-sm w-full rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-3">
       <div class="flex items-center justify-between">
@@ -1202,6 +1224,7 @@
 
         <div id="admin-panel-athletes" class="space-y-3 hidden">
           <p class="text-xs opacity-70">Športovci sa registrujú sami. Tu môžeš označiť známu osobnosť (⭐) alebo zmazať účet.</p>
+          <div id="admin-invites-summary" class="text-xs p-2.5 rounded-xl bg-slate-500/10"></div>
           <div id="admin-athletes-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
         </div>
 
@@ -1647,6 +1670,43 @@
         document.getElementById('pf-consent').checked = false;
       }
 
+      // ---- pozvánky: ?pozval=<id> si zapamätáme, kým sa kamarát zaregistruje
+      (function captureRef() {
+        try {
+          const m = location.search.match(/[?&]pozval=([0-9a-f-]{36})/i);
+          if (m) {
+            localStorage.setItem('porovnajsa_ref', m[1]);
+            history.replaceState(null, '', location.pathname + location.hash);
+          }
+        } catch (e) {}
+      })();
+
+      async function handleInvite() {
+        if (!sb || !currentUserId) return;
+        try {
+          let ref = null;
+          try { ref = localStorage.getItem('porovnajsa_ref'); } catch (e) {}
+          if (ref && ref !== String(currentUserId)) { await sb.rpc('register_invite', { p_inviter: ref }); }
+          if (ref) { try { localStorage.removeItem('porovnajsa_ref'); } catch (e) {} }
+          const { data } = await sb.from('invites').select('inviter_id, handled').eq('invitee_id', currentUserId).maybeSingle();
+          if (!data || data.handled) return;
+          const inv = db.athletes.find(a => String(a.id) === String(data.inviter_id));
+          if (!inv) return;
+          document.getElementById('invite-welcome-text').innerHTML = `<strong>${escapeHtml(inv.name)}</strong> ťa pozval(a) na Porovnaj sa. Chceš si ${inv.gender === 'Z' ? 'ju' : 'ho'} pridať medzi priateľov? Uvidíš jeho výkony a upozornenia.`;
+          document.getElementById('invite-welcome-add').onclick = async () => {
+            await sb.rpc('respond_invite', { p_add: true });
+            closeModal('invite-welcome-modal');
+            await reloadData(); refreshAllViews();
+            showToast(inv.name + ' je teraz medzi tvojimi priateľmi.');
+          };
+          document.getElementById('invite-welcome-no').onclick = async () => {
+            await sb.rpc('respond_invite', { p_add: false });
+            closeModal('invite-welcome-modal');
+          };
+          openModal('invite-welcome-modal');
+        } catch (e) { /* pozvánky sú doplnok, chyba nesmie blokovať web */ }
+      }
+
       async function applySession(session) {
         authUser = session ? session.user : null;
         lastAuthUserId = authUser ? authUser.id : null;
@@ -1668,6 +1728,7 @@
             } else {
               ownProfileRow = p;
               await reloadData();
+              handleInvite();
             }
           }
         } else {
@@ -1897,6 +1958,9 @@
           const val = sp && pl.value !== undefined ? ` ${formatVal(Number(pl.value), sp.unit)}` : '';
           return { icon, html: `<strong>${escapeHtml(name)}</strong> ${verb} nový výkon: ${escapeHtml(sp ? sp.name : '')}<strong>${escapeHtml(val)}</strong>`, actorId: actor ? actor.id : null };
         }
+        if (n.type === 'invite_joined') {
+          return { icon: '🎉', html: `<strong>${escapeHtml(name)}</strong> sa zaregistroval(a) cez tvoju pozvánku`, actorId: actor ? actor.id : null };
+        }
         const spn = getSportById(pl.sport_id);
         const spName = spn ? spn.name : '';
         if (n.type === 'challenge_invite') {
@@ -1981,7 +2045,7 @@
       }
 
       function inviteFriend() {
-        const url = location.origin + location.pathname;
+        const url = location.origin + location.pathname + (currentUserId ? '?pozval=' + encodeURIComponent(currentUserId) : '');
         const text = 'Pridaj sa ku mne na Porovnaj sa – porovnaj svoj výkon s ostatnými v rebríčku:';
         const full = text + ' ' + url;
         const q = encodeURIComponent;
@@ -2238,7 +2302,7 @@
         const countryItems = countriesWithAthletes
           .map(c => {
             const cnt = matchingAthletes.filter(a => a.country === c).length;
-            return { code: c, count: cnt, label: `${getFlag(c)} ${c} (${cnt})` };
+            return { code: c, count: cnt, label: `${getFlag(c)} ${c} (${cnt})`, short: `${getFlag(c)} ${getIso3(c) || c} ${cnt}` };
           })
           .sort((a, b) => {
             if (b.count !== a.count) return b.count - a.count;
@@ -2259,7 +2323,9 @@
             (active
               ? 'bg-blue-600 text-white shadow-sm'
               : 'bg-slate-500/10 hover:bg-slate-500/20');
-          btn.textContent = item.label;
+          if (item.short) {
+            btn.innerHTML = '<span class="cn-full">' + escapeHtml(item.label) + '</span><span class="cn-short">' + escapeHtml(item.short) + '</span>';
+          } else { btn.textContent = item.label; }
           btn.addEventListener('click', () => {
             selectedCountry = item.code;
             currentPage = 1;
@@ -3632,27 +3698,39 @@
         });
         document.getElementById('admin-add-sport-form').classList.toggle('hidden', !isSuper);
 
-        let profiles = [], requests = [], audit = [];
+        let profiles = [], requests = [], audit = [], invitesRows = [];
         try {
-          const [pr, rq, au] = await Promise.all([
+          const [pr, rq, au, ivq] = await Promise.all([
             fetchAllRows('profiles', 'created_at'),
             sb.from('deletion_requests').select('*').eq('status', 'pending').order('created_at'),
-            isSuper ? sb.from('audit_log').select('*').order('created_at', { ascending: false }).limit(100) : Promise.resolve({ data: [] })
+            isSuper ? sb.from('audit_log').select('*').order('created_at', { ascending: false }).limit(100) : Promise.resolve({ data: [] }),
+            (async () => { try { return await sb.from('invites').select('invitee_id, inviter_id, created_at'); } catch (e) { return { data: [] }; } })()
           ]);
           if (rq.error) throw rq.error;
           if (au.error) throw au.error;
           profiles = pr; requests = rq.data || []; audit = au.data || [];
+          invitesRows = (ivq && ivq.data) || [];
         } catch (err) {
           showToast('Admin dáta sa nepodarilo načítať: ' + ((err && err.message) || err));
           return;
         }
 
         const btnBase = 'px-2.5 py-1 rounded-lg font-semibold cursor-pointer ';
+        const invCount = {}; const invitedBy = {};
+        invitesRows.forEach(r => { invCount[r.inviter_id] = (invCount[r.inviter_id] || 0) + 1; invitedBy[r.invitee_id] = r.inviter_id; });
+        const nameOf = (id) => { const x = profiles.find(q => q.id === id); return x ? x.display_name : '—'; };
+        const topInv = Object.keys(invCount).sort((x, y) => invCount[y] - invCount[x]).slice(0, 10);
+        const invBox = document.getElementById('admin-invites-summary');
+        if (invBox) invBox.innerHTML = invitesRows.length
+          ? `<strong>Pozvánky: ${invitesRows.length} registrácií cez odkaz.</strong> Najviac pozvali: ` + topInv.map(id => `${escapeHtml(nameOf(id))} (${invCount[id]})`).join(', ')
+          : 'Zatiaľ sa nikto nezaregistroval cez pozvánku.';
         document.getElementById('admin-athletes-list').innerHTML = profiles.length ? profiles.map(p => `
           <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs">
             <div><strong>${escapeHtml(p.display_name)}</strong> · ${getFlag(p.country)} ${escapeHtml(p.country || '—')} ${p.is_celebrity ? '⭐' : ''}
               ${p.role !== 'user' ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 font-semibold">${escapeHtml(roleLabel(p.role))}</span>` : ''}
-              ${p.consent_at ? '' : '<span class="ml-1 opacity-60">(profil nedokončený)</span>'}</div>
+              ${p.consent_at ? '' : '<span class="ml-1 opacity-60">(profil nedokončený)</span>'}
+              ${invCount[p.id] ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/15 font-semibold">pozval: ${invCount[p.id]}</span>` : ''}
+              ${invitedBy[p.id] ? `<span class="ml-1 opacity-60">pozval ho: ${escapeHtml(nameOf(invitedBy[p.id]))}</span>` : ''}</div>
             <div class="flex items-center gap-1.5">
               <button type="button" data-adm-celeb="${escapeHtml(p.id)}" data-flag="${p.is_celebrity ? '0' : '1'}" class="${btnBase}bg-purple-500/15 text-purple-700">${p.is_celebrity ? 'Zrušiť ★' : 'Označiť ★'}</button>
               ${isSuper && p.id !== currentAdmin.id ? `<button type="button" data-adm-del-ath="${escapeHtml(p.id)}" data-name="${escapeHtml(p.display_name)}" class="${btnBase}bg-rose-500/15 text-rose-700">Zmazať</button>` : ''}
