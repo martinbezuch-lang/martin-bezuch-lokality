@@ -297,6 +297,17 @@
     body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
     #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
     .m-only { display: none; }
+    #help-fab { position: fixed; right: 16px; bottom: 16px; z-index: 40; width: 46px; height: 46px; border-radius: 9999px; background: #2563eb; color: #fff; font-weight: 800; font-size: 20px; border: 0; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+    #help-fab:hover { background: #1d4ed8; }
+    #help-panel { position: fixed; right: 16px; bottom: 72px; z-index: 40; width: 380px; max-width: calc(100vw - 32px); max-height: min(72vh, 620px); display: flex; flex-direction: column; background: #fff; color: #0f172a; border: 1px solid rgba(148,163,184,.5); border-radius: 16px; box-shadow: 0 14px 40px rgba(0,0,0,.3); }
+    #help-panel.hidden { display: none; }
+    #help-panel details { border-bottom: 1px solid rgba(148,163,184,.3); padding: 8px 2px; }
+    #help-panel summary { cursor: pointer; font-weight: 700; font-size: 13px; }
+    #help-panel details > div { font-size: 12.5px; line-height: 1.5; opacity: .85; padding-top: 6px; }
+    #help-panel details > div ul { list-style: disc; padding-left: 18px; margin: 4px 0; }
+    #help-panel input, #help-panel textarea, #help-panel select { border: 1px solid rgba(148,163,184,.6); background: transparent; color: inherit; border-radius: 10px; padding: 8px 10px; font-size: 13px; width: 100%; }
+    body.dark-chess #help-panel { background: #312e2b; color: #e7e5e4; border-color: #4a4642; }
+    @media (max-width: 640px) { #help-fab { right: 12px; bottom: 12px; width: 42px; height: 42px; } #help-panel { right: 10px; bottom: 62px; max-width: calc(100vw - 20px); } }
     .adm-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; background: #dc2626; color: #fff; font-size: 11px !important; font-weight: 800; line-height: 1; vertical-align: middle; }
     #open-admin-btn { position: relative; }
     #open-admin-btn .adm-badge { position: absolute; top: -7px; right: -7px; margin: 0; box-shadow: 0 0 0 2px #fff; }
@@ -958,6 +969,29 @@
   </div>
 
   <!-- Súboje -->
+  <button id="help-fab" type="button" title="Pomoc, FAQ a spätná väzba" aria-label="Pomoc">?</button>
+  <div id="help-panel" class="hidden" role="dialog" aria-label="Pomoc">
+    <div class="flex items-center justify-between px-4 pt-3 pb-2">
+      <div class="flex gap-1.5">
+        <button type="button" data-help-tab="faq" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">FAQ</button>
+        <button type="button" data-help-tab="write" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">✉️ Napísať nám</button>
+      </div>
+      <button id="help-close" type="button" class="w-8 h-8 rounded-lg bg-slate-500/10 font-bold cursor-pointer" aria-label="Zavrieť">✕</button>
+    </div>
+    <div id="help-faq" class="px-4 pb-4 overflow-y-auto space-y-2">
+      <input id="help-search" type="text" autocomplete="off" placeholder="Hľadať v otázkach…">
+      <div id="help-faq-list"></div>
+    </div>
+    <form id="help-write" class="hidden px-4 pb-4 overflow-y-auto space-y-2.5">
+      <p class="text-xs opacity-70">Otázka, nápad na vylepšenie alebo problém? Napíš nám, každú správu čítame.</p>
+      <select id="fb-kind"><option value="otazka">❓ Otázka</option><option value="napad">💡 Nápad na vylepšenie</option><option value="chyba">🐞 Nahlásiť chybu</option><option value="obsah">🚩 Nahlásiť profil alebo výsledok</option><option value="ine">💬 Niečo iné</option></select>
+      <textarea id="fb-message" rows="5" maxlength="2000" required minlength="5" placeholder="Čo nám chceš povedať? Pri chybe napíš, čo si robil a čo sa stalo."></textarea>
+      <input id="fb-contact" type="email" maxlength="200" placeholder="Tvoj e-mail (nepovinné, ak chceš odpoveď)">
+      <input id="fb-website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;opacity:0">
+      <div class="flex justify-end"><button id="fb-send" type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Odoslať</button></div>
+    </form>
+  </div>
+
   <div id="lists-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6">
     <div class="max-w-xl w-full max-h-[88vh] flex flex-col rounded-2xl border border-slate-200/20 bg-white text-slate-900 shadow-2xl">
       <div class="flex items-center justify-between p-4 sm:p-5 pb-2">
@@ -1024,6 +1058,7 @@
       <p class="text-xs opacity-70">Vyber, o čom chceš dostávať upozornenia (červené číslo pri zvončeku).</p>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-friends" type="checkbox" class="mt-1"><span><strong>Priatelia</strong><br><span class="text-xs opacity-70">keď priateľ pridá nový výkon</span></span></label>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-freq" type="checkbox" class="mt-1"><span><strong>Žiadosti o priateľstvo</strong><br><span class="text-xs opacity-70">keď ťa niekto pridá ako priateľa alebo prijme tvoju žiadosť (sledovanie sa neoznamuje)</span></span></label>
+      <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-celebnew" type="checkbox" class="mt-1"><span><strong>Nové známe osobnosti</strong><br><span class="text-xs opacity-70">keď sa na stránke objaví nová známa osobnosť, ktorú môžeš sledovať</span></span></label>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-celebs" type="checkbox" class="mt-1"><span><strong>Známe osobnosti</strong><br><span class="text-xs opacity-70">keď známa osobnosť pridá nový výkon</span></span></label>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-challenges" type="checkbox" class="mt-1"><span><strong>Výzvy na súboj</strong><br><span class="text-xs opacity-70">keď ťa priateľ vyzve a keď sa súboj skončí</span></span></label>
       <label class="flex items-start gap-3 text-sm opacity-50"><input type="checkbox" disabled class="mt-1"><span><strong>Športové hry a udalosti</strong> <span class="text-[10px] font-bold">(pripravujeme)</span></span></label>
@@ -1344,6 +1379,7 @@
           <button data-admin-tab="sports" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Disciplíny</button>
           <button data-admin-tab="requests" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Žiadosti o zmazanie</button>
           <button data-admin-tab="celebs" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Celebrity</button>
+          <button data-admin-tab="feedback" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Správy</button>
           <button id="admin-super-tab-btn" data-admin-tab="super" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Roly a audit log</button>
         </div>
 
@@ -1365,6 +1401,7 @@
 
         <div id="admin-panel-requests" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
         <div id="admin-panel-celebs" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
+        <div id="admin-panel-feedback" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
 
         <div id="admin-panel-super" class="hidden space-y-4">
           <div>
@@ -1898,6 +1935,54 @@
       const REL_LABEL = { none: '＋', following: '👁', pending_out: '⏳', pending_in: '❗', friend: '🤝' };
       const REL_TITLE = { none: 'Sledovať alebo pridať ako priateľa', following: 'Sleduješ', pending_out: 'Žiadosť odoslaná', pending_in: 'Žiadosť o priateľstvo čaká na teba', friend: 'Priateľ' };
 
+      // ===== Pomoc: FAQ + Napísať nám =====
+      const FAQ = [
+        { q: '🎯 Prečo Porovnaj sa vôbec existuje?', open: true, a: '<p>Väčšina ľudí nevie, ako na tom so svojím telom a výkonom naozaj je. Porovnaj sa ti to ukáže jednoducho: zmeriaš sa v pár disciplínach a uvidíš, kde stojíš oproti ľuďom ako ty, rovnakého pohlavia, veku a z tvojej krajiny. Nie je to súťaž profesionálov, ale amatérsky rebríček pre každého, kto sa chce poznať a zlepšovať.</p>' },
+        { q: '✅ Čo mi to prinesie?', open: true, a: '<ul><li><strong>Percentil:</strong> vidíš, akú časť ľudí vo svojej skupine si prekonal.</li><li><strong>Porovnanie s rovesníkmi:</strong> rebríček môžeš filtrovať podľa pohlavia, vekovej skupiny, krajiny aj váhy.</li><li><strong>Vývoj v čase:</strong> v profile pri disciplíne vidíš svoj percentil podľa veku. Ak si sa zlepšil oproti rovesníkom, uvidíš to, aj keď ti s vekom absolútny výkon klesá.</li><li><strong>Osobné rekordy</strong> a história všetkých meraní.</li><li><strong>Súboje</strong> s priateľmi a sledovanie ľudí, ktorých výkony ťa zaujímajú.</li><li><strong>Zdieľateľný profil</strong> odkazom.</li></ul>' },
+        { q: '📈 Ako zistím, či sa zlepšujem oproti rovesníkom?', a: '<p>Zapíš si výsledok v rovnakej disciplíne aspoň raz za rok (najlepšie v podobných podmienkach). V profile vyber disciplínu a pozri sekciu s výsledkami podľa veku: pri každom veku uvidíš svoj percentil medzi ľuďmi rovnakého pohlavia a veku. Ak percentil rastie, zlepšuješ sa rýchlejšie, než sa so starnutím zhoršuje priemer tvojej vekovej skupiny.</p>' },
+        { q: '🔢 Ako sa počíta percentil?', a: '<p>Percentil ukazuje, akú časť porovnávanej skupiny si prekonal. Percentil 70 znamená, že si lepší ako približne 70 % ľudí v skupine. Skupinu určujú tvoje filtre: pohlavie, krajina, vek, váha a rok. Ak sú vo výsledku zhody, počítajú sa napoly. Čím viac ľudí v skupine je, tým je percentil presnejší.</p>' },
+        { q: '🚀 Ako začať?', a: '<ul><li>Zaregistruj sa (e-mail je povinný, ale nikdy sa nezobrazuje verejne).</li><li>Otvor svoj profil a pridaj prvý výsledok v disciplíne.</li><li>Pozri sa do rebríčka, kde si, a pozvi kamarátov cez „Pozvať kamaráta" v ⚙️ menu.</li></ul>' },
+        { q: '🏋️ Ako sa merajú disciplíny?', a: '<p>Meraj férovo: jeden súvislý pokus v stanovenom čase, bez zmeny pravidiel a bez pomôcok navyše. Zapisuj svoj skutočný najlepší výsledok.</p><ul><li><strong>Biceps, Drepy, Benchpress (1 minúta):</strong> cvičíš súvislo jednu minútu, výsledkom je celkový objem v kg (hmotnosť × počet správne vykonaných opakovaní).</li><li><strong>Bežecký pás 10, 20, 30 minút a beh na páse 1 hodina:</strong> výsledkom je prebehnutá vzdialenosť v metroch za daný čas.</li><li><strong>Plávanie 25 m a 50 m:</strong> výsledkom je čas v sekundách. Označenie (25) alebo (50) znamená dĺžku bazéna.</li><li><strong>HB Sequence, HB Number Memory:</strong> pamäťové testy, výsledkom je dosiahnuté skóre v bodoch.</li></ul>' },
+        { q: '👁 Aký je rozdiel medzi „Sledovať" a „Priateľ"?', a: '<p><strong>Sledovať</strong> je tiché: uvidíš novinky človeka vo filtri a on sa to nedozvie. <strong>Priateľ</strong> vyžaduje žiadosť, ktorú musí druhá strana prijať. Až vtedy sa môžete vyzývať na súboje. Sledovať a priateľov nájdeš cez tlačidlo 🤝 v hornom menu.</p>' },
+        { q: '⚔️ Ako fungujú súboje?', a: '<p>Vyzvi priateľa v zvolenej disciplíne a stanov termín. Ak výzvu prijme, do termínu si každý zapíše výkon a vyhráva lepší. Výsledok dostaneš v upozornení 🔔.</p>' },
+        { q: '⭐ Ako získam status známej osobnosti?', a: '<p>V ⚙️ menu vyber „Požiadať o status celebrity", zvoľ typ (napr. herec, youtuber), napíš popis a vlož odkaz na video, v ktorom sa predstavíš. Admin ho skontroluje. Video vidí iba admin.</p>' },
+        { q: '🗑 Môžem upraviť alebo zmazať výsledok?', a: '<p>Výsledok môžeš upraviť priamo v profile. Zmazanie výsledku sa posiela ako žiadosť, ktorú schvaľuje admin, aby sa rebríček nedal zneužiť.</p>' },
+        { q: '🔒 Aké údaje sú verejné?', a: '<p>Verejné je meno, krajina, pohlavie, rok narodenia, váha, výška a výsledky, pretože bez nich by porovnávanie nedávalo zmysel. E-mail nie je nikdy verejný. Viac v časti Ochrana osobných údajov v pätičke stránky.</p>' },
+        { q: '📨 Ako pozvem kamaráta?', a: '<p>⚙️ menu → „Pozvať kamaráta" alebo odkaz v pätičke. Pošle sa ti odkaz, cez ktorý sa kamarát zaregistruje, a dozvieš sa, že sa pridal.</p>' },
+        { q: '🐞 Našiel som chybu alebo mám nápad', a: '<p>Skvelé! Otvor záložku <strong>✉️ Napísať nám</strong> a pošli správu.</p>' },
+      ];
+      function renderHelpFaq() {
+        const q = (document.getElementById('help-search').value || '').trim().toLowerCase();
+        const items = FAQ.filter(f => !q || (f.q + ' ' + f.a.replace(/<[^>]+>/g, ' ')).toLowerCase().includes(q));
+        document.getElementById('help-faq-list').innerHTML = items.length
+          ? items.map(f => `<details ${(f.open && !q) || q ? 'open' : ''}><summary>${f.q}</summary><div>${f.a}</div></details>`).join('')
+          : '<div class="text-sm opacity-70 py-3">Nič sa nenašlo. Skús to napísať nám v záložke ✉️.</div>';
+      }
+      function setHelpTab(tab) {
+        document.getElementById('help-faq').classList.toggle('hidden', tab !== 'faq');
+        document.getElementById('help-write').classList.toggle('hidden', tab !== 'write');
+        document.querySelectorAll('[data-help-tab]').forEach(b => { b.className = 'px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ' + (b.getAttribute('data-help-tab') === tab ? 'bg-blue-600 text-white' : 'bg-slate-500/10'); });
+        const c = document.getElementById('fb-contact'); if (c) c.classList.toggle('hidden', !!currentUserId);
+        if (tab === 'faq') renderHelpFaq();
+      }
+      function toggleHelp(force) {
+        const pnl = document.getElementById('help-panel');
+        const show = force === undefined ? pnl.classList.contains('hidden') : force;
+        pnl.classList.toggle('hidden', !show);
+        if (show) setHelpTab('faq');
+      }
+      async function submitFeedback(ev) {
+        ev.preventDefault();
+        if (document.getElementById('fb-website').value) return;
+        const btn = document.getElementById('fb-send'); btn.disabled = true;
+        const { error } = await sb.rpc('send_feedback', { p_kind: document.getElementById('fb-kind').value, p_message: document.getElementById('fb-message').value, p_contact: currentUserId ? null : document.getElementById('fb-contact').value, p_key: viewerKey() });
+        btn.disabled = false;
+        if (error) { showToast('Správu sa nepodarilo odoslať: ' + error.message); return; }
+        document.getElementById('fb-message').value = '';
+        toggleHelp(false);
+        showToast('Ďakujeme! Správu sme dostali.');
+      }
+
       // ===== Typy celebrít =====
       const CELEB_KINDS = { politik: 'Politik', sportovec: 'Športovec', influencer: 'Influencer', spevak: 'Spevák / spevárka', herec: 'Herec / herečka', youtuber: 'YouTuber', podnikatel: 'Podnikateľ', ina: 'Iné' };
       function celebKindLabel(k) { return CELEB_KINDS[k] || ''; }
@@ -2213,7 +2298,7 @@
       // ===== Upozornenia =====
       let notifs = [];
       let notifTimer = null;
-      let notifPrefs = { friends: true, celebrities: false, challenges: true, friend_requests: true };
+      let notifPrefs = { friends: true, celebrities: false, challenges: true, friend_requests: true, celebrity_new: true };
       const EMAIL_DEFAULTS = { friend_request: 'instant', friend_accepted: 'off', challenge: 'instant', friend_record: 'off', celebrity_record: 'off', invite_joined: 'instant' };
       let emailPrefs = Object.assign({}, EMAIL_DEFAULTS);
       function applyEmailPrefsToUi() { document.querySelectorAll('[data-email-pref]').forEach(sel => { sel.value = emailPrefs[sel.getAttribute('data-email-pref')] || 'off'; }); }
@@ -2281,6 +2366,11 @@
         if (n.type === 'friend_accepted') {
           return { icon: '🤝', html: `<strong>${escapeHtml(name)}</strong> prijal(a) tvoju žiadosť o priateľstvo`, actorId: actor ? actor.id : null };
         }
+        if (n.type === 'celebrity_new') {
+          const kl = celebKindLabel(pl.kind);
+          const cur = actor ? (actor.relation || (actor.isFriend ? 'following' : 'none')) : 'none';
+          return { icon: '⭐', html: `Známa osobnosť${kl ? ', ' + escapeHtml(kl.toLowerCase()) + ',' : ''} <strong>${escapeHtml(name)}</strong> je na Porovnaj sa. Sleduj ${actor && actor.gender === 'Z' ? 'ju' : 'ho'} a dostávaj informácie o ${actor && actor.gender === 'Z' ? 'jej' : 'jeho'} výkonoch.`, actorId: actor ? actor.id : null, followId: (actor && cur === 'none') ? actor.id : null, note: (actor && cur !== 'none') ? '👁 Už sleduješ' : '' };
+        }
         if (n.type === 'celebrity_decision') {
           return { icon: '⭐', html: pl.approved ? 'Tvoja žiadosť o status známej osobnosti bola <strong>schválená</strong>' : 'Tvoja žiadosť o status známej osobnosti bola <strong>zamietnutá</strong>', actorId: null };
         }
@@ -2316,7 +2406,9 @@
         panel.innerHTML = notifs.map(n => {
           const t = notifText(n);
           const unread = unreadIds.has(n.id);
-          const extra = t.friendReqId
+          const extra = t.followId
+            ? `<span class="block mt-1.5"><button type="button" class="ch-btn ch-yes" data-n-follow="${escapeHtml(t.followId)}">👁 Sledovať</button></span>`
+            : t.friendReqId
             ? `<span class="block mt-1.5"><button type="button" class="ch-btn ch-yes" data-fr-accept="${escapeHtml(t.friendReqId)}">Prijať</button> <button type="button" class="ch-btn ch-no" data-fr-decline="${escapeHtml(t.friendReqId)}">Odmietnuť</button></span>`
             : t.challengeId
             ? `<span class="block mt-1.5"><button type="button" class="ch-btn ch-yes" data-ch-accept="${escapeHtml(t.challengeId)}">Prijať</button> <button type="button" class="ch-btn ch-no" data-ch-decline="${escapeHtml(t.challengeId)}">Odmietnuť</button></span>`
@@ -2325,6 +2417,7 @@
             <span class="notif-dot ${unread ? '' : 'read'}"></span>
             <span class="flex-1"><span class="block">${t.icon} ${t.html}</span><span class="block opacity-60 mt-0.5">${escapeHtml(timeAgo(n.created_at))}</span>${extra}</span></div>`;
         }).join('');
+        panel.querySelectorAll('[data-n-follow]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); const t = db.athletes.find(x => String(x.id) === b.getAttribute('data-n-follow')); if (t) relAction('follow', t); }));
         panel.querySelectorAll('[data-fr-accept]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondFriend(b.getAttribute('data-fr-accept'), true); }));
         panel.querySelectorAll('[data-fr-decline]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondFriend(b.getAttribute('data-fr-decline'), false); }));
         panel.querySelectorAll('[data-ch-accept]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondChallenge(b.getAttribute('data-ch-accept'), true); }));
@@ -2355,10 +2448,10 @@
       async function openNotifSettings() {
         openModal('notif-settings-modal');
         const f = document.getElementById('np-friends'), c = document.getElementById('np-celebs');
-        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; document.getElementById('np-freq').checked = notifPrefs.friend_requests;
+        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; document.getElementById('np-freq').checked = notifPrefs.friend_requests; document.getElementById('np-celebnew').checked = notifPrefs.celebrity_new;
         try {
           const { data } = await sb.from('notification_prefs').select('*').eq('user_id', authUser.id).maybeSingle();
-          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities, challenges: data.challenges !== false, friend_requests: data.friend_requests !== false }; document.getElementById('np-freq').checked = notifPrefs.friend_requests; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; }
+          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities, challenges: data.challenges !== false, friend_requests: data.friend_requests !== false, celebrity_new: data.celebrity_new !== false }; document.getElementById('np-celebnew').checked = notifPrefs.celebrity_new; document.getElementById('np-freq').checked = notifPrefs.friend_requests; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; }
           if (data) { emailPrefs = Object.assign({}, EMAIL_DEFAULTS, data.email_prefs || {}); }
         } catch (e) { /* tabuľka ešte nemusí existovať */ }
         applyEmailPrefsToUi();
@@ -2366,10 +2459,10 @@
 
       async function saveNotifPrefs() {
         if (!authUser) return;
-        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked, challenges: document.getElementById('np-challenges').checked, friend_requests: document.getElementById('np-freq').checked };
+        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked, challenges: document.getElementById('np-challenges').checked, friend_requests: document.getElementById('np-freq').checked, celebrity_new: document.getElementById('np-celebnew').checked };
         document.querySelectorAll('[data-email-pref]').forEach(sel => { emailPrefs[sel.getAttribute('data-email-pref')] = sel.value; });
         try {
-          let { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges, friend_requests: notifPrefs.friend_requests, email_prefs: emailPrefs });
+          let { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges, friend_requests: notifPrefs.friend_requests, celebrity_new: notifPrefs.celebrity_new, email_prefs: emailPrefs });
           if (error) { ({ error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges, friend_requests: notifPrefs.friend_requests })); }
           if (error) { ({ error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges })); }
           if (error) showToast('Nastavenie sa nepodarilo uložiť: ' + error.message);
@@ -4089,7 +4182,7 @@
         const modal = document.getElementById('admin-modal');
         const open = modal && !modal.classList.contains('hidden');
         if (open && activeAdminTab === 'athletes') admSeenSet();
-        let nReq = 0, nNew = 0, nCel = 0;
+        let nReq = 0, nNew = 0, nCel = 0, nFb = 0;
         try {
           const a = await sb.from('deletion_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
           nReq = (a && a.count) || 0;
@@ -4097,11 +4190,13 @@
           nNew = (b && b.count) || 0;
         } catch (e) {}
         try { const c = await sb.rpc('admin_celebrity_requests'); nCel = (c && Array.isArray(c.data)) ? c.data.length : 0; } catch (e) {}
+        try { const f = await sb.rpc('admin_feedback_list'); nFb = (f && Array.isArray(f.data)) ? f.data.filter(x => x.status === 'new').length : 0; } catch (e) {}
         if (open && activeAdminTab === 'athletes') nNew = 0;
         setBadge(document.querySelector('[data-admin-tab="requests"]'), nReq);
         setBadge(document.querySelector('[data-admin-tab="athletes"]'), nNew);
         setBadge(document.querySelector('[data-admin-tab="celebs"]'), nCel);
-        setBadge(hdr, nReq + nNew + nCel);
+        setBadge(document.querySelector('[data-admin-tab="feedback"]'), nFb);
+        setBadge(hdr, nReq + nNew + nCel + nFb);
       }
       setInterval(() => { if (!document.hidden && typeof currentAdmin !== 'undefined' && currentAdmin) updateAdminBadges(); }, 60000);
 
@@ -4123,7 +4218,7 @@
           const active = b.getAttribute('data-admin-tab') === activeAdminTab;
           b.className = 'admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ' + (active ? 'bg-blue-600 text-white' : 'bg-slate-500/10');
         });
-        ['athletes', 'sports', 'requests', 'celebs', 'super'].forEach(tab => {
+        ['athletes', 'sports', 'requests', 'celebs', 'feedback', 'super'].forEach(tab => {
           const panel = document.getElementById(`admin-panel-${tab}`);
           if (panel) panel.classList.toggle('hidden', activeAdminTab !== tab);
         });
@@ -4146,6 +4241,8 @@
           return;
         }
 
+        let fbRows = [];
+        try { const fr = await sb.rpc('admin_feedback_list'); fbRows = (fr && fr.data) || []; } catch (e) {}
         let celebReqs = [];
         try { const cr = await sb.rpc('admin_celebrity_requests'); celebReqs = (cr && cr.data) || []; } catch (e) {}
         updateAdminBadges();
@@ -4185,6 +4282,28 @@
               <button type="button" data-reject-req="${escapeHtml(r.id)}" class="${btnBase}bg-slate-500/15">Zamietnuť</button>
             </div>
           </div>`).join('') : '<div class="text-xs opacity-70 py-4">Žiadne čakajúce žiadosti o zmazanie.</div>';
+
+        (function renderFeedback() {
+          const box = document.getElementById('admin-panel-feedback');
+          if (!box) return;
+          const KL = { otazka: '❓ Otázka', napad: '💡 Nápad', chyba: '🐞 Chyba', obsah: '🚩 Nahlásenie', ine: '💬 Iné' };
+          box.innerHTML = fbRows.length ? fbRows.map(f => {
+            const mail = f.contact || f.account_email || '';
+            const who = f.display_name ? escapeHtml(f.display_name) : 'hosť';
+            return `<div class="p-3 rounded-xl border text-xs space-y-1.5 ${f.status === 'done' ? 'opacity-60' : ''}">
+              <div class="flex items-center justify-between gap-2 flex-wrap"><span><strong>${KL[f.kind] || ''}</strong> · ${who}${mail ? ' · ' + escapeHtml(mail) : ''}</span><span class="opacity-60">${escapeHtml(new Date(f.created_at).toLocaleString('sk-SK'))}</span></div>
+              <div style="white-space:pre-wrap">${escapeHtml(f.message)}</div>
+              <div class="flex gap-1.5 pt-1 flex-wrap">
+                ${f.status === 'new' ? `<button type="button" data-fb-done="${escapeHtml(f.id)}" class="${btnBase}bg-emerald-600 text-white">Vybavené</button>` : `<button type="button" data-fb-new="${escapeHtml(f.id)}" class="${btnBase}bg-slate-500/15">Vrátiť medzi nové</button>`}
+                ${mail ? `<a href="mailto:${escapeHtml(mail)}" class="${btnBase}bg-slate-500/15 no-underline">Odpísať</a>` : ''}
+                <button type="button" data-fb-del="${escapeHtml(f.id)}" class="${btnBase}bg-rose-500/15 text-rose-700">Zmazať</button>
+              </div></div>`;
+          }).join('') : '<div class="text-xs opacity-70 py-4">Zatiaľ žiadne správy.</div>';
+          const act = async (id, st) => { const { error } = await sb.rpc('admin_feedback_set', { p_id: id, p_status: st }); if (error) { showToast('Nepodarilo sa: ' + error.message); return; } syncAdminModalView(); };
+          box.querySelectorAll('[data-fb-done]').forEach(b => b.addEventListener('click', () => act(b.getAttribute('data-fb-done'), 'done')));
+          box.querySelectorAll('[data-fb-new]').forEach(b => b.addEventListener('click', () => act(b.getAttribute('data-fb-new'), 'new')));
+          box.querySelectorAll('[data-fb-del]').forEach(b => b.addEventListener('click', () => { if (confirm('Zmazať túto správu?')) act(b.getAttribute('data-fb-del'), 'deleted'); }));
+        })();
 
         (function renderCelebReqs() {
           const box = document.getElementById('admin-panel-celebs');
@@ -4742,6 +4861,13 @@
           });
         });
 
+        document.getElementById('help-fab').addEventListener('click', (e) => { e.stopPropagation(); toggleHelp(); });
+        document.getElementById('help-close').addEventListener('click', () => toggleHelp(false));
+        document.getElementById('help-panel').addEventListener('click', (e) => e.stopPropagation());
+        document.addEventListener('click', () => toggleHelp(false));
+        document.querySelectorAll('[data-help-tab]').forEach(b => b.addEventListener('click', () => setHelpTab(b.getAttribute('data-help-tab'))));
+        document.getElementById('help-search').addEventListener('input', renderHelpFaq);
+        document.getElementById('help-write').addEventListener('submit', submitFeedback);
         document.getElementById('open-friends-list-btn').addEventListener('click', () => openLists('friends'));
         document.getElementById('open-celebs-list-btn').addEventListener('click', () => openLists('celebs'));
         document.getElementById('close-lists-btn').addEventListener('click', () => closeModal('lists-modal'));
@@ -4763,6 +4889,7 @@
         document.getElementById('np-celebs').addEventListener('change', saveNotifPrefs);
         document.getElementById('np-challenges').addEventListener('change', saveNotifPrefs);
         document.getElementById('np-freq').addEventListener('change', saveNotifPrefs);
+        document.getElementById('np-celebnew').addEventListener('change', saveNotifPrefs);
         document.querySelectorAll('[data-email-pref]').forEach(sel => sel.addEventListener('change', saveNotifPrefs));
         document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-invite]')) inviteFriend(); });
         document.getElementById('filters-toggle-btn').addEventListener('click', () => {
