@@ -2871,6 +2871,35 @@
 
         renderPagination(rows.length, totalPages, startIdx, endIdx);
 
+        // Športovci bez výsledku v tejto disciplíne (aby sa dali nájsť a pridať medzi sledovaných / priateľov)
+        (function renderNoResultExtras() {
+          const wrap = tbody.closest('.overflow-auto');
+          if (!wrap) return;
+          let box = document.getElementById('search-extra');
+          if (!box) { box = document.createElement('div'); box.id = 'search-extra'; wrap.insertAdjacentElement('afterend', box); }
+          const inRows = new Set(rows.map(x => String(x.athlete.id)));
+          const wantFilter = Boolean(q) || onlyFriends;
+          const extras = !wantFilter ? [] : db.athletes.filter(a => {
+            if (inRows.has(String(a.id)) || String(a.id) === String(currentUserId)) return false;
+            if (onlyCelebrities && !a.isCelebrity) return false;
+            if (onlyFriends && !(a.relation && a.relation !== 'none') && !a.isFriend) return false;
+            if (q && !(a.name || '').toLowerCase().includes(q) && !(a.country || '').toLowerCase().includes(q)) return false;
+            return true;
+          }).slice(0, 8);
+          if (!extras.length) { box.innerHTML = ''; box.className = 'hidden'; return; }
+          box.className = 'px-4 py-3 border-t border-slate-200/70';
+          box.innerHTML = '<div class="text-[11px] font-bold uppercase tracking-wider opacity-70 mb-2">Bez výsledku v tejto disciplíne / filtri</div>' + extras.map(a => {
+            const rel = a.relation || (a.isFriend ? 'following' : 'none');
+            return `<div class="flex items-center justify-between gap-2 py-1.5 text-sm"><span class="min-w-0 truncate">${getFlag(a.country)} <button type="button" data-extra-profile="${escapeHtml(a.id)}" class="font-bold hover:text-blue-600 cursor-pointer">${escapeHtml(a.name)}</button> <span class="text-xs opacity-60">(${escapeHtml(a.country)})</span></span><button type="button" data-extra-rel="${escapeHtml(a.id)}" title="${REL_TITLE[rel]}" class="w-8 h-8 shrink-0 inline-flex items-center justify-center rounded-lg text-sm font-bold border transition cursor-pointer ${rel !== 'none' ? 'bg-amber-500/20 border-amber-500/40 text-amber-700' : 'bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'}">${REL_LABEL[rel]}</button></div>`;
+          }).join('');
+          box.querySelectorAll('[data-extra-profile]').forEach(b => b.addEventListener('click', () => openAthleteProfile(b.getAttribute('data-extra-profile'))));
+          box.querySelectorAll('[data-extra-rel]').forEach(b => b.addEventListener('click', (ev) => {
+            ev.stopPropagation();
+            const t = db.athletes.find(x => String(x.id) === b.getAttribute('data-extra-rel'));
+            if (t) openRelMenu(t, b);
+          }));
+        })();
+
         tbody.innerHTML = '';
         if (pageRows.length === 0) {
           tbody.innerHTML = `<tr><td colspan="7" class="py-10 px-4 text-center text-sm"><div class="opacity-70">Pre zvolené filtre sa nenašli žiadne výsledky.</div><button type="button" id="reset-filters-btn" class="mt-3 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Zruš filtre</button></td></tr>`;
@@ -4085,9 +4114,6 @@
           idA = loggedInUser.id;
           if (targetAthleteId && String(targetAthleteId) !== String(loggedInUser.id) && db.athletes.some(a => String(a.id) === String(targetAthleteId))) {
             idB = targetAthleteId;
-          } else if (celebrities.length > 0) {
-            const otherCeleb = celebrities.find(c => String(c.id) !== String(idA)) || celebrities[0];
-            idB = otherCeleb ? otherCeleb.id : '';
           }
         } else {
           if (targetAthleteId && db.athletes.some(a => String(a.id) === String(targetAthleteId))) {
@@ -4120,6 +4146,10 @@
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
+        if (!compareState.athleteBId) {
+          const ib = document.getElementById('compare-ath-b-search');
+          if (ib) setTimeout(() => { ib.focus(); }, 50);
+        }
       }
 
       function closeCompareModal() {
