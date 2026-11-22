@@ -459,8 +459,8 @@
             </button>
           </div>
 
-          <button id="friends-filter-btn" type="button" title="Zobraziť v rebríčku len sledovaných a priateľov" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 Priatelia</button>
-          <button id="celebrities-filter-btn" type="button" title="Zobraziť v rebríčku len známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ Celebrity</button>
+          <button id="friends-filter-btn" type="button" title="Zobraziť v rebríčku len sledovaných a priateľov" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">🤝 Priatelia</button>
+          <button id="celebrities-filter-btn" type="button" title="Zobraziť v rebríčku len známe osobnosti" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">⭐ Celebrity</button>
           <button id="filters-toggle-btn" type="button" aria-expanded="false" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">⚙️ Filtre</button>
         </div>
 
@@ -1917,7 +1917,7 @@
         if (!body || !tabs) return;
         const isF = listsState.kind === 'friends';
         document.getElementById('lists-title').textContent = isF ? '🤝 Priatelia a sledovaní' : '⭐ Známe osobnosti';
-        const others = db.athletes.filter(a => String(a.id) !== String(currentUserId));
+        const others = db.athletes.filter(a => isF ? String(a.id) !== String(currentUserId) : true);
         const relOfA = (a) => a.relation || (a.isFriend ? 'following' : 'none');
         const groups = {
           friends: others.filter(a => relOfA(a) === 'friend'),
@@ -1935,15 +1935,16 @@
         const emptyTxt = q ? 'Nikto sa nenašiel.' : (isF ? ({ friends: 'Zatiaľ nemáš žiadnych priateľov. Nájdi ich cez vyhľadávanie vyššie.', following: 'Zatiaľ nikoho nesleduješ.', requests: 'Žiadne žiadosti.' }[listsState.tab]) : 'Zatiaľ nie sú žiadne známe osobnosti.');
         const sorted = list.slice().sort((x, y) => (x.name || '').localeCompare(y.name || '', 'sk'));
         body.innerHTML = (heading ? `<div class="text-[11px] font-bold uppercase tracking-wider opacity-60 mb-1">${heading}</div>` : '') + (sorted.length ? sorted.map(a => {
-          const rel = relOfA(a);
-          const note = { friend: 'Priateľ', following: 'Sleduješ', pending_out: 'Žiadosť odoslaná', pending_in: 'Chce byť tvoj priateľ', none: '' }[rel];
+          const isMeRow = String(a.id) === String(currentUserId);
+          const rel = isMeRow ? 'none' : relOfA(a);
+          const note = isMeRow ? 'Ty' : { friend: 'Priateľ', following: 'Sleduješ', pending_out: 'Žiadosť odoslaná', pending_in: 'Chce byť tvoj priateľ', none: '' }[rel];
           const pend = rel === 'pending_in'
             ? `<button type="button" data-lacc="${escapeHtml(a.id)}" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer">Prijať</button><button type="button" data-ldec="${escapeHtml(a.id)}" class="px-2.5 py-1 rounded-lg bg-slate-500/15 text-xs font-bold cursor-pointer">Odmietnuť</button>` : '';
           const chal = rel === 'friend' ? `<button type="button" data-lchal="${escapeHtml(a.id)}" title="Vyzvať na súboj" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-slate-500/10 border border-slate-500/20 cursor-pointer">⚔️</button>` : '';
           return `<div class="flex items-center justify-between gap-2 py-1.5 border-b border-slate-300/30">
             <div class="min-w-0"><button type="button" data-lprof="${escapeHtml(a.id)}" class="font-bold text-sm hover:text-blue-600 cursor-pointer text-left truncate max-w-full">${getFlag(a.country)} ${escapeHtml(a.name)}${a.isCelebrity ? ' ⭐' : ''}</button>
               <div class="text-[11px] opacity-60">${escapeHtml(a.country || '')}${note ? ' · ' + note : ''}</div></div>
-            <div class="flex items-center gap-1.5 shrink-0">${pend}${chal}<button type="button" data-lrel="${escapeHtml(a.id)}" title="${REL_TITLE[rel]}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-bold border cursor-pointer ${rel !== 'none' ? 'bg-amber-500/20 border-amber-500/40 text-amber-700' : 'bg-slate-500/10 border-slate-500/20'}">${REL_LABEL[rel]}</button></div>
+            <div class="flex items-center gap-1.5 shrink-0">${pend}${chal}${isMeRow ? '' : `<button type="button" data-lrel="${escapeHtml(a.id)}" title="${REL_TITLE[rel]}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-bold border cursor-pointer ${rel !== 'none' ? 'bg-amber-500/20 border-amber-500/40 text-amber-700' : 'bg-slate-500/10 border-slate-500/20'}">${REL_LABEL[rel]}</button>`}</div>
           </div>`;
         }).join('') : `<div class="text-sm opacity-70 py-4">${emptyTxt}</div>`);
         const find = (id) => db.athletes.find(x => String(x.id) === String(id));
@@ -2710,9 +2711,9 @@
           pk.disabled = !ok; pk.style.opacity = ok ? '' : '0.45';
           pk.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition ' + (ok ? 'cursor-pointer ' : 'cursor-not-allowed ') + (perKg && ok ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
         }
-        const base = 'h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border transition cursor-pointer ';
-        const fb = document.getElementById('friends-filter-btn'); if (fb) fb.className = base + (onlyFriends ? 'bg-amber-500 text-slate-950 border-amber-500 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-300/70');
-        const cb = document.getElementById('celebrities-filter-btn'); if (cb) cb.className = base + (onlyCelebrities ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-300/70');
+        const base = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer ';
+        const fb = document.getElementById('friends-filter-btn'); if (fb) fb.className = base + (onlyFriends ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
+        const cb = document.getElementById('celebrities-filter-btn'); if (cb) cb.className = base + (onlyCelebrities ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20');
       }
       function clearExtraFilters() {
         onlyFriends = false; onlyCelebrities = false; selectedAgeAtRecord = null; selectedAgeGroup = '';
