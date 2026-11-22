@@ -419,8 +419,8 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <button id="friends-filter-btn" type="button" title="Zobraziť len sledovaných a priateľov" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 (0)</button>
-        <button id="celebrities-filter-btn" type="button" title="Zobraziť len známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ (0)</button>
+        <button id="open-friends-list-btn" type="button" title="Moji priatelia a sledovaní" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 (0)</button>
+        <button id="open-celebs-list-btn" type="button" title="Známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ (0)</button>
         <div id="user-auth-controls" class="flex items-center gap-2 flex-wrap">
             <button id="my-profile-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600/15 text-blue-700 cursor-pointer">
               👤 Martin Bezuch
@@ -459,6 +459,8 @@
             </button>
           </div>
 
+          <button id="friends-filter-btn" type="button" title="Zobraziť v rebríčku len sledovaných a priateľov" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 Priatelia</button>
+          <button id="celebrities-filter-btn" type="button" title="Zobraziť v rebríčku len známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ Celebrity</button>
           <button id="filters-toggle-btn" type="button" aria-expanded="false" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">⚙️ Filtre</button>
         </div>
 
@@ -956,6 +958,41 @@
   </div>
 
   <!-- Súboje -->
+  <div id="lists-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6">
+    <div class="max-w-xl w-full max-h-[88vh] flex flex-col rounded-2xl border border-slate-200/20 bg-white text-slate-900 shadow-2xl">
+      <div class="flex items-center justify-between p-4 sm:p-5 pb-2">
+        <h3 id="lists-title" class="text-lg font-extrabold">🤝 Priatelia</h3>
+        <button id="close-lists-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-500/10 font-bold cursor-pointer">✕</button>
+      </div>
+      <div class="px-4 sm:px-5 space-y-2.5">
+        <div id="lists-tabs" class="flex gap-1.5 flex-wrap"></div>
+        <input id="lists-search" type="text" autocomplete="off" placeholder="Hľadať športovca podľa mena alebo krajiny…" class="w-full px-3.5 py-2 rounded-xl border border-slate-300/80 bg-transparent text-sm outline-none focus:border-blue-500">
+      </div>
+      <div id="lists-body" class="p-4 sm:p-5 pt-3 overflow-y-auto space-y-1"></div>
+    </div>
+  </div>
+
+  <div id="celeb-req-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+    <div class="max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-extrabold">⭐ Status známej osobnosti</h3>
+        <button id="close-celeb-req-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-500/10 font-bold cursor-pointer">✕</button>
+      </div>
+      <div id="celeb-req-status" class="text-sm"></div>
+      <form id="celeb-req-form" class="space-y-3">
+        <p class="text-xs opacity-70">Požiadaj o označenie ⭐. Admin žiadosť skontroluje podľa videa, v ktorom sa predstavíš. Video vidí iba admin.</p>
+        <div><label for="celeb-kind" class="block text-xs font-semibold mb-1">Typ</label>
+          <select id="celeb-kind" class="w-full px-3 py-2 rounded-xl border text-sm"></select></div>
+        <div><label for="celeb-desc" class="block text-xs font-semibold mb-1">Krátky popis (kto si, čím si známy/á)</label>
+          <textarea id="celeb-desc" rows="3" maxlength="500" required class="w-full px-3 py-2 rounded-xl border text-sm"></textarea></div>
+        <div><label for="celeb-video" class="block text-xs font-semibold mb-1">Odkaz na video ako dôkaz</label>
+          <input id="celeb-video" type="url" required placeholder="https://…" class="w-full px-3 py-2 rounded-xl border text-sm">
+          <p class="text-[11px] opacity-60 mt-1">Nahraj video (napr. na YouTube ako neverejné), v ktorom povieš, že žiadaš o status na stránke Porovnaj sa, a ukážeš, že si to ty. Vlož sem odkaz.</p></div>
+        <div class="flex justify-end"><button id="celeb-send-btn" type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Odoslať žiadosť</button></div>
+      </form>
+    </div>
+  </div>
+
   <div id="challenges-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6">
     <div class="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
@@ -1306,6 +1343,7 @@
           <button data-admin-tab="athletes" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Športovci</button>
           <button data-admin-tab="sports" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Disciplíny</button>
           <button data-admin-tab="requests" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Žiadosti o zmazanie</button>
+          <button data-admin-tab="celebs" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Celebrity</button>
           <button id="admin-super-tab-btn" data-admin-tab="super" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Roly a audit log</button>
         </div>
 
@@ -1326,6 +1364,7 @@
         </div>
 
         <div id="admin-panel-requests" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
+        <div id="admin-panel-celebs" class="hidden space-y-2 max-h-96 overflow-y-auto"></div>
 
         <div id="admin-panel-super" class="hidden space-y-4">
           <div>
@@ -1683,7 +1722,7 @@
           const athletes = pr.map(p => {
             const a = { id: p.id, name: p.display_name, country: p.country || '', gender: p.gender || 'M',
               birthYear: p.birth_year, weightKg: p.weight_kg, heightCm: p.height_cm,
-              isFriend: false, isCelebrity: !!p.is_celebrity, records: [] };
+              isFriend: false, isCelebrity: !!p.is_celebrity, celebrityType: p.celebrity_type || '', records: [] };
             byId.set(p.id, a);
             return a;
           });
@@ -1859,6 +1898,91 @@
       const REL_LABEL = { none: '＋', following: '👁', pending_out: '⏳', pending_in: '❗', friend: '🤝' };
       const REL_TITLE = { none: 'Sledovať alebo pridať ako priateľa', following: 'Sleduješ', pending_out: 'Žiadosť odoslaná', pending_in: 'Žiadosť o priateľstvo čaká na teba', friend: 'Priateľ' };
 
+      // ===== Typy celebrít =====
+      const CELEB_KINDS = { politik: 'Politik', sportovec: 'Športovec', influencer: 'Influencer', spevak: 'Spevák / spevárka', herec: 'Herec / herečka', youtuber: 'YouTuber', podnikatel: 'Podnikateľ', ina: 'Iné' };
+      function celebKindLabel(k) { return CELEB_KINDS[k] || ''; }
+
+      // ===== Zoznamy: priatelia / celebrity =====
+      const listsState = { kind: 'friends', tab: 'friends', q: '' };
+      function listsOpen() { const m = document.getElementById('lists-modal'); return m && !m.classList.contains('hidden'); }
+      function openLists(kind) {
+        if (kind === 'friends' && !currentUserId) { showToast('Najprv sa prihlás.'); openModal('auth-modal'); return; }
+        listsState.kind = kind; listsState.tab = 'friends'; listsState.q = '';
+        document.getElementById('lists-search').value = '';
+        openModal('lists-modal');
+        renderLists();
+      }
+      function renderLists() {
+        const body = document.getElementById('lists-body'), tabs = document.getElementById('lists-tabs');
+        if (!body || !tabs) return;
+        const isF = listsState.kind === 'friends';
+        document.getElementById('lists-title').textContent = isF ? '🤝 Priatelia a sledovaní' : '⭐ Známe osobnosti';
+        const others = db.athletes.filter(a => String(a.id) !== String(currentUserId));
+        const relOfA = (a) => a.relation || (a.isFriend ? 'following' : 'none');
+        const groups = {
+          friends: others.filter(a => relOfA(a) === 'friend'),
+          following: others.filter(a => relOfA(a) === 'following' || relOfA(a) === 'pending_out'),
+          requests: others.filter(a => relOfA(a) === 'pending_in' || relOfA(a) === 'pending_out'),
+        };
+        if (isF) {
+          const T = [['friends', 'Priatelia'], ['following', 'Sledovaní'], ['requests', 'Žiadosti']];
+          tabs.innerHTML = T.map(([k, l]) => `<button type="button" data-ltab="${k}" class="px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer ${listsState.tab === k ? 'bg-blue-600 text-white' : 'bg-slate-500/10'}">${l} (${groups[k].length})</button>`).join('');
+        } else tabs.innerHTML = '';
+        const q = listsState.q.trim().toLowerCase();
+        let list, heading = '';
+        if (q) { list = (isF ? others : others.filter(a => a.isCelebrity)).filter(a => (a.name || '').toLowerCase().includes(q) || (a.country || '').toLowerCase().includes(q)).slice(0, 30); heading = 'Výsledky hľadania'; }
+        else list = isF ? groups[listsState.tab] : others.filter(a => a.isCelebrity);
+        const emptyTxt = q ? 'Nikto sa nenašiel.' : (isF ? ({ friends: 'Zatiaľ nemáš žiadnych priateľov. Nájdi ich cez vyhľadávanie vyššie.', following: 'Zatiaľ nikoho nesleduješ.', requests: 'Žiadne žiadosti.' }[listsState.tab]) : 'Zatiaľ nie sú žiadne známe osobnosti.');
+        const sorted = list.slice().sort((x, y) => (x.name || '').localeCompare(y.name || '', 'sk'));
+        body.innerHTML = (heading ? `<div class="text-[11px] font-bold uppercase tracking-wider opacity-60 mb-1">${heading}</div>` : '') + (sorted.length ? sorted.map(a => {
+          const rel = relOfA(a);
+          const note = { friend: 'Priateľ', following: 'Sleduješ', pending_out: 'Žiadosť odoslaná', pending_in: 'Chce byť tvoj priateľ', none: '' }[rel];
+          const pend = rel === 'pending_in'
+            ? `<button type="button" data-lacc="${escapeHtml(a.id)}" class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white text-xs font-bold cursor-pointer">Prijať</button><button type="button" data-ldec="${escapeHtml(a.id)}" class="px-2.5 py-1 rounded-lg bg-slate-500/15 text-xs font-bold cursor-pointer">Odmietnuť</button>` : '';
+          const chal = rel === 'friend' ? `<button type="button" data-lchal="${escapeHtml(a.id)}" title="Vyzvať na súboj" class="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-slate-500/10 border border-slate-500/20 cursor-pointer">⚔️</button>` : '';
+          return `<div class="flex items-center justify-between gap-2 py-1.5 border-b border-slate-300/30">
+            <div class="min-w-0"><button type="button" data-lprof="${escapeHtml(a.id)}" class="font-bold text-sm hover:text-blue-600 cursor-pointer text-left truncate max-w-full">${getFlag(a.country)} ${escapeHtml(a.name)}${a.isCelebrity ? ' ⭐' : ''}</button>
+              <div class="text-[11px] opacity-60">${escapeHtml(a.country || '')}${note ? ' · ' + note : ''}</div></div>
+            <div class="flex items-center gap-1.5 shrink-0">${pend}${chal}<button type="button" data-lrel="${escapeHtml(a.id)}" title="${REL_TITLE[rel]}" class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-bold border cursor-pointer ${rel !== 'none' ? 'bg-amber-500/20 border-amber-500/40 text-amber-700' : 'bg-slate-500/10 border-slate-500/20'}">${REL_LABEL[rel]}</button></div>
+          </div>`;
+        }).join('') : `<div class="text-sm opacity-70 py-4">${emptyTxt}</div>`);
+        const find = (id) => db.athletes.find(x => String(x.id) === String(id));
+        tabs.querySelectorAll('[data-ltab]').forEach(b => b.addEventListener('click', () => { listsState.tab = b.getAttribute('data-ltab'); renderLists(); }));
+        body.querySelectorAll('[data-lprof]').forEach(b => b.addEventListener('click', () => { closeModal('lists-modal'); openAthleteProfile(b.getAttribute('data-lprof')); }));
+        body.querySelectorAll('[data-lrel]').forEach(b => b.addEventListener('click', (ev) => { ev.stopPropagation(); const t = find(b.getAttribute('data-lrel')); if (t) openRelMenu(t, b); }));
+        body.querySelectorAll('[data-lchal]').forEach(b => b.addEventListener('click', () => { closeModal('lists-modal'); openChallenges(b.getAttribute('data-lchal'), selectedSportId); }));
+        body.querySelectorAll('[data-lacc]').forEach(b => b.addEventListener('click', () => { const t = find(b.getAttribute('data-lacc')); if (t) relAction('accept', t); }));
+        body.querySelectorAll('[data-ldec]').forEach(b => b.addEventListener('click', () => { const t = find(b.getAttribute('data-ldec')); if (t) relAction('decline', t); }));
+      }
+
+      // ===== Žiadosť o status celebrity =====
+      async function openCelebRequest() {
+        if (!currentUserId) { showToast('Najprv sa prihlás.'); return; }
+        const kind = document.getElementById('celeb-kind');
+        if (!kind.options.length) kind.innerHTML = Object.keys(CELEB_KINDS).map(k => `<option value="${k}">${CELEB_KINDS[k]}</option>`).join('');
+        const st = document.getElementById('celeb-req-status'), form = document.getElementById('celeb-req-form');
+        const me = db.athletes.find(a => String(a.id) === String(currentUserId));
+        st.innerHTML = ''; form.classList.remove('hidden');
+        openModal('celeb-req-modal');
+        if (me && me.isCelebrity) { st.innerHTML = '✅ Už máš status známej osobnosti' + (me.celebrityType ? ' (' + escapeHtml(celebKindLabel(me.celebrityType)) + ')' : '') + '.'; form.classList.add('hidden'); return; }
+        try {
+          const { data } = await sb.from('celebrity_requests').select('status,kind,created_at').order('created_at', { ascending: false }).limit(1);
+          const last = data && data[0];
+          if (last && last.status === 'pending') { st.innerHTML = '⏳ Tvoja žiadosť čaká na vybavenie adminom.'; form.classList.add('hidden'); }
+          else if (last && last.status === 'rejected') st.innerHTML = '❌ Tvoja predchádzajúca žiadosť bola zamietnutá. Môžeš poslať novú s lepším dôkazom.';
+        } catch (e) { /* tabuľka ešte nemusí existovať */ }
+      }
+      async function submitCelebRequest(ev) {
+        ev.preventDefault();
+        const btn = document.getElementById('celeb-send-btn'); btn.disabled = true;
+        const { error } = await sb.rpc('request_celebrity', { p_kind: document.getElementById('celeb-kind').value, p_description: document.getElementById('celeb-desc').value, p_video: document.getElementById('celeb-video').value });
+        btn.disabled = false;
+        if (error) { showToast('Žiadosť sa nepodarilo odoslať: ' + error.message); return; }
+        document.getElementById('celeb-desc').value = ''; document.getElementById('celeb-video').value = '';
+        closeModal('celeb-req-modal');
+        showToast('Žiadosť bola odoslaná. Admin ju skontroluje.');
+      }
+
       async function relAction(kind, target) {
         const me = getCurrentUser();
         if (!me) { showToast('Najprv sa prihlás.'); openModal('auth-modal'); return; }
@@ -1874,6 +1998,7 @@
         if (error) { showToast('Zmenu sa nepodarilo uložiť: ' + (error.message || error)); return; }
         await overlayOwn();
         refreshAllViews();
+        if (listsOpen()) renderLists();
         loadNotifications();
         showToast(msg);
       }
@@ -2154,6 +2279,9 @@
         }
         if (n.type === 'friend_accepted') {
           return { icon: '🤝', html: `<strong>${escapeHtml(name)}</strong> prijal(a) tvoju žiadosť o priateľstvo`, actorId: actor ? actor.id : null };
+        }
+        if (n.type === 'celebrity_decision') {
+          return { icon: '⭐', html: pl.approved ? 'Tvoja žiadosť o status známej osobnosti bola <strong>schválená</strong>' : 'Tvoja žiadosť o status známej osobnosti bola <strong>zamietnutá</strong>', actorId: null };
         }
         const spn = getSportById(pl.sport_id);
         const spName = spn ? spn.name : '';
@@ -2547,10 +2675,12 @@
         });
 
         const friendsBtn = document.getElementById('friends-filter-btn');
-        if (friendsBtn) friendsBtn.textContent = `🤝 (${baseFilterPool.filter(a => a.isFriend).length})`;
+        if (friendsBtn) friendsBtn.textContent = `🤝 Priatelia (${baseFilterPool.filter(a => a.isFriend).length})`;
 
         const celebsBtn = document.getElementById('celebrities-filter-btn');
-        if (celebsBtn) celebsBtn.textContent = `⭐ (${baseFilterPool.filter(a => a.isCelebrity).length})`;
+        if (celebsBtn) celebsBtn.textContent = `⭐ Celebrity (${baseFilterPool.filter(a => a.isCelebrity).length})`;
+        const ofb = document.getElementById('open-friends-list-btn'); if (ofb) ofb.textContent = `🤝 (${db.athletes.filter(a => a.relation && a.relation !== 'none').length || db.athletes.filter(a => a.isFriend).length})`;
+        const ocb = document.getElementById('open-celebs-list-btn'); if (ocb) ocb.textContent = `⭐ (${db.athletes.filter(a => a.isCelebrity).length})`;
       }
 
       const AGE_GROUPS = { 'u18': [0, 17, 'do 18 rokov'], '18-29': [18, 29, '18 – 29 rokov'], '30-39': [30, 39, '30 – 39 rokov'], '40-49': [40, 49, '40 – 49 rokov'], '50-59': [50, 59, '50 – 59 rokov'], '60+': [60, 200, '60 a viac rokov'] };
@@ -3606,6 +3736,7 @@
         document.getElementById('profile-country-pill').textContent = `${getFlag(athlete.country)} ${athlete.country}`;
         document.getElementById('profile-gender-pill').textContent = athlete.gender === 'Z' ? '♀ Žena' : '♂ Muž';
         document.getElementById('profile-celeb-pill').classList.toggle('hidden', !athlete.isCelebrity);
+        document.getElementById('profile-celeb-pill').textContent = '⭐ Známa osobnosť' + (athlete.celebrityType && celebKindLabel(athlete.celebrityType) ? ' · ' + celebKindLabel(athlete.celebrityType) : '');
 
         const editAccBtn = document.getElementById('edit-account-btn');
         if (editAccBtn) {
@@ -3866,6 +3997,7 @@
                 <button type="button" role="menuitem" data-menu="notif" class="${itemCls}">🔔 Nastavenia upozornení</button>
                 <button type="button" role="menuitem" data-menu="invite" class="${itemCls}">📨 Pozvať kamaráta</button>
                 <button type="button" role="menuitem" data-menu="edit" class="${itemCls}">✏️ Upraviť údaje</button>
+                <button type="button" role="menuitem" data-menu="celeb" class="${itemCls}">⭐ Požiadať o status celebrity</button>
                 <button type="button" role="menuitem" data-menu="theme" class="${itemCls} m-only">🌓 Tmavý / svetlý režim</button>
                 <button type="button" role="menuitem" data-menu="logout" class="${itemCls} m-only">↩️ Odhlásiť sa</button>
               </div>
@@ -3892,6 +4024,7 @@
             if (a === 'edit') openEditAccountModal(user);
             else if (a === 'notif') openNotifSettings();
             else if (a === 'invite') inviteFriend();
+            else if (a === 'celeb') openCelebRequest();
             else if (a === 'logout') doLogout();
             else if (a === 'theme') { const tb = document.getElementById('theme-toggle'); if (tb) tb.click(); }
             else if (a === 'delete') doDeleteAccount();
@@ -3955,17 +4088,19 @@
         const modal = document.getElementById('admin-modal');
         const open = modal && !modal.classList.contains('hidden');
         if (open && activeAdminTab === 'athletes') admSeenSet();
-        let nReq = 0, nNew = 0;
+        let nReq = 0, nNew = 0, nCel = 0;
         try {
           const a = await sb.from('deletion_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
           nReq = (a && a.count) || 0;
           const b = await sb.from('profiles').select('id', { count: 'exact', head: true }).gt('created_at', admSeenGet());
           nNew = (b && b.count) || 0;
         } catch (e) {}
+        try { const c = await sb.rpc('admin_celebrity_requests'); nCel = (c && Array.isArray(c.data)) ? c.data.length : 0; } catch (e) {}
         if (open && activeAdminTab === 'athletes') nNew = 0;
         setBadge(document.querySelector('[data-admin-tab="requests"]'), nReq);
         setBadge(document.querySelector('[data-admin-tab="athletes"]'), nNew);
-        setBadge(hdr, nReq + nNew);
+        setBadge(document.querySelector('[data-admin-tab="celebs"]'), nCel);
+        setBadge(hdr, nReq + nNew + nCel);
       }
       setInterval(() => { if (!document.hidden && typeof currentAdmin !== 'undefined' && currentAdmin) updateAdminBadges(); }, 60000);
 
@@ -3987,7 +4122,7 @@
           const active = b.getAttribute('data-admin-tab') === activeAdminTab;
           b.className = 'admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ' + (active ? 'bg-blue-600 text-white' : 'bg-slate-500/10');
         });
-        ['athletes', 'sports', 'requests', 'super'].forEach(tab => {
+        ['athletes', 'sports', 'requests', 'celebs', 'super'].forEach(tab => {
           const panel = document.getElementById(`admin-panel-${tab}`);
           if (panel) panel.classList.toggle('hidden', activeAdminTab !== tab);
         });
@@ -4010,6 +4145,8 @@
           return;
         }
 
+        let celebReqs = [];
+        try { const cr = await sb.rpc('admin_celebrity_requests'); celebReqs = (cr && cr.data) || []; } catch (e) {}
         updateAdminBadges();
         const btnBase = 'px-2.5 py-1 rounded-lg font-semibold cursor-pointer ';
         const invCount = {}; const invitedBy = {};
@@ -4047,6 +4184,35 @@
               <button type="button" data-reject-req="${escapeHtml(r.id)}" class="${btnBase}bg-slate-500/15">Zamietnuť</button>
             </div>
           </div>`).join('') : '<div class="text-xs opacity-70 py-4">Žiadne čakajúce žiadosti o zmazanie.</div>';
+
+        (function renderCelebReqs() {
+          const box = document.getElementById('admin-panel-celebs');
+          if (!box) return;
+          box.innerHTML = celebReqs.length ? celebReqs.map(q => `
+            <div class="p-3 rounded-xl border text-xs space-y-1.5">
+              <div><strong>${escapeHtml(q.display_name)}</strong> (${escapeHtml(q.country || '—')}) · typ: <strong>${escapeHtml(celebKindLabel(q.kind))}</strong></div>
+              <div class="opacity-80">${escapeHtml(q.description)}</div>
+              <div><a href="${/^https?:\/\//i.test(q.video_url) ? escapeHtml(q.video_url) : '#'}" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline break-all">▶ Video (dôkaz)</a></div>
+              <div class="flex gap-1.5 pt-1">
+                <button type="button" data-celeb-ok="${escapeHtml(q.id)}" class="${btnBase}bg-emerald-600 text-white">Schváliť ⭐</button>
+                <button type="button" data-celeb-no="${escapeHtml(q.id)}" class="${btnBase}bg-slate-500/15">Zamietnuť</button>
+                <button type="button" data-celeb-profile="${escapeHtml(q.user_id)}" class="${btnBase}bg-slate-500/15">Profil</button>
+              </div>
+            </div>`).join('') : '<div class="text-xs opacity-70 py-4">Žiadne čakajúce žiadosti o status celebrity.</div>';
+          box.querySelectorAll('[data-celeb-ok],[data-celeb-no]').forEach(b => b.addEventListener('click', async () => {
+            const ok = b.hasAttribute('data-celeb-ok');
+            const id = b.getAttribute(ok ? 'data-celeb-ok' : 'data-celeb-no');
+            const { error } = await sb.rpc('decide_celebrity_request', { p_id: id, p_approve: ok });
+            if (error) { showToast('Nepodarilo sa: ' + error.message); return; }
+            showToast(ok ? 'Status celebrity schválený.' : 'Žiadosť zamietnutá.');
+            await reloadData();
+            syncAdminModalView();
+          }));
+          box.querySelectorAll('[data-celeb-profile]').forEach(b => b.addEventListener('click', () => {
+            const m = document.getElementById('admin-modal'); m.classList.add('hidden'); m.classList.remove('flex');
+            openAthleteProfile(b.getAttribute('data-celeb-profile'));
+          }));
+        })();
 
         if (isSuper) {
           const roles = ['user', 'moderator', 'superadmin'];
@@ -4575,6 +4741,14 @@
           });
         });
 
+        document.getElementById('open-friends-list-btn').addEventListener('click', () => openLists('friends'));
+        document.getElementById('open-celebs-list-btn').addEventListener('click', () => openLists('celebs'));
+        document.getElementById('close-lists-btn').addEventListener('click', () => closeModal('lists-modal'));
+        document.getElementById('lists-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('lists-modal'); });
+        document.getElementById('lists-search').addEventListener('input', (e) => { listsState.q = e.target.value || ''; renderLists(); });
+        document.getElementById('close-celeb-req-btn').addEventListener('click', () => closeModal('celeb-req-modal'));
+        document.getElementById('celeb-req-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('celeb-req-modal'); });
+        document.getElementById('celeb-req-form').addEventListener('submit', submitCelebRequest);
         document.getElementById('friends-filter-btn').addEventListener('click', function () {
           onlyFriends = !onlyFriends;
           currentPage = 1;
