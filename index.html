@@ -619,6 +619,7 @@
               <span id="profile-gender-pill" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10">♂ Muž</span>
               <span id="profile-followers-pill" class="hidden px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10" title="Koľko ľudí ho sleduje alebo má medzi priateľmi"></span>
               <span id="profile-views-pill" class="hidden px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10" title="Počet zobrazení profilu (jeden návštevník sa počíta najviac raz za deň)"></span>
+              <span id="profile-social-links" class="hidden inline-flex items-center gap-1.5 flex-wrap"></span>
               <span id="profile-celeb-pill" class="px-2.5 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-600">
                 ⭐ Známa osobnosť
               </span>
@@ -1116,6 +1117,14 @@
           </div>
         </div>
         
+        <div class="space-y-2 pt-1">
+          <div class="text-xs font-semibold">Odkazy na tvoje siete (nepovinné, zobrazia sa v profile)</div>
+          <input id="edit-soc-youtube" type="text" maxlength="300" placeholder="YouTube – odkaz na kanál" class="w-full px-3 py-2 rounded-xl border text-sm">
+          <input id="edit-soc-instagram" type="text" maxlength="300" placeholder="Instagram – odkaz na profil" class="w-full px-3 py-2 rounded-xl border text-sm">
+          <input id="edit-soc-facebook" type="text" maxlength="300" placeholder="Facebook – odkaz na profil alebo stránku" class="w-full px-3 py-2 rounded-xl border text-sm">
+          <input id="edit-soc-tiktok" type="text" maxlength="300" placeholder="TikTok – odkaz na profil" class="w-full px-3 py-2 rounded-xl border text-sm">
+        </div>
+
         <div class="flex justify-end gap-2 pt-2">
           <button type="button" id="cancel-edit-account-btn" class="px-4 py-2 rounded-xl bg-slate-500/10 hover:bg-slate-500/20 text-xs font-bold cursor-pointer">
             Zrušiť
@@ -1771,7 +1780,7 @@
           const athletes = pr.map(p => {
             const a = { id: p.id, name: p.display_name, country: p.country || '', gender: p.gender || 'M',
               birthYear: p.birth_year, weightKg: p.weight_kg, heightCm: p.height_cm,
-              isFriend: false, isCelebrity: !!p.is_celebrity, celebrityType: p.celebrity_type || '', records: [] };
+              isFriend: false, isCelebrity: !!p.is_celebrity, celebrityType: p.celebrity_type || '', socialYoutube: p.social_youtube || '', socialInstagram: p.social_instagram || '', socialFacebook: p.social_facebook || '', socialTiktok: p.social_tiktok || '', records: [] };
             byId.set(p.id, a);
             return a;
           });
@@ -3620,6 +3629,29 @@
         }
       }
 
+      // ===== Odkazy na sociálne siete =====
+      const SOCIALS = [
+        { key: 'youtube', name: 'YouTube', icon: '▶', host: /(^|\.)(youtube\.com|youtu\.be)$/i },
+        { key: 'instagram', name: 'Instagram', icon: '📷', host: /(^|\.)instagram\.com$/i },
+        { key: 'facebook', name: 'Facebook', icon: '👍', host: /(^|\.)(facebook\.com|fb\.com|fb\.me)$/i },
+        { key: 'tiktok', name: 'TikTok', icon: '🎵', host: /(^|\.)tiktok\.com$/i },
+      ];
+      // vráti { ok, url } ; prázdne = ok s null
+      function normalizeSocial(x, raw) {
+        let v = String(raw || '').trim();
+        if (!v) return { ok: true, url: null };
+        if (!/^https?:\/\//i.test(v)) v = 'https://' + v.replace(/^\/+/, '');
+        v = v.replace(/^http:\/\//i, 'https://');
+        try { const u = new URL(v); if (u.protocol !== 'https:' || !x.host.test(u.hostname)) return { ok: false }; return { ok: true, url: u.toString().slice(0, 300) }; } catch (e) { return { ok: false }; }
+      }
+      function renderSocialLinks(athlete) {
+        const box = document.getElementById('profile-social-links');
+        if (!box) return;
+        const items = SOCIALS.map(x => ({ x, url: athlete['social' + x.key[0].toUpperCase() + x.key.slice(1)] })).filter(i => i.url && /^https:\/\//i.test(i.url));
+        box.innerHTML = items.map(i => `<a href="${escapeHtml(i.url)}" target="_blank" rel="noopener noreferrer nofollow" title="${i.x.name}" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-500/10 hover:bg-slate-500/20 no-underline">${i.x.icon} ${i.x.name}</a>`).join('');
+        box.classList.toggle('hidden', items.length === 0);
+      }
+
       function openEditAccountModal(athlete) {
         if (!athlete) return;
         populateCountrySelects();
@@ -3629,6 +3661,7 @@
         document.getElementById('edit-acc-birth-year').value = athlete.birthYear || '';
         document.getElementById('edit-acc-weight').value = athlete.weightKg ?? '';
         document.getElementById('edit-acc-height').value = athlete.heightCm ?? '';
+        SOCIALS.forEach(x => { document.getElementById('edit-soc-' + x.key).value = athlete['social' + x.key[0].toUpperCase() + x.key.slice(1)] || ''; });
 
         const m = document.getElementById('edit-account-modal');
         m.classList.remove('hidden');
@@ -3856,6 +3889,7 @@
         document.getElementById('profile-name').textContent = athlete.name;
         document.getElementById('profile-country-pill').textContent = `${getFlag(athlete.country)} ${athlete.country}`;
         document.getElementById('profile-gender-pill').textContent = athlete.gender === 'Z' ? '♀ Žena' : '♂ Muž';
+        renderSocialLinks(athlete);
         document.getElementById('profile-celeb-pill').classList.toggle('hidden', !athlete.isCelebrity);
         document.getElementById('profile-celeb-pill').textContent = '⭐ Známa osobnosť' + (athlete.celebrityType && celebKindLabel(athlete.celebrityType) ? ' · ' + celebKindLabel(athlete.celebrityType) : '');
 
@@ -4844,14 +4878,22 @@
           const weightRaw = document.getElementById('edit-acc-weight').value;
           const heightRaw = document.getElementById('edit-acc-height').value;
           if (name.length < 2) { showToast('Meno musí mať aspoň 2 znaky.'); return; }
-          const { error } = await sb.from('profiles').update({
+          const soc = {};
+          for (const x of SOCIALS) {
+            const nz = normalizeSocial(x, document.getElementById('edit-soc-' + x.key).value);
+            if (!nz.ok) { showToast('Odkaz na ' + x.name + ' nie je platný. Vlož odkaz na ' + x.name + ' (https://…).'); return; }
+            soc['social_' + x.key] = nz.url;
+          }
+          const baseUpd = {
             display_name: name,
             country: document.getElementById('edit-acc-country').value || user.country || 'Slovensko',
             gender: document.getElementById('edit-acc-gender').value === 'Z' ? 'Z' : 'M',
             birth_year: birthYearRaw ? Number(birthYearRaw) : null,
             weight_kg: weightRaw !== '' ? Number(weightRaw) : null,
             height_cm: heightRaw !== '' ? Number(heightRaw) : null
-          }).eq('id', user.id);
+          };
+          let { error } = await sb.from('profiles').update(Object.assign({}, baseUpd, soc)).eq('id', user.id);
+          if (error && /social_/.test(String(error.message || ''))) ({ error } = await sb.from('profiles').update(baseUpd).eq('id', user.id));
           if (error) { showToast('Uloženie zlyhalo: ' + error.message); return; }
           await refreshOwn();
           closeEditAccountModal();
