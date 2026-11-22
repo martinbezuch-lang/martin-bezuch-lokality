@@ -297,6 +297,8 @@
     body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
     #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
     .m-only { display: none; }
+    #site-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
+    @media (max-width: 640px) { #site-stats { font-size: 11.5px; gap: 2px 12px; } }
     #help-fab { position: fixed; right: 16px; bottom: 16px; z-index: 40; width: 46px; height: 46px; border-radius: 9999px; background: #2563eb; color: #fff; font-weight: 800; font-size: 20px; border: 0; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
     #help-fab:hover { background: #1d4ed8; }
     #help-panel { position: fixed; right: 16px; bottom: 72px; z-index: 40; width: 380px; max-width: calc(100vw - 32px); max-height: min(72vh, 620px); display: flex; flex-direction: column; background: #fff; color: #0f172a; border: 1px solid rgba(148,163,184,.5); border-radius: 16px; box-shadow: 0 14px 40px rgba(0,0,0,.3); }
@@ -451,6 +453,7 @@
   <!-- Hlavný obsah -->
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
     <!-- Ovládací panel pre rebríček -->
+    <div id="site-stats" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs sm:text-sm font-semibold opacity-80" aria-label="Štatistiky stránky"></div>
     <section id="controls-panel" class="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm space-y-4">
       <div id="sport-chips" class="flex gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-1"></div>
 
@@ -2782,6 +2785,14 @@
 
         const celebsBtn = document.getElementById('celebrities-filter-btn');
         if (celebsBtn) celebsBtn.textContent = `⭐ Celebrity (${baseFilterPool.filter(a => a.isCelebrity).length})`;
+        const ss = document.getElementById('site-stats');
+        if (ss) {
+          const nUsers = db.athletes.length;
+          let nRec = 0, nVid = 0;
+          db.athletes.forEach(a => (a.records || []).forEach(x => { nRec++; if (x.videoUrl) nVid++; }));
+          const f = (n) => n.toLocaleString('sk-SK');
+          ss.innerHTML = `<span title="Registrovaní športovci">👥 ${f(nUsers)} ${slPlural(nUsers, 'používateľ', 'používatelia', 'používateľov')}</span><span title="Všetky zapísané výsledky">🏋️ ${f(nRec)} ${slPlural(nRec, 'meranie', 'merania', 'meraní')}</span><span title="Merania s priloženým videom">🎥 ${f(nVid)} ${slPlural(nVid, 'meranie s videom', 'merania s videom', 'meraní s videom')}</span>`;
+        }
         const ofb = document.getElementById('open-friends-list-btn'); if (ofb) ofb.textContent = `🤝 (${db.athletes.filter(a => a.relation && a.relation !== 'none').length || db.athletes.filter(a => a.isFriend).length})`;
         const ocb = document.getElementById('open-celebs-list-btn'); if (ocb) ocb.textContent = `⭐ (${db.athletes.filter(a => a.isCelebrity).length})`;
       }
