@@ -74,7 +74,7 @@
     }
     .tip-wrap .tip-box { display: none; }
     .tip-wrap:hover .tip-box, .tip-wrap:focus-within .tip-box { display: block; }
-    #user-menu-panel { min-width: 14rem; }
+    #user-menu-panel { min-width: 14rem; position: absolute; right: 0; top: 100%; margin-top: 6px; }
     #user-menu-panel button { white-space: nowrap; }
     #leaderboard-section thead th { position: sticky; top: 0; z-index: 5; background-color: #ffffff; }
     body.dark-chess #leaderboard-section thead th { background-color: #312e2b; }
@@ -208,6 +208,18 @@
     body.dark-chess .pct-top25 { color: #fcd34d; }
     .pr-badge { display:inline-block; margin-left:.35rem; padding:0 .35rem; border-radius:.375rem; font-size:10px; font-weight:700; background: rgba(34,197,94,.18); color:#15803d; }
     body.dark-chess .pr-badge { color:#86efac; }
+    .notif-wrap { position: relative; display: inline-flex; }
+    .notif-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff; }
+    .notif-badge.on { display: inline-flex; }
+    body.dark-chess .notif-badge { box-shadow: 0 0 0 2px #262421; }
+    #notif-btn.has-new { border-color: #dc2626; }
+    .notif-panel { position: absolute; right: 0; top: 100%; margin-top: 6px; width: min(22rem, 92vw); max-height: 70vh; overflow-y: auto; z-index: 60; border-radius: .75rem; border: 1px solid #e2e8f0; background: #fff; color: #0f172a; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    body.dark-chess .notif-panel { background: #312e2b; border-color: #45423e; color: #e7e5e4; }
+    .notif-item { display: flex; gap: .6rem; width: 100%; text-align: left; padding: .65rem .8rem; border-bottom: 1px solid rgba(100,116,139,.2); font-size: 12px; cursor: pointer; }
+    .notif-item:hover { background: rgba(100,116,139,.12); }
+    .notif-item.unread { background: rgba(220,38,38,.10); }
+    .notif-dot { width: 8px; height: 8px; border-radius: 9999px; background: #dc2626; margin-top: 5px; flex: none; }
+    .notif-dot.read { background: transparent; }
     /* ===== Tmavý režim: čitateľné farby (kontrast) ===== */
     body.dark-chess .text-blue-700, body.dark-chess .text-blue-600 { color: #93c5fd; }
     body.dark-chess .text-amber-700, body.dark-chess .text-amber-800 { color: #fcd34d; }
@@ -777,6 +789,22 @@
   </main>
 
   <!-- Modálne okno úpravy používateľského konta -->
+  <!-- Nastavenia upozornení -->
+  <div id="notif-settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+    <div class="max-w-md w-full rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-extrabold">🔔 Upozornenia</h3>
+        <button id="close-notif-settings-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-500/10 font-bold cursor-pointer">✕</button>
+      </div>
+      <p class="text-xs opacity-70">Vyber, o čom chceš dostávať upozornenia (červené číslo pri zvončeku).</p>
+      <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-friends" type="checkbox" class="mt-1"><span><strong>Priatelia</strong><br><span class="text-xs opacity-70">keď priateľ pridá nový výkon</span></span></label>
+      <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-celebs" type="checkbox" class="mt-1"><span><strong>Známe osobnosti</strong><br><span class="text-xs opacity-70">keď známa osobnosť pridá nový výkon</span></span></label>
+      <label class="flex items-start gap-3 text-sm opacity-50"><input type="checkbox" disabled class="mt-1"><span><strong>Výzvy na súboj</strong> <span class="text-[10px] font-bold">(pripravujeme)</span><br><span class="text-xs">keď ťa priateľ vyzve na súboj</span></span></label>
+      <label class="flex items-start gap-3 text-sm opacity-50"><input type="checkbox" disabled class="mt-1"><span><strong>Športové hry a udalosti</strong> <span class="text-[10px] font-bold">(pripravujeme)</span></span></label>
+      <div class="flex justify-end"><button id="done-notif-settings-btn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Hotovo</button></div>
+    </div>
+  </div>
+
   <div id="edit-account-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
     <div class="max-w-lg w-full rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-6 shadow-2xl space-y-4">
       <div class="flex items-center justify-between">
@@ -1121,7 +1149,7 @@
   </div>
 
   <!-- Toast notifikácia -->
-  <div class="text-center text-xs opacity-60 py-6"><button type="button" data-open-privacy class="underline cursor-pointer">Ochrana osobných údajov</button></div>
+  <div class="text-center text-xs opacity-60 py-6"><button type="button" data-invite class="underline cursor-pointer mr-4">📨 Pozvať kamaráta</button><button type="button" data-open-privacy class="underline cursor-pointer">Ochrana osobných údajov</button></div>
 
   <div id="app-toast" class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-slate-900 text-white px-4 py-3 text-xs sm:text-sm font-medium shadow-xl items-center gap-3 hidden">
     <span id="app-toast-text" class="flex-1">Skopíroval som posledné vložené údaje (disciplína, dátum, krajina, mesto).</span>
@@ -1550,6 +1578,7 @@
         } else {
           db.athletes.forEach(a => { a.isFriend = false; });
           db.deletionRequests = [];
+          notifs = [];
         }
         updateAuthHeaderUi();
         updateAdminHeaderUi();
@@ -1579,9 +1608,140 @@
         db.deletionRequests = ((rq && rq.data) || []).map(r => ({ id: r.id, athleteId: r.requested_by, recordId: r.record_id, status: r.status }));
       }
 
+      // ===== Upozornenia =====
+      let notifs = [];
+      let notifTimer = null;
+      let notifPrefs = { friends: true, celebrities: false };
+
+      function timeAgo(iso) {
+        const t = new Date(iso).getTime();
+        if (Number.isNaN(t)) return '';
+        const m = Math.max(0, Math.round((Date.now() - t) / 60000));
+        if (m < 1) return 'práve teraz';
+        if (m < 60) return `pred ${m} min`;
+        const h = Math.round(m / 60);
+        if (h < 24) return `pred ${h} h`;
+        const d = Math.round(h / 24);
+        return d === 1 ? 'včera' : `pred ${d} dňami`;
+      }
+
+      function renderNotifBadge() {
+        const b = document.getElementById('notif-badge');
+        if (!b) return;
+        const n = notifs.filter(x => !x.read_at).length;
+        b.textContent = n > 99 ? '99+' : String(n);
+        b.classList.toggle('on', n > 0);
+        const btn = document.getElementById('notif-btn');
+        if (btn) btn.classList.toggle('has-new', n > 0);
+        document.title = (n > 0 ? `(${n}) ` : '') + document.title.replace(/^\(\d+\+?\)\s*/, '');
+      }
+
+      async function loadNotifications() {
+        if (!authUser || !currentUserId) { notifs = []; renderNotifBadge(); return; }
+        try {
+          const { data, error } = await sb.from('notifications').select('*').eq('user_id', authUser.id).order('created_at', { ascending: false }).limit(50);
+          notifs = (!error && Array.isArray(data)) ? data : [];
+        } catch (e) { notifs = []; }
+        renderNotifBadge();
+        const panel = document.getElementById('notif-panel');
+        if (panel && !panel.classList.contains('hidden')) renderNotifPanel(new Set());
+      }
+
+      function startNotifPolling() {
+        if (notifTimer) return;
+        notifTimer = setInterval(() => { if (!document.hidden) loadNotifications(); }, 60000);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) loadNotifications(); });
+      }
+
+      function notifText(n) {
+        const actor = db.athletes.find(a => String(a.id) === String(n.actor_id));
+        const name = actor ? actor.name : 'Niekto';
+        const verb = actor && actor.gender === 'Z' ? 'pridala' : 'pridal';
+        const pl = n.payload || {};
+        if (n.type === 'friend_record' || n.type === 'celebrity_record') {
+          const sp = getSportById(pl.sport_id);
+          const icon = n.type === 'celebrity_record' ? '⭐' : '🤝';
+          const val = sp && pl.value !== undefined ? ` ${formatVal(Number(pl.value), sp.unit)}` : '';
+          return { icon, html: `<strong>${escapeHtml(name)}</strong> ${verb} nový výkon: ${escapeHtml(sp ? sp.name : '')}<strong>${escapeHtml(val)}</strong>`, actorId: actor ? actor.id : null };
+        }
+        return { icon: '🔔', html: escapeHtml(String(pl.text || 'Nové upozornenie')), actorId: null };
+      }
+
+      function renderNotifPanel(unreadIds) {
+        const panel = document.getElementById('notif-panel');
+        if (!panel) return;
+        if (notifs.length === 0) {
+          panel.innerHTML = '<div class="p-4 text-xs opacity-70 text-center">Zatiaľ žiadne upozornenia.<br>Pridaj si priateľov a uvidíš ich nové výkony.</div>';
+          return;
+        }
+        panel.innerHTML = notifs.map(n => {
+          const t = notifText(n);
+          const unread = unreadIds.has(n.id);
+          return `<button type="button" class="notif-item ${unread ? 'unread' : ''}" data-notif-actor="${escapeHtml(String(t.actorId || ''))}">
+            <span class="notif-dot ${unread ? '' : 'read'}"></span>
+            <span class="flex-1"><span class="block">${t.icon} ${t.html}</span><span class="block opacity-60 mt-0.5">${escapeHtml(timeAgo(n.created_at))}</span></span></button>`;
+        }).join('');
+        panel.querySelectorAll('[data-notif-actor]').forEach(b => b.addEventListener('click', () => {
+          const id = b.getAttribute('data-notif-actor');
+          panel.classList.add('hidden');
+          if (id) openAthleteProfile(id);
+        }));
+      }
+
+      async function toggleNotifPanel() {
+        const panel = document.getElementById('notif-panel');
+        if (!panel) return;
+        const menu = document.getElementById('user-menu-panel'); if (menu) menu.classList.add('hidden');
+        if (!panel.classList.contains('hidden')) { panel.classList.add('hidden'); return; }
+        const unread = notifs.filter(n => !n.read_at);
+        renderNotifPanel(new Set(unread.map(n => n.id)));
+        panel.classList.remove('hidden');
+        if (unread.length === 0) return;
+        const ids = unread.map(n => n.id);
+        const now = new Date().toISOString();
+        notifs.forEach(n => { if (ids.includes(n.id)) n.read_at = now; });
+        renderNotifBadge();
+        try { await sb.from('notifications').update({ read_at: now }).in('id', ids); } catch (e) { /* nevadí, označí sa nabudúce */ }
+      }
+
+      async function openNotifSettings() {
+        openModal('notif-settings-modal');
+        const f = document.getElementById('np-friends'), c = document.getElementById('np-celebs');
+        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities;
+        try {
+          const { data } = await sb.from('notification_prefs').select('*').eq('user_id', authUser.id).maybeSingle();
+          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities }; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; }
+        } catch (e) { /* tabuľka ešte nemusí existovať */ }
+      }
+
+      async function saveNotifPrefs() {
+        if (!authUser) return;
+        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked };
+        try {
+          const { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities });
+          if (error) showToast('Nastavenie sa nepodarilo uložiť: ' + error.message);
+        } catch (e) { showToast('Nastavenie sa nepodarilo uložiť.'); }
+      }
+
+      async function inviteFriend() {
+        const url = location.origin + location.pathname;
+        const text = 'Pridaj sa ku mne na Biceps 1 minúta – porovnaj svoj výkon s ostatnými v rebríčku:';
+        try {
+          if (navigator.share) { await navigator.share({ title: 'Biceps 1 minúta', text, url }); return; }
+        } catch (e) { if (e && e.name === 'AbortError') return; }
+        try {
+          await navigator.clipboard.writeText(text + ' ' + url);
+          showToast('Pozvánka je skopírovaná – vlož ju kamarátovi do správy.');
+        } catch (e) {
+          window.prompt('Skopíruj pozvánku:', text + ' ' + url);
+        }
+      }
+
       async function reloadData() {
         await loadFromSupabase();
         await overlayOwn();
+        loadNotifications();
+        startNotifPolling();
       }
 
       async function refreshOwn() {
@@ -3092,11 +3252,18 @@
           const itemCls = 'w-full text-left px-3 py-2 rounded-lg hover:bg-slate-500/10 cursor-pointer';
           box.innerHTML = `
             <div class="relative inline-flex items-center gap-1.5" id="user-menu-wrap">
+              <div class="notif-wrap" id="notif-wrap">
+                <button id="notif-btn" type="button" title="Upozornenia" aria-label="Upozornenia" class="w-9 h-9 inline-flex items-center justify-center rounded-xl text-base border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🔔</button>
+                <span id="notif-badge" class="notif-badge"></span>
+                <div id="notif-panel" class="notif-panel hidden" role="dialog" aria-label="Upozornenia"></div>
+              </div>
               <button id="settings-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Nastavenia" aria-label="Nastavenia" class="w-9 h-9 inline-flex items-center justify-center rounded-xl text-base border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⚙️</button>
               <button id="my-profile-btn" type="button" title="Môj profil" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600/15 text-blue-700 cursor-pointer">
                 👤 ${escapeHtml(user.name)}
               </button>
               <div id="user-menu-panel" role="menu" class="hidden absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-slate-200 bg-white text-slate-900 shadow-lg p-1.5 z-50 text-xs font-semibold">
+                <button type="button" role="menuitem" data-menu="notif" class="${itemCls}">🔔 Upozornenia</button>
+                <button type="button" role="menuitem" data-menu="invite" class="${itemCls}">📨 Pozvať kamaráta</button>
                 <button type="button" role="menuitem" data-menu="edit" class="${itemCls}">✏️ Upraviť údaje</button>
                 <button type="button" role="menuitem" data-menu="logout" class="${itemCls}">↩️ Odhlásiť</button>
                 <div class="menu-sep my-1 border-t border-slate-200"></div>
@@ -3106,18 +3273,23 @@
           `;
           const menuBtn = document.getElementById('settings-btn');
           document.getElementById('my-profile-btn').addEventListener('click', () => openAthleteProfile(user.id));
+          document.getElementById('notif-btn').addEventListener('click', (ev) => { ev.stopPropagation(); toggleNotifPanel(); });
+          document.getElementById('notif-panel').addEventListener('click', (ev) => ev.stopPropagation());
+          renderNotifBadge();
           const menuPanel = document.getElementById('user-menu-panel');
           const setMenu = (open) => {
             menuPanel.classList.toggle('hidden', !open);
             menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
           };
-          menuBtn.addEventListener('click', (ev) => { ev.stopPropagation(); setMenu(menuPanel.classList.contains('hidden')); });
+          menuBtn.addEventListener('click', (ev) => { ev.stopPropagation(); const np = document.getElementById('notif-panel'); if (np) np.classList.add('hidden'); setMenu(menuPanel.classList.contains('hidden')); });
           menuPanel.addEventListener('click', (ev) => {
             const it = ev.target.closest ? ev.target.closest('[data-menu]') : null;
             if (!it) return;
             setMenu(false);
             const a = it.getAttribute('data-menu');
             if (a === 'edit') openEditAccountModal(user);
+            else if (a === 'notif') openNotifSettings();
+            else if (a === 'invite') inviteFriend();
             else if (a === 'logout') doLogout();
             else if (a === 'delete') doDeleteAccount();
           });
@@ -3127,11 +3299,15 @@
               const w = document.getElementById('user-menu-wrap');
               const pn = document.getElementById('user-menu-panel');
               if (pn && w && !w.contains(ev.target)) pn.classList.add('hidden');
+              const np = document.getElementById('notif-panel');
+              if (np) np.classList.add('hidden');
             });
             document.addEventListener('keydown', (ev) => {
               if (ev.key !== 'Escape') return;
               const pn = document.getElementById('user-menu-panel');
               if (pn) pn.classList.add('hidden');
+              const np = document.getElementById('notif-panel');
+              if (np) np.classList.add('hidden');
             });
           }
         } else if (pendingProfile) {
@@ -3730,6 +3906,12 @@
           renderLeaderboard();
         });
 
+        document.getElementById('close-notif-settings-btn').addEventListener('click', () => closeModal('notif-settings-modal'));
+        document.getElementById('done-notif-settings-btn').addEventListener('click', () => closeModal('notif-settings-modal'));
+        document.getElementById('notif-settings-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('notif-settings-modal'); });
+        document.getElementById('np-friends').addEventListener('change', saveNotifPrefs);
+        document.getElementById('np-celebs').addEventListener('change', saveNotifPrefs);
+        document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-invite]')) inviteFriend(); });
         document.getElementById('filters-toggle-btn').addEventListener('click', () => {
           document.getElementById('extra-filters').classList.toggle('hidden');
           syncFiltersUi();
@@ -3958,7 +4140,7 @@
             });
           } catch (e) {}
         }
-        ['edit-account-modal', 'edit-record-modal', 'compare-modal', 'auth-modal', 'admin-modal', 'video-modal'].forEach(id => {
+        ['notif-settings-modal', 'edit-account-modal', 'edit-record-modal', 'compare-modal', 'auth-modal', 'admin-modal', 'video-modal'].forEach(id => {
           const el = document.getElementById(id);
           if (el) { el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); }
         });
