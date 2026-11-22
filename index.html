@@ -253,6 +253,8 @@
     body.dark-chess .text-amber-700, body.dark-chess .text-amber-800 { color: #fcd34d; }
     body.dark-chess .text-rose-600, body.dark-chess .text-rose-700 { color: #fda4af; }
     body.dark-chess .text-purple-700 { color: #d8b4fe; }
+    body.dark-chess .text-orange-800, body.dark-chess .text-orange-700 { color: #fdba74; }
+    body.dark-chess #leaderboard-body .text-slate-700 { color: #e2e8f0; }
     body.dark-chess .text-emerald-600, body.dark-chess .text-emerald-700 { color: #6ee7b7; }
     body.dark-chess .text-slate-400 { color: #a8a29e; }
     body.dark-chess .text-slate-500 { color: #b5afa8; }
@@ -922,6 +924,11 @@
           <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">
             Uložiť zmeny účtu
           </button>
+        </div>
+        <div class="mt-6 pt-4 border-t border-rose-500/30 text-xs">
+          <div class="font-bold text-rose-600 mb-1">Nebezpečná zóna</div>
+          <p class="opacity-70 mb-2">Zmazanie účtu natrvalo odstráni tvoj profil a všetky tvoje výkony. Nedá sa vrátiť späť.</p>
+          <button type="button" id="delete-account-btn" class="px-3 py-1.5 rounded-lg border border-rose-500/40 text-rose-600 hover:bg-rose-500/10 font-semibold cursor-pointer">🗑️ Zmazať účet</button>
         </div>
       </form>
     </div>
@@ -2433,7 +2440,7 @@
 
       function resetLeaderboardFilters() {
         onlyFriends = false; onlyCelebrities = false; selectedAgeAtRecord = null; selectedAgeGroup = ''; perKg = false;
-        searchQuery = ''; selectedWeight = ''; selectedYear = ''; selectedCountry = 'ALL'; currentPage = 1;
+        searchQuery = ''; selectedWeight = ''; selectedYear = ''; selectedCountry = db.athletes.some(x => x.country === 'Slovensko') ? 'Slovensko' : 'ALL'; currentPage = 1;
         const base = 'px-3 py-1.5 rounded-lg text-xs font-semibold border transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/20';
         const si = document.getElementById('search-input'); if (si) si.value = '';
         const w = document.getElementById('weight-filter'); if (w) w.value = '';
@@ -3509,6 +3516,7 @@
                 <div id="notif-panel" class="notif-panel hidden" role="dialog" aria-label="Upozornenia"></div>
               </div>
               <button id="settings-btn" type="button" aria-haspopup="true" aria-expanded="false" title="Nastavenia" aria-label="Nastavenia" class="w-9 h-9 inline-flex items-center justify-center rounded-xl text-base border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⚙️</button>
+              <button id="header-logout-btn" type="button" title="Odhlásiť sa" class="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">↩️ Odhlásiť</button>
               <button id="my-profile-btn" type="button" title="Môj profil" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600/15 text-blue-700 cursor-pointer">
                 👤 ${escapeHtml(user.name)}
               </button>
@@ -3516,14 +3524,12 @@
                 <button type="button" role="menuitem" data-menu="notif" class="${itemCls}">🔔 Nastavenia upozornení</button>
                 <button type="button" role="menuitem" data-menu="invite" class="${itemCls}">📨 Pozvať kamaráta</button>
                 <button type="button" role="menuitem" data-menu="edit" class="${itemCls}">✏️ Upraviť údaje</button>
-                <button type="button" role="menuitem" data-menu="logout" class="${itemCls}">↩️ Odhlásiť</button>
-                <div class="menu-sep my-1 border-t border-slate-200"></div>
-                <button type="button" role="menuitem" data-menu="delete" class="w-full text-left px-3 py-2 rounded-lg hover:bg-rose-500/10 text-rose-700 cursor-pointer">🗑️ Zmazať účet</button>
               </div>
             </div>
           `;
           const menuBtn = document.getElementById('settings-btn');
           document.getElementById('my-profile-btn').addEventListener('click', () => openAthleteProfile(user.id));
+          document.getElementById('header-logout-btn').addEventListener('click', doLogout);
           document.getElementById('notif-btn').addEventListener('click', (ev) => { ev.stopPropagation(); toggleNotifPanel(); });
           document.getElementById('challenge-btn').addEventListener('click', () => openChallenges());
           document.getElementById('notif-panel').addEventListener('click', (ev) => ev.stopPropagation());
@@ -4042,6 +4048,7 @@
 
         document.getElementById('close-edit-account-btn').addEventListener('click', closeEditAccountModal);
         document.getElementById('cancel-edit-account-btn').addEventListener('click', closeEditAccountModal);
+        document.getElementById('delete-account-btn').addEventListener('click', () => { closeEditAccountModal(); doDeleteAccount(); });
         document.getElementById('edit-account-modal').addEventListener('click', (e) => {
           if (e.target === e.currentTarget) closeEditAccountModal();
         });
@@ -4365,6 +4372,7 @@
                 const n = db.athletes.filter(x => getAthleteBestInSport(x, sp.id) !== null).length;
                 if (n > bestN) { bestN = n; best = sp; }
               });
+              if (db.athletes.some(x => x.country === 'Slovensko')) selectedCountry = 'Slovensko';
               if (best && bestN > 0) {
                 selectedSportId = best.id;
                 const hs = document.getElementById('header-sport-select'); if (hs) hs.value = best.id;
