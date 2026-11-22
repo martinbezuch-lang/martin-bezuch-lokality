@@ -202,6 +202,42 @@
     body.dark-chess #profile-age-bests-title {
       color: #e7e5e4;
     }
+    .pct-top10 { background-color: rgba(34,197,94,.20) !important; border-color: rgba(34,197,94,.55) !important; color: #15803d; }
+    .pct-top25 { background-color: rgba(245,158,11,.20) !important; border-color: rgba(245,158,11,.55) !important; color: #b45309; }
+    body.dark-chess .pct-top10 { color: #86efac; }
+    body.dark-chess .pct-top25 { color: #fcd34d; }
+    .pr-badge { display:inline-block; margin-left:.35rem; padding:0 .35rem; border-radius:.375rem; font-size:10px; font-weight:700; background: rgba(34,197,94,.18); color:#15803d; }
+    body.dark-chess .pr-badge { color:#86efac; }
+    /* ===== Tmavý režim: čitateľné farby (kontrast) ===== */
+    body.dark-chess .text-blue-700, body.dark-chess .text-blue-600 { color: #93c5fd; }
+    body.dark-chess .text-amber-700, body.dark-chess .text-amber-800 { color: #fcd34d; }
+    body.dark-chess .text-rose-600, body.dark-chess .text-rose-700 { color: #fda4af; }
+    body.dark-chess .text-purple-700 { color: #d8b4fe; }
+    body.dark-chess .text-emerald-600, body.dark-chess .text-emerald-700 { color: #6ee7b7; }
+    body.dark-chess .text-slate-400 { color: #a8a29e; }
+    body.dark-chess .text-slate-500 { color: #b5afa8; }
+    body.dark-chess .text-slate-700, body.dark-chess .text-slate-800 { color: #e7e5e4; }
+    body.dark-chess .text-slate-900 { color: #f5f5f4; }
+    body.dark-chess #main-header #my-profile-btn { background-color: #1e3a8a; color: #e0ecff; border: 1px solid #3b66c4; }
+    body.dark-chess #main-header #my-profile-btn:hover { background-color: #2548a8; }
+    body.dark-chess #open-admin-btn { background-color: #4a3410; color: #fde68a; border-color: #b7791f; }
+    body.dark-chess #open-auth-modal-btn, body.dark-chess #finish-profile-btn { background-color: #1e3a8a; color: #e0ecff; border-color: #3b66c4; }
+    body.dark-chess #profile-share-btn, body.dark-chess #profile-compare-btn, body.dark-chess #back-to-leaderboard-btn, body.dark-chess #profile-theme-toggle {
+      background-color: #3a3733; color: #f5f5f4; border-color: #5a5650;
+    }
+    body.dark-chess #profile-share-btn:hover, body.dark-chess #profile-compare-btn:hover { background-color: #47433e; }
+    body.dark-chess #edit-account-btn { background-color: #1e3a8a; color: #e0ecff; border-color: #3b66c4; }
+    body.dark-chess #profile-records-list [data-edit-rec] { background-color: #1e3a8a; color: #e0ecff; border-color: #3b66c4; }
+    body.dark-chess #profile-records-list [data-edit-rec]:hover { background-color: #2548a8; }
+    body.dark-chess #profile-records-list thead, body.dark-chess #profile-records-list ~ * { }
+    body.dark-chess #profile-records-list { background-color: transparent; }
+    body.dark-chess table thead tr { background-color: #3a3733 !important; color: #d6d3d1 !important; }
+    body.dark-chess table thead th { color: #d6d3d1; }
+    body.dark-chess .bg-blue-500\/15 { background-color: rgba(96, 165, 250, 0.16); }
+    body.dark-chess #leaderboard-body [data-compare-athlete] { background-color: #1e3a8a; color: #e0ecff; border-color: #3b66c4; }
+    body.dark-chess #leaderboard-body [data-toggle-friend].text-amber-700 { background-color: #5b4210; color: #fde68a; }
+    body.dark-chess #leaderboard-body [data-toggle-friend] { color: #e7e5e4; }
+    body.dark-chess .no-op-guard { }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
@@ -340,7 +376,6 @@
             <tr class="border-b border-slate-200/70 text-[11px] font-bold uppercase tracking-wider opacity-70">
               <th class="py-3 px-4">Poradie</th>
               <th class="py-3 px-4">Priezvisko Meno</th>
-              <th class="py-3 px-4 sm-col">Vlajka</th>
               <th class="py-3 px-4 sm-col">Krajina</th>
               <th class="py-3 px-4">Výsledok</th>
               <th id="pct-th" class="py-3 px-4 sm-col">Percentil</th>
@@ -1299,6 +1334,16 @@
         }
       }
 
+      const COUNTRY_ISO3 = {"Albánsko": "ALB", "Argentína": "ARG", "Austrália": "AUS", "Belgicko": "BEL", "Bosna a Hercegovina": "BIH", "Brazília": "BRA", "Bulharsko": "BGR", "Česko": "CZE", "Čierna Hora": "MNE", "Čile": "CHL", "Čína": "CHN", "Dánsko": "DNK", "Egypt": "EGY", "Estónsko": "EST", "Filipíny": "PHL", "Fínsko": "FIN", "Francúzsko": "FRA", "Grécko": "GRC", "Holandsko": "NLD", "Chorvátsko": "HRV", "India": "IND", "Indonézia": "IDN", "Írsko": "IRL", "Island": "ISL", "Izrael": "ISR", "Japonsko": "JPN", "Juhoafrická republika": "ZAF", "Južná Kórea": "KOR", "Kanada": "CAN", "Keňa": "KEN", "Kolumbia": "COL", "Litva": "LTU", "Lotyšsko": "LVA", "Luxembursko": "LUX", "Maďarsko": "HUN", "Malajzia": "MYS", "Maroko": "MAR", "Mexiko": "MEX", "Nemecko": "DEU", "Nigéria": "NGA", "Nórsko": "NOR", "Nový Zéland": "NZL", "Peru": "PER", "Poľsko": "POL", "Portugalsko": "PRT", "Rakúsko": "AUT", "Rumunsko": "ROU", "Saudská Arábia": "SAU", "Severné Macedónsko": "MKD", "Slovensko": "SVK", "Slovinsko": "SVN", "Spojené arabské emiráty": "ARE", "Spojené kráľovstvo": "GBR", "Spojené štáty": "USA", "Srbsko": "SRB", "Španielsko": "ESP", "Švajčiarsko": "CHE", "Švédsko": "SWE", "Taliansko": "ITA", "Thajsko": "THA", "Tunisko": "TUN", "Turecko": "TUR", "Ukrajina": "UKR", "Vietnam": "VNM"};
+      function getIso3(country) {
+        return COUNTRY_ISO3[country] || String(country || '—').slice(0, 3).toUpperCase();
+      }
+
+      function pctClass(p) {
+        if (p === null || p === undefined) return '';
+        return p >= 90 ? 'pct-top10' : (p >= 75 ? 'pct-top25' : '');
+      }
+
       function getFlag(country) {
         return COUNTRY_FLAGS[country] || '🌍';
       }
@@ -2003,12 +2048,13 @@
         db.sports.forEach(sp => {
           const active = sp.id === selectedSportId;
           const color = safeColor(sp.accent);
+          const cnt = db.athletes.filter(a => a.gender === selectedGender && getAthleteBestInSport(a, sp.id) !== null).length;
           const b = document.createElement('button');
           b.type = 'button';
           b.className = 'shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer inline-flex items-center gap-1.5 ' +
             (active ? 'text-white border-transparent shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/15');
           if (active) b.style.backgroundColor = color;
-          b.innerHTML = `<span class="rounded-full" style="width:8px;height:8px;background:${active ? '#fff' : color}"></span>${escapeHtml(sp.name)}`;
+          b.innerHTML = `<span class="rounded-full" style="width:8px;height:8px;background:${active ? '#fff' : color}"></span>${escapeHtml(sp.name)}<span class="ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums ${active ? 'bg-white/25' : 'bg-slate-500/20'}" title="Počet účastníkov">${cnt}</span>`;
           b.addEventListener('click', () => {
             selectedSportId = sp.id;
             const sel = document.getElementById('header-sport-select');
@@ -2149,7 +2195,7 @@
 
         tbody.innerHTML = '';
         if (pageRows.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="8" class="py-10 px-4 text-center text-sm"><div class="opacity-70">Pre zvolené filtre sa nenašli žiadne výsledky.</div><button type="button" id="reset-filters-btn" class="mt-3 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Zruš filtre</button></td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="py-10 px-4 text-center text-sm"><div class="opacity-70">Pre zvolené filtre sa nenašli žiadne výsledky.</div><button type="button" id="reset-filters-btn" class="mt-3 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Zruš filtre</button></td></tr>`;
           const rb = document.getElementById('reset-filters-btn');
           if (rb) rb.addEventListener('click', resetLeaderboardFilters);
           return;
@@ -2195,13 +2241,12 @@
               ${ath.isCelebrity ? '<span class="ml-1.5 text-xs" title="Známa osobnosť">⭐</span>' : ''}
               ${isOwnRow ? '<span class="ml-1.5 px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold align-middle">TY</span>' : ''}
             </td>
-            <td class="py-3 px-4 text-base sm-col">${getFlag(ath.country)}</td>
-            <td class="py-3 px-4 text-xs sm:text-sm font-medium sm-col">${escapeHtml(ath.country)}</td>
+            <td class="py-3 px-4 text-xs sm:text-sm font-semibold sm-col whitespace-nowrap" title="${escapeHtml(ath.country)}"><span class="text-base mr-1">${getFlag(ath.country)}</span>${escapeHtml(getIso3(ath.country))}</td>
             <td class="py-3 px-4">
               <div class="inline-flex items-center gap-2 flex-wrap">
                 <span class="font-extrabold text-base text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
                 ${perKg && entry.metric !== entry.best ? `<span class="text-xs opacity-70 tabular-nums" title="Výkon na kg telesnej váhy">(${escapeHtml(entry.metric.toFixed(2).replace('.', ','))} /kg)</span>` : ''}
-                ${rowPct !== null ? `<span class="mobile-only px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums" title="Percentil">${escapeHtml(rowPctText)}</span>` : ''}
+                ${rowPct !== null ? `<span class="mobile-only px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums ${pctClass(rowPct)}" title="Percentil">${escapeHtml(rowPctText)}</span>` : ''}
                 ${isRecentBest ? '<span class="text-emerald-600 text-xs font-bold" title="Najlepší výkon z posledných 90 dní">▲</span>' : ''}
                 ${videoUrl
                   ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="Prehrať video záznam" class="w-7 h-6 rounded-md bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
@@ -2210,7 +2255,7 @@
             </td>
             <td class="py-3 px-4 sm-col">
               ${rowPct !== null
-                ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold border bg-slate-500/10 border-slate-500/20 tabular-nums" title="Lepší ako ${escapeHtml(String(Math.round(rowPct)))} % v aktuálnom filtri${selectedAgeAtRecord !== null ? ' (vekovej skupine ' + escapeHtml(String(selectedAgeAtRecord)) + ' r.)' : ''}">${escapeHtml(rowPctText)}</span>`
+                ? `<span class="px-2.5 py-1 rounded-lg text-xs font-bold border bg-slate-500/10 border-slate-500/20 tabular-nums ${pctClass(rowPct)}" title="Lepší ako ${escapeHtml(String(Math.round(rowPct)))} % v aktuálnom filtri${selectedAgeAtRecord !== null ? ' (vekovej skupine ' + escapeHtml(String(selectedAgeAtRecord)) + ' r.)' : ''}">${escapeHtml(rowPctText)}</span>`
                 : `<span class="text-xs opacity-50">—</span>`}
             </td>
             <td class="py-3 px-4 sm-col">
@@ -2975,6 +3020,17 @@
           return;
         }
 
+        const prInfo = {};
+        (Array.isArray(athlete.records) ? athlete.records : []).forEach(r => {
+          const spx = getSportById(r.sportId);
+          if (!spx) return;
+          const same = athlete.records.filter(o => o.sportId === r.sportId);
+          const better = (a, b) => spx.lowerIsBetter ? a < b : a > b;
+          const best = same.reduce((m, o) => (m === null || better(o.value, m)) ? o.value : m, null);
+          const earlier = same.filter(o => String(o.date || '') < String(r.date || '') || (String(o.date || '') === String(r.date || '') && String(o.id) < String(r.id)));
+          const wasPr = earlier.length > 0 && earlier.every(o => better(r.value, o.value));
+          prInfo[r.id] = { isBest: r.value === best && same.length > 1, wasPr };
+        });
         visibleRecords.forEach((rec, recIdx) => {
           const sp = getSportById(rec.sportId);
           const recCountry = rec.country || athlete.country;
@@ -2988,7 +3044,7 @@
           tr.innerHTML = `
             <td class="py-3 px-3.5 font-bold text-slate-900 whitespace-nowrap">${escapeHtml(rec.date || '—')}</td>
             <td class="py-3 px-3.5 font-semibold text-slate-800">${escapeHtml(sp ? sp.name : rec.sportId)}</td>
-            <td class="py-3 px-3.5 font-extrabold text-[#2563eb] whitespace-nowrap">${escapeHtml(formatVal(rec.value, sp ? sp.unit : ''))}</td>
+            <td class="py-3 px-3.5 font-extrabold text-[#2563eb] whitespace-nowrap">${escapeHtml(formatVal(rec.value, sp ? sp.unit : ''))}${(prInfo[rec.id] && prInfo[rec.id].isBest) ? '<span class="pr-badge" title="Najlepší výkon v tejto disciplíne">⭐ osobný rekord</span>' : ((prInfo[rec.id] && prInfo[rec.id].wasPr) ? '<span class="pr-badge" title="V tom čase nový osobný rekord">▲ PR</span>' : '')}</td>
             <td class="py-3 px-3.5 font-medium text-slate-700 whitespace-nowrap">${getFlag(recCountry)} ${escapeHtml(recCountry)}</td>
             <td class="py-3 px-3.5 text-slate-500">${escapeHtml(rec.city || '—')}</td>
             <td class="py-3 px-3.5 text-center">
