@@ -202,12 +202,20 @@
     body.dark-chess #profile-age-bests-title {
       color: #e7e5e4;
     }
+    .pct-top1 { background-color: rgba(168,85,247,.24) !important; border-color: rgba(168,85,247,.65) !important; color: #7e22ce; }
+    body.dark-chess .pct-top1 { color: #d8b4fe; }
     .pct-top10 { background-color: rgba(34,197,94,.20) !important; border-color: rgba(34,197,94,.55) !important; color: #15803d; }
     .pct-top25 { background-color: rgba(245,158,11,.20) !important; border-color: rgba(245,158,11,.55) !important; color: #b45309; }
     body.dark-chess .pct-top10 { color: #86efac; }
     body.dark-chess .pct-top25 { color: #fcd34d; }
     .pr-badge { display:inline-block; margin-left:.35rem; padding:0 .35rem; border-radius:.375rem; font-size:10px; font-weight:700; background: rgba(34,197,94,.18); color:#15803d; }
     body.dark-chess .pr-badge { color:#86efac; }
+    #profile-records-filter-tags { display: none !important; }
+    .ch-card { border: 1px solid rgba(100,116,139,.3); border-radius: .75rem; padding: .7rem .85rem; font-size: 12px; background: rgba(100,116,139,.07); }
+    .ch-btn { padding: .35rem .7rem; border-radius: .6rem; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid transparent; }
+    .ch-yes { background: #16a34a; color: #fff; } .ch-no { background: rgba(220,38,38,.12); color: #b91c1c; border-color: rgba(220,38,38,.4); }
+    body.dark-chess .ch-no { color: #fda4af; }
+    body.dark-chess #challenges-modal > div { background-color: #312e2b; color: #e7e5e4; border-color: #45423e; }
     .notif-wrap { position: relative; display: inline-flex; }
     .notif-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; background: #dc2626; color: #fff; font-size: 10px; font-weight: 800; display: none; align-items: center; justify-content: center; box-shadow: 0 0 0 2px #fff; }
     .notif-badge.on { display: inline-flex; }
@@ -456,6 +464,7 @@
           <button id="profile-compare-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
             ⚖️ Porovnať účastníka
           </button>
+          <button id="profile-challenge-btn" type="button" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">⚔️ Vyzvať na súboj</button>
           <button id="profile-friend-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer border-slate-300/80 bg-white hover:bg-slate-100">+ Pridať priateľa</button>
           <button id="profile-theme-toggle" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-300/80 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">🌙 Tmavý režim</button>
         </div>
@@ -520,7 +529,7 @@
         <div class="flex items-start sm:items-center justify-between gap-2 flex-wrap">
           <div>
             <h3 id="profile-sports-heading" class="text-[11px] sm:text-xs font-extrabold uppercase tracking-[0.06em] text-slate-700">Športové a kognitívne disciplíny — najlepšie výkony účastníka (12)</h3>
-            <p class="text-xs font-medium text-slate-500 mt-0.5">Kliknutím na disciplínu zobrazíš rekord, poradie, percentil a vyfiltruješ merania</p>
+            <p class="text-xs font-medium text-slate-500 mt-0.5">Kliknutím na disciplínu zobrazíš rekord, poradie, percentil a vyfiltruješ merania (druhým kliknutím filter zrušíš)</p>
           </div>
 
           <button id="toggle-age-bests-btn" type="button" class="px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer inline-flex items-center gap-1.5 shrink-0"><span>📈 História</span></button>
@@ -789,6 +798,27 @@
   </main>
 
   <!-- Modálne okno úpravy používateľského konta -->
+  <!-- Súboje -->
+  <div id="challenges-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6">
+    <div class="max-w-2xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-extrabold">⚔️ Súboje</h3>
+        <button id="close-challenges-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-500/10 font-bold cursor-pointer">✕</button>
+      </div>
+      <div class="ch-card space-y-2">
+        <div class="font-bold text-sm">Nový súboj</div>
+        <div class="flex flex-wrap gap-2">
+          <select id="ch-opp" class="px-2.5 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs outline-none"></select>
+          <select id="ch-sport" class="px-2.5 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs outline-none"></select>
+          <label class="inline-flex items-center gap-1.5 text-xs">do <input id="ch-deadline" type="date" class="px-2.5 py-1.5 rounded-xl border border-slate-300/80 bg-transparent text-xs outline-none"></label>
+          <button id="ch-create-btn" type="button" class="ch-btn bg-blue-600 text-white">Vyzvať</button>
+        </div>
+        <div class="text-[11px] opacity-70">Vyzvať môžeš len priateľa. Po prijatí výzvy sa počíta najlepší výkon, ktorý každý z vás pridá v danej disciplíne od dňa prijatia až do termínu (vrátane). Kto nepridá žiadny výkon, prehráva. Ak nepridá nikto, súboj sa zruší.</div>
+      </div>
+      <div id="ch-lists" class="space-y-4"></div>
+    </div>
+  </div>
+
   <!-- Nastavenia upozornení -->
   <div id="notif-settings-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
     <div class="max-w-md w-full rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-4">
@@ -799,7 +829,7 @@
       <p class="text-xs opacity-70">Vyber, o čom chceš dostávať upozornenia (červené číslo pri zvončeku).</p>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-friends" type="checkbox" class="mt-1"><span><strong>Priatelia</strong><br><span class="text-xs opacity-70">keď priateľ pridá nový výkon</span></span></label>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-celebs" type="checkbox" class="mt-1"><span><strong>Známe osobnosti</strong><br><span class="text-xs opacity-70">keď známa osobnosť pridá nový výkon</span></span></label>
-      <label class="flex items-start gap-3 text-sm opacity-50"><input type="checkbox" disabled class="mt-1"><span><strong>Výzvy na súboj</strong> <span class="text-[10px] font-bold">(pripravujeme)</span><br><span class="text-xs">keď ťa priateľ vyzve na súboj</span></span></label>
+      <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-challenges" type="checkbox" class="mt-1"><span><strong>Výzvy na súboj</strong><br><span class="text-xs opacity-70">keď ťa priateľ vyzve a keď sa súboj skončí</span></span></label>
       <label class="flex items-start gap-3 text-sm opacity-50"><input type="checkbox" disabled class="mt-1"><span><strong>Športové hry a udalosti</strong> <span class="text-[10px] font-bold">(pripravujeme)</span></span></label>
       <div class="flex justify-end"><button id="done-notif-settings-btn" type="button" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Hotovo</button></div>
     </div>
@@ -1149,7 +1179,7 @@
   </div>
 
   <!-- Toast notifikácia -->
-  <div class="text-center text-xs opacity-60 py-6"><button type="button" data-invite class="underline cursor-pointer mr-4">📨 Pozvať kamaráta</button><button type="button" data-open-privacy class="underline cursor-pointer">Ochrana osobných údajov</button></div>
+  <div class="text-center text-xs opacity-60 py-6"><button type="button" data-invite class="underline cursor-pointer" style="margin-right:1rem">📨 Pozvať kamaráta</button><button type="button" data-open-privacy class="underline cursor-pointer">Ochrana osobných údajov</button></div>
 
   <div id="app-toast" class="fixed bottom-4 right-4 z-50 max-w-sm rounded-xl bg-slate-900 text-white px-4 py-3 text-xs sm:text-sm font-medium shadow-xl items-center gap-3 hidden">
     <span id="app-toast-text" class="flex-1">Skopíroval som posledné vložené údaje (disciplína, dátum, krajina, mesto).</span>
@@ -1369,7 +1399,7 @@
 
       function pctClass(p) {
         if (p === null || p === undefined) return '';
-        return p >= 90 ? 'pct-top10' : (p >= 75 ? 'pct-top25' : '');
+        return p >= 99 ? 'pct-top1' : (p >= 90 ? 'pct-top10' : (p >= 75 ? 'pct-top25' : ''));
       }
 
       function getFlag(country) {
@@ -1608,10 +1638,133 @@
         db.deletionRequests = ((rq && rq.data) || []).map(r => ({ id: r.id, athleteId: r.requested_by, recordId: r.record_id, status: r.status }));
       }
 
+      // ===== Súboje =====
+      let challenges = [];
+
+      function fmtDay(d) {
+        const m = String(d || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+        return m ? `${Number(m[3])}.${Number(m[2])}.${m[1]}` : String(d || '');
+      }
+      function athleteById(id) { return db.athletes.find(a => String(a.id) === String(id)); }
+      function nameOf(id) { const a = athleteById(id); return a ? a.name : 'Niekto'; }
+      function challengeBest(aid, sportId, from, to) {
+        const a = athleteById(aid), sp = getSportById(sportId);
+        if (!a || !sp) return null;
+        const vals = (a.records || []).filter(r => r.sportId === sportId && r.date && String(r.date) >= from && String(r.date) <= to).map(r => r.value);
+        if (!vals.length) return null;
+        return sp.lowerIsBetter ? Math.min(...vals) : Math.max(...vals);
+      }
+      function renderChallengeBadge() {
+        const b = document.getElementById('challenge-badge');
+        if (!b) return;
+        const n = challenges.filter(c => c.status === 'pending' && String(c.opponent_id) === String(currentUserId)).length;
+        b.textContent = String(n);
+        b.classList.toggle('on', n > 0);
+      }
+      async function loadChallenges() {
+        if (!authUser || !currentUserId) { challenges = []; renderChallengeBadge(); return; }
+        try {
+          await sb.rpc('resolve_challenges');
+          const { data, error } = await sb.from('challenges').select('*').order('created_at', { ascending: false }).limit(100);
+          challenges = (!error && Array.isArray(data)) ? data : [];
+        } catch (e) { challenges = []; }
+        renderChallengeBadge();
+        const m = document.getElementById('challenges-modal');
+        if (m && !m.classList.contains('hidden')) renderChallengeLists();
+      }
+      function challengeLine(c) {
+        const sp = getSportById(c.sport_id);
+        return `${escapeHtml(sp ? sp.name : c.sport_id)} · do ${escapeHtml(fmtDay(c.deadline))}`;
+      }
+      function renderChallengeLists() {
+        const box = document.getElementById('ch-lists');
+        if (!box) return;
+        const me = String(currentUserId);
+        const incoming = challenges.filter(c => c.status === 'pending' && String(c.opponent_id) === me);
+        const sent = challenges.filter(c => c.status === 'pending' && String(c.challenger_id) === me);
+        const active = challenges.filter(c => c.status === 'active');
+        const done = challenges.filter(c => !['pending', 'active'].includes(c.status));
+        const sec = (title, items, empty) => `<div><div class="font-bold text-sm mb-1.5">${title}</div><div class="space-y-2">${items.length ? items.join('') : `<div class="text-xs opacity-60">${empty}</div>`}</div></div>`;
+        const incHtml = incoming.map(c => `<div class="ch-card flex flex-wrap items-center justify-between gap-2"><span><strong>${escapeHtml(nameOf(c.challenger_id))}</strong> ťa vyzýva<br><span class="opacity-70">${challengeLine(c)}</span></span><span class="inline-flex gap-2"><button type="button" class="ch-btn ch-yes" data-ch-accept="${escapeHtml(c.id)}">Prijať</button><button type="button" class="ch-btn ch-no" data-ch-decline="${escapeHtml(c.id)}">Odmietnuť</button></span></div>`);
+        const sentHtml = sent.map(c => `<div class="ch-card flex flex-wrap items-center justify-between gap-2"><span>Vyzval si <strong>${escapeHtml(nameOf(c.opponent_id))}</strong> – čaká na odpoveď<br><span class="opacity-70">${challengeLine(c)}</span></span><button type="button" class="ch-btn ch-no" data-ch-cancel="${escapeHtml(c.id)}">Zrušiť výzvu</button></div>`);
+        const actHtml = active.map(c => {
+          const mine = String(c.challenger_id) === me;
+          const oppId = mine ? c.opponent_id : c.challenger_id;
+          const sp = getSportById(c.sport_id);
+          const mv = challengeBest(me, c.sport_id, c.start_date || '0000', c.deadline);
+          const ov = challengeBest(oppId, c.sport_id, c.start_date || '0000', c.deadline);
+          const f = v => v === null ? '—' : formatVal(v, sp ? sp.unit : '');
+          let lead = '';
+          if (mv !== null || ov !== null) {
+            if (mv !== null && ov !== null && mv !== ov) { const better = sp && sp.lowerIsBetter ? mv < ov : mv > ov; lead = better ? ' <span class="text-emerald-600 font-bold">vedieš</span>' : ' <span class="text-rose-600 font-bold">prehrávaš</span>'; }
+            else if (mv !== null && ov === null) lead = ' <span class="text-emerald-600 font-bold">vedieš</span>';
+            else if (mv === null) lead = ' <span class="text-rose-600 font-bold">prehrávaš</span>';
+          }
+          return `<div class="ch-card">⚔️ <strong>Ty</strong> vs <strong>${escapeHtml(nameOf(oppId))}</strong>${lead}<br><span class="opacity-70">${challengeLine(c)}</span><br>Ty: <strong>${escapeHtml(f(mv))}</strong> · ${escapeHtml(nameOf(oppId))}: <strong>${escapeHtml(f(ov))}</strong></div>`;
+        });
+        const doneHtml = done.slice(0, 20).map(c => {
+          const mine = String(c.challenger_id) === me;
+          const oppId = mine ? c.opponent_id : c.challenger_id;
+          const sp = getSportById(c.sport_id);
+          const f = v => (v === null || v === undefined) ? '—' : formatVal(Number(v), sp ? sp.unit : '');
+          let res = '';
+          if (c.status === 'finished') {
+            const my = mine ? c.challenger_value : c.opponent_value, ot = mine ? c.opponent_value : c.challenger_value;
+            res = c.winner_id ? (String(c.winner_id) === me ? '🏆 Vyhral si' : '😕 Prehral si') : '🤝 Remíza';
+            res += ` (${escapeHtml(f(my))} vs ${escapeHtml(f(ot))})`;
+          } else if (c.status === 'declined') res = mine ? 'Odmietnutá' : 'Odmietol si';
+          else if (c.status === 'cancelled') res = 'Zrušená';
+          else res = 'Vypršala / bez výkonov';
+          return `<div class="ch-card"><strong>${escapeHtml(nameOf(oppId))}</strong> · ${challengeLine(c)}<br>${res}</div>`;
+        });
+        box.innerHTML = sec('📥 Výzvy pre teba', incHtml, 'Žiadne čakajúce výzvy.') + sec('📤 Odoslané výzvy', sentHtml, 'Žiadne.') + sec('🔥 Prebiehajúce súboje', actHtml, 'Zatiaľ žiadne prebiehajúce súboje.') + sec('📜 História', doneHtml, 'Zatiaľ prázdna.');
+        box.querySelectorAll('[data-ch-accept]').forEach(b => b.addEventListener('click', () => respondChallenge(b.getAttribute('data-ch-accept'), true)));
+        box.querySelectorAll('[data-ch-decline]').forEach(b => b.addEventListener('click', () => respondChallenge(b.getAttribute('data-ch-decline'), false)));
+        box.querySelectorAll('[data-ch-cancel]').forEach(b => b.addEventListener('click', () => cancelChallenge(b.getAttribute('data-ch-cancel'))));
+      }
+      function openChallenges(oppId, sportId) {
+        if (!currentUserId) { showToast('Najprv sa prihlás.'); return; }
+        const opp = document.getElementById('ch-opp'), sp = document.getElementById('ch-sport'), dl = document.getElementById('ch-deadline');
+        const friends = db.athletes.filter(a => a.isFriend);
+        opp.innerHTML = friends.length ? friends.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}</option>`).join('') : '<option value="">(najprv pridaj priateľov)</option>';
+        sp.innerHTML = db.sports.map(x => `<option value="${escapeHtml(x.id)}">${escapeHtml(x.name)}</option>`).join('');
+        if (oppId) opp.value = oppId;
+        sp.value = sportId && db.sports.some(x => x.id === sportId) ? sportId : selectedSportId;
+        const day = (n) => { const d = new Date(Date.now() + n * 86400000); return d.toISOString().slice(0, 10); };
+        dl.min = day(1); dl.max = day(60);
+        if (!dl.value || dl.value < dl.min) dl.value = day(7);
+        openModal('challenges-modal');
+        renderChallengeLists();
+        loadChallenges();
+      }
+      async function createChallenge() {
+        const opp = document.getElementById('ch-opp').value, sport = document.getElementById('ch-sport').value, dl = document.getElementById('ch-deadline').value;
+        if (!opp) { showToast('Vyber súpera.'); return; }
+        const { error } = await sb.rpc('create_challenge', { p_opponent: opp, p_sport: sport, p_deadline: dl });
+        if (error) { showToast(error.message); return; }
+        showToast('Výzva bola odoslaná.');
+        await loadChallenges();
+      }
+      async function respondChallenge(id, accept) {
+        const { error } = await sb.rpc('respond_challenge', { p_id: id, p_accept: accept });
+        if (error) showToast(error.message); else showToast(accept ? 'Súboj sa začal. Pridaj výkon do termínu!' : 'Výzva bola odmietnutá.');
+        await loadChallenges();
+        renderNotifPanelIfOpen();
+      }
+      async function cancelChallenge(id) {
+        const { error } = await sb.rpc('cancel_challenge', { p_id: id });
+        if (error) showToast(error.message);
+        await loadChallenges();
+      }
+      function renderNotifPanelIfOpen() {
+        const panel = document.getElementById('notif-panel');
+        if (panel && !panel.classList.contains('hidden')) renderNotifPanel(new Set());
+      }
+
       // ===== Upozornenia =====
       let notifs = [];
       let notifTimer = null;
-      let notifPrefs = { friends: true, celebrities: false };
+      let notifPrefs = { friends: true, celebrities: false, challenges: true };
 
       function timeAgo(iso) {
         const t = new Date(iso).getTime();
@@ -1637,12 +1790,13 @@
       }
 
       async function loadNotifications() {
-        if (!authUser || !currentUserId) { notifs = []; renderNotifBadge(); return; }
+        if (!authUser || !currentUserId) { notifs = []; challenges = []; renderNotifBadge(); renderChallengeBadge(); return; }
         try {
           const { data, error } = await sb.from('notifications').select('*').eq('user_id', authUser.id).order('created_at', { ascending: false }).limit(50);
           notifs = (!error && Array.isArray(data)) ? data : [];
         } catch (e) { notifs = []; }
         renderNotifBadge();
+        await loadChallenges();
         const panel = document.getElementById('notif-panel');
         if (panel && !panel.classList.contains('hidden')) renderNotifPanel(new Set());
       }
@@ -1664,6 +1818,25 @@
           const val = sp && pl.value !== undefined ? ` ${formatVal(Number(pl.value), sp.unit)}` : '';
           return { icon, html: `<strong>${escapeHtml(name)}</strong> ${verb} nový výkon: ${escapeHtml(sp ? sp.name : '')}<strong>${escapeHtml(val)}</strong>`, actorId: actor ? actor.id : null };
         }
+        const spn = getSportById(pl.sport_id);
+        const spName = spn ? spn.name : '';
+        if (n.type === 'challenge_invite') {
+          const c = challenges.find(x => String(x.id) === String(pl.challenge_id));
+          return { icon: '⚔️', html: `<strong>${escapeHtml(name)}</strong> ťa vyzýva na súboj: ${escapeHtml(spName)} do ${escapeHtml(fmtDay(pl.deadline))}`, actorId: actor ? actor.id : null, challengeId: c && c.status === 'pending' && String(c.opponent_id) === String(currentUserId) ? c.id : null, note: c && c.status !== 'pending' ? ({ active: 'Prijaté', declined: 'Odmietnuté', expired: 'Vypršalo', cancelled: 'Zrušené', finished: 'Skončené' }[c.status] || '') : '' };
+        }
+        if (n.type === 'challenge_response') {
+          const txt = pl.kind === 'accepted' ? 'prijal(a) tvoju výzvu' : (pl.kind === 'declined' ? 'odmietol(a) tvoju výzvu' : 'neodpovedal(a) na tvoju výzvu, vypršala');
+          return { icon: '⚔️', html: `<strong>${escapeHtml(name)}</strong> ${txt}: ${escapeHtml(spName)}`, actorId: null };
+        }
+        if (n.type === 'challenge_result') {
+          let res;
+          if (pl.outcome === 'cancelled') res = 'Súboj bol zrušený – nikto nepridal výkon.';
+          else if (pl.outcome === 'draw') res = 'Remíza!';
+          else res = String(pl.winner_id) === String(currentUserId) ? '🏆 Vyhral si!' : '😕 Prehral si.';
+          const vals = (pl.my_value !== null && pl.my_value !== undefined) || (pl.other_value !== null && pl.other_value !== undefined)
+            ? ` (${(spn && pl.my_value !== null && pl.my_value !== undefined) ? formatVal(Number(pl.my_value), spn.unit) : '—'} vs ${(spn && pl.other_value !== null && pl.other_value !== undefined) ? formatVal(Number(pl.other_value), spn.unit) : '—'})` : '';
+          return { icon: '⚔️', html: `Súboj s <strong>${escapeHtml(name)}</strong> (${escapeHtml(spName)}): ${escapeHtml(res)}${escapeHtml(pl.outcome === 'win' || pl.outcome === 'draw' ? vals : '')}`, actorId: null };
+        }
         return { icon: '🔔', html: escapeHtml(String(pl.text || 'Nové upozornenie')), actorId: null };
       }
 
@@ -1677,10 +1850,15 @@
         panel.innerHTML = notifs.map(n => {
           const t = notifText(n);
           const unread = unreadIds.has(n.id);
-          return `<button type="button" class="notif-item ${unread ? 'unread' : ''}" data-notif-actor="${escapeHtml(String(t.actorId || ''))}">
+          const extra = t.challengeId
+            ? `<span class="block mt-1.5"><button type="button" class="ch-btn ch-yes" data-ch-accept="${escapeHtml(t.challengeId)}">Prijať</button> <button type="button" class="ch-btn ch-no" data-ch-decline="${escapeHtml(t.challengeId)}">Odmietnuť</button></span>`
+            : (t.note ? `<span class="block mt-0.5 font-semibold opacity-80">${escapeHtml(t.note)}</span>` : '');
+          return `<div role="button" tabindex="0" class="notif-item ${unread ? 'unread' : ''}" data-notif-actor="${escapeHtml(String(t.actorId || ''))}">
             <span class="notif-dot ${unread ? '' : 'read'}"></span>
-            <span class="flex-1"><span class="block">${t.icon} ${t.html}</span><span class="block opacity-60 mt-0.5">${escapeHtml(timeAgo(n.created_at))}</span></span></button>`;
+            <span class="flex-1"><span class="block">${t.icon} ${t.html}</span><span class="block opacity-60 mt-0.5">${escapeHtml(timeAgo(n.created_at))}</span>${extra}</span></div>`;
         }).join('');
+        panel.querySelectorAll('[data-ch-accept]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondChallenge(b.getAttribute('data-ch-accept'), true); }));
+        panel.querySelectorAll('[data-ch-decline]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondChallenge(b.getAttribute('data-ch-decline'), false); }));
         panel.querySelectorAll('[data-notif-actor]').forEach(b => b.addEventListener('click', () => {
           const id = b.getAttribute('data-notif-actor');
           panel.classList.add('hidden');
@@ -1707,18 +1885,18 @@
       async function openNotifSettings() {
         openModal('notif-settings-modal');
         const f = document.getElementById('np-friends'), c = document.getElementById('np-celebs');
-        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities;
+        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges;
         try {
           const { data } = await sb.from('notification_prefs').select('*').eq('user_id', authUser.id).maybeSingle();
-          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities }; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; }
+          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities, challenges: data.challenges !== false }; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; }
         } catch (e) { /* tabuľka ešte nemusí existovať */ }
       }
 
       async function saveNotifPrefs() {
         if (!authUser) return;
-        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked };
+        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked, challenges: document.getElementById('np-challenges').checked };
         try {
-          const { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities });
+          const { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges });
           if (error) showToast('Nastavenie sa nepodarilo uložiť: ' + error.message);
         } catch (e) { showToast('Nastavenie sa nepodarilo uložiť.'); }
       }
@@ -2930,29 +3108,33 @@
         let lo = Math.min(...vals), hi = Math.max(...vals);
         if (hi === lo) { hi += 1; lo -= 1; }
         const padV = (hi - lo) * 0.1; lo -= padV; hi += padV;
-        const t0 = new Date(pts[0].date).getTime(), t1 = new Date(pts[pts.length - 1].date).getTime();
-        const span = Math.max(1, t1 - t0);
-        const x = p => L + ((new Date(p.date).getTime() - t0) / span) * (W - L - R);
+        const n = pts.length;
+        const x0 = L + 14, x1 = W - R - 14;
+        const xi = (i) => n === 1 ? (x0 + x1) / 2 : x0 + (i / (n - 1)) * (x1 - x0);
         const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
         const bestVal = sport.lowerIsBetter ? Math.min(...vals) : Math.max(...vals);
         const color = sport.accent || '#2563eb';
-        const line = pts.map(p => `${x(p).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
-        const dots = pts.map(p => {
+        const line = pts.map((p, i) => `${xi(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(' ');
+        const dots = pts.map((p, i) => {
           const isBest = p.value === bestVal;
-          return `<circle cx="${x(p).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="${isBest ? 6 : 4}" fill="${color}" ${isBest ? 'stroke="#f59e0b" stroke-width="3"' : ''}><title>${escapeHtml(formatVal(p.value, sport.unit))} · ${escapeHtml(p.date)}</title></circle>`;
+          return `<circle cx="${xi(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="${isBest ? 6 : 4}" fill="${color}" ${isBest ? 'stroke="#f59e0b" stroke-width="3"' : ''}><title>${escapeHtml(formatVal(p.value, sport.unit))} · ${escapeHtml(p.date)}</title></circle>`;
         }).join('');
         const fmt = v => formatVal(Math.round(v * 10) / 10, sport.unit);
-        box.innerHTML = title + `<svg viewBox="0 0 ${W} ${H}" class="w-full h-auto" role="img" aria-label="Graf vývoja výkonov">
+        const step = Math.max(1, Math.ceil(n / 8));
+        const shortDate = d => { const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${Number(m[3])}.${Number(m[2])}.${m[1].slice(2)}` : String(d); };
+        const xLabels = pts.map((p, i) => (i % step === 0 || i === n - 1)
+          ? `<text x="${xi(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.65">${i + 1}.</text><text x="${xi(i).toFixed(1)}" y="${H + 6}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.5">${escapeHtml(shortDate(p.date))}</text>`
+          : '').join('');
+        box.innerHTML = title + `<svg viewBox="0 0 ${W} ${H + 10}" class="w-full h-auto" role="img" aria-label="Graf vývoja výkonov">
           <line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="currentColor" stroke-opacity="0.2"/>
           <line x1="${L}" y1="${T}" x2="${L}" y2="${H - B}" stroke="currentColor" stroke-opacity="0.2"/>
           <text x="${L - 6}" y="${T + 8}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(hi))}</text>
           <text x="${L - 6}" y="${H - B}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(lo))}</text>
-          <text x="${L}" y="${H - 8}" text-anchor="start" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(pts[0].date)}</text>
-          <text x="${W - R}" y="${H - 8}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(pts[pts.length - 1].date)}</text>
+          ${xLabels}
           <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
           ${dots}
         </svg>
-        <div class="text-[11px] opacity-65 mt-1">Zlatý okraj = najlepší výkon. Po prejdení kurzorom na bod uvidíš hodnotu a dátum.</div>`;
+        <div class="text-[11px] opacity-65 mt-1">Merania v poradí, v akom išli za sebou (pod číslom je dátum). Zlatý okraj = najlepší výkon.</div>`;
       }
 
       function renderSelectedSportBanner(athlete) {
@@ -3027,6 +3209,8 @@
               ? 'bg-amber-500/20 border-amber-500/40 text-amber-700'
               : 'border-slate-300/80 bg-white hover:bg-slate-100');
           friendBtn.classList.toggle('hidden', String(athlete.id) === String(currentUserId));
+          const chBtn = document.getElementById('profile-challenge-btn');
+          if (chBtn) chBtn.classList.toggle('hidden', !currentUserId || String(athlete.id) === String(currentUserId));
         }
 
         const records = Array.isArray(athlete.records) ? athlete.records : [];
@@ -3107,8 +3291,9 @@
           `;
 
           card.addEventListener('click', () => {
-            selectedProfileSportId = sp.id;
-            profileSportFilterId = sp.id;
+            const same = selectedProfileSportId === sp.id;
+            selectedProfileSportId = same ? null : sp.id;
+            profileSportFilterId = same ? null : sp.id;
             renderSelectedSportBanner(athlete);
             renderAthleteProfile(athlete.id);
           });
@@ -3252,6 +3437,10 @@
           const itemCls = 'w-full text-left px-3 py-2 rounded-lg hover:bg-slate-500/10 cursor-pointer';
           box.innerHTML = `
             <div class="relative inline-flex items-center gap-1.5" id="user-menu-wrap">
+              <div class="notif-wrap" id="challenge-wrap">
+                <button id="challenge-btn" type="button" title="Súboje" aria-label="Súboje" class="w-9 h-9 inline-flex items-center justify-center rounded-xl text-base border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⚔️</button>
+                <span id="challenge-badge" class="notif-badge"></span>
+              </div>
               <div class="notif-wrap" id="notif-wrap">
                 <button id="notif-btn" type="button" title="Upozornenia" aria-label="Upozornenia" class="w-9 h-9 inline-flex items-center justify-center rounded-xl text-base border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🔔</button>
                 <span id="notif-badge" class="notif-badge"></span>
@@ -3262,7 +3451,7 @@
                 👤 ${escapeHtml(user.name)}
               </button>
               <div id="user-menu-panel" role="menu" class="hidden absolute right-0 top-full mt-1.5 w-56 rounded-xl border border-slate-200 bg-white text-slate-900 shadow-lg p-1.5 z-50 text-xs font-semibold">
-                <button type="button" role="menuitem" data-menu="notif" class="${itemCls}">🔔 Upozornenia</button>
+                <button type="button" role="menuitem" data-menu="notif" class="${itemCls}">🔔 Nastavenia upozornení</button>
                 <button type="button" role="menuitem" data-menu="invite" class="${itemCls}">📨 Pozvať kamaráta</button>
                 <button type="button" role="menuitem" data-menu="edit" class="${itemCls}">✏️ Upraviť údaje</button>
                 <button type="button" role="menuitem" data-menu="logout" class="${itemCls}">↩️ Odhlásiť</button>
@@ -3274,6 +3463,7 @@
           const menuBtn = document.getElementById('settings-btn');
           document.getElementById('my-profile-btn').addEventListener('click', () => openAthleteProfile(user.id));
           document.getElementById('notif-btn').addEventListener('click', (ev) => { ev.stopPropagation(); toggleNotifPanel(); });
+          document.getElementById('challenge-btn').addEventListener('click', () => openChallenges());
           document.getElementById('notif-panel').addEventListener('click', (ev) => ev.stopPropagation());
           renderNotifBadge();
           const menuPanel = document.getElementById('user-menu-panel');
@@ -3862,6 +4052,15 @@
         });
 
         document.getElementById('profile-compare-btn').addEventListener('click', () => openCompareModal(activeProfileAthleteId));
+        document.getElementById('profile-challenge-btn').addEventListener('click', () => {
+          const t = db.athletes.find(a => String(a.id) === String(activeProfileAthleteId));
+          if (!t) return;
+          if (!t.isFriend) { showToast('Vyzvať môžeš len priateľa. Najprv ho pridaj medzi priateľov.'); return; }
+          openChallenges(t.id, selectedProfileSportId);
+        });
+        document.getElementById('close-challenges-btn').addEventListener('click', () => closeModal('challenges-modal'));
+        document.getElementById('challenges-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('challenges-modal'); });
+        document.getElementById('ch-create-btn').addEventListener('click', createChallenge);
         document.getElementById('profile-friend-btn').addEventListener('click', async () => {
           if (!activeProfileAthleteId) return;
           const target = db.athletes.find(a => String(a.id) === String(activeProfileAthleteId));
@@ -3911,6 +4110,7 @@
         document.getElementById('notif-settings-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('notif-settings-modal'); });
         document.getElementById('np-friends').addEventListener('change', saveNotifPrefs);
         document.getElementById('np-celebs').addEventListener('change', saveNotifPrefs);
+        document.getElementById('np-challenges').addEventListener('change', saveNotifPrefs);
         document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-invite]')) inviteFriend(); });
         document.getElementById('filters-toggle-btn').addEventListener('click', () => {
           document.getElementById('extra-filters').classList.toggle('hidden');
@@ -4140,7 +4340,7 @@
             });
           } catch (e) {}
         }
-        ['notif-settings-modal', 'edit-account-modal', 'edit-record-modal', 'compare-modal', 'auth-modal', 'admin-modal', 'video-modal'].forEach(id => {
+        ['challenges-modal', 'notif-settings-modal', 'edit-account-modal', 'edit-record-modal', 'compare-modal', 'auth-modal', 'admin-modal', 'video-modal'].forEach(id => {
           const el = document.getElementById(id);
           if (el) { el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); }
         });
