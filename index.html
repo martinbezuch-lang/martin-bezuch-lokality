@@ -330,6 +330,17 @@
     #profile-records-list td, #profile-records-list th { padding: 8px 6px !important; }
     #profile-records-list td { white-space: normal !important; }
     table th { padding-left: 6px; padding-right: 6px; }
+    #athlete-profile-section .lbl-long { display: none; }
+    #athlete-profile-section > div:first-child { justify-content: flex-start; gap: 6px; }
+    #athlete-profile-section > div:first-child > div { gap: 6px; }
+    #athlete-profile-section > div:first-child button { padding: 6px 9px !important; font-size: 12px !important; }
+    #profile-theme-toggle { display: none !important; }
+    #athlete-profile-section > div:nth-child(2) { padding: 14px !important; }
+    [class*="auto-cols-"] > div { padding: 8px 10px !important; }
+    [class*="auto-cols-"] > div > div:first-child { font-size: 10px !important; }
+    [class*="auto-cols-"] > div > div:last-child { font-size: 15px !important; margin-top: 2px !important; }
+    [class*="auto-cols-"] > div:nth-child(5) { display: none; }
+    #profile-name { font-size: 20px; }
     #app-toast { font-size: 14px !important; }
   }
   </style>
@@ -518,18 +529,18 @@
     <section id="athlete-profile-section" class="space-y-5 hidden">
       <div class="flex items-center justify-between gap-2 flex-wrap">
         <button id="back-to-leaderboard-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
-          ← Späť na rebríček
+          ← Späť<span class="lbl-long"> na rebríček</span>
         </button>
 
         <div class="flex items-center gap-2 flex-wrap">
           <button id="edit-account-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-blue-500/35 bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 transition cursor-pointer">
-            ✏️ Upraviť údaje účtu
+            ✏️ Upraviť<span class="lbl-long"> údaje účtu</span>
           </button>
           <button id="profile-share-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
-            🔗 Zdieľať profil
+            🔗 Zdieľať<span class="lbl-long"> profil</span>
           </button>
           <button id="profile-compare-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
-            ⚖️ Porovnať účastníka
+            ⚖️ Porovnať<span class="lbl-long"> účastníka</span>
           </button>
           <button id="profile-challenge-btn" type="button" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">⚔️ Vyzvať na súboj</button>
           <button id="profile-friend-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer border-slate-300/80 bg-white hover:bg-slate-100">+ Pridať priateľa</button>
@@ -1697,25 +1708,6 @@
         } catch (e) {}
       })();
 
-
-      // diagnostika šírky stránky: otvor porovnajsa.sk/?sirka=1
-      if (/[?&]sirka=1/.test(location.search)) {
-        setTimeout(() => {
-          const W = document.documentElement.clientWidth;
-          const out = ['okno ' + window.innerWidth + ' | dokument ' + W + ' | scroll ' + document.documentElement.scrollWidth];
-          const list = [];
-          document.querySelectorAll('body *').forEach(e => {
-            const r = e.getBoundingClientRect();
-            if (r.width > 0 && r.right > W + 1 && getComputedStyle(e).position !== 'fixed') list.push([Math.round(r.right), (e.id ? '#' + e.id : e.tagName) + '.' + String(e.className).split(' ').slice(0, 2).join('.')]);
-          });
-          list.sort((a, b) => b[0] - a[0]);
-          list.slice(0, 12).forEach(x => out.push(x[0] + ' ' + x[1]));
-          const d = document.createElement('pre');
-          d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#000;color:#0f0;font-size:11px;padding:8px;margin:0;white-space:pre-wrap;max-height:50vh;overflow:auto';
-          d.textContent = out.join('\n');
-          document.body.appendChild(d);
-        }, 4000);
-      }
 
       async function handleInvite() {
         if (!sb || !currentUserId) return;
