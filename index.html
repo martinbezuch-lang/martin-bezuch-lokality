@@ -3601,6 +3601,27 @@
         `;
       }
 
+      // YouTube odkaz -> { id, start (sekundy) } ; zachová čas začiatku (t=, start=, napr. 1m30s)
+      function parseYoutubeUrl(raw) {
+        try {
+          const u = new URL(String(raw || '').trim());
+          const h = u.hostname.replace(/^www\.|^m\./i, '').toLowerCase();
+          let id = '';
+          if (h === 'youtu.be') id = u.pathname.slice(1).split('/')[0];
+          else if (h === 'youtube.com' || h === 'youtube-nocookie.com') {
+            if (u.pathname === '/watch') id = u.searchParams.get('v') || '';
+            else { const m = u.pathname.match(/^\/(?:shorts|live|embed)\/([A-Za-z0-9_-]{6,})/); if (m) id = m[1]; }
+          } else return null;
+          if (!/^[A-Za-z0-9_-]{6,}$/.test(id)) return null;
+          let t = u.searchParams.get('t') || u.searchParams.get('start') || '';
+          if (!t && u.hash) { const hm = u.hash.match(/t=([0-9hms]+)/i); if (hm) t = hm[1]; }
+          let start = 0;
+          if (/^\d+$/.test(t)) start = Number(t);
+          else { const m = t.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s)?$/i); if (m && t) start = (Number(m[1]) || 0) * 3600 + (Number(m[2]) || 0) * 60 + (Number(m[3]) || 0); }
+          return { id, start: start > 0 && start < 86400 ? start : 0 };
+        } catch (e) { return null; }
+      }
+
       function openVideoModal(title, videoUrl) {
         const modal = document.getElementById('video-modal');
         const titleEl = document.getElementById('video-modal-title');
@@ -3608,9 +3629,9 @@
         if (!modal || !titleEl || !bodyEl) return;
 
         titleEl.textContent = title || 'Video záznam';
-        const match = String(videoUrl || '').match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
-        if (match && match[1]) {
-          bodyEl.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/${escapeHtml(match[1])}" title="YouTube video" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+        const ytInfo = parseYoutubeUrl(videoUrl);
+        if (ytInfo) {
+          bodyEl.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/${escapeHtml(ytInfo.id)}?rel=0${ytInfo.start ? '&start=' + ytInfo.start : ''}${ytInfo.start ? '&autoplay=1' : ''}" title="YouTube video" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
         } else {
           const safeUrl = safeHttpUrl(videoUrl);
           bodyEl.innerHTML = !safeUrl ? '<span class="text-white text-sm">Neplatný odkaz na video.</span>' : `<a href="${escapeHtml(safeUrl)}" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-bold">Otvoriť video na YouTube ↗</a>`;
