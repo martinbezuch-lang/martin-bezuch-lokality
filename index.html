@@ -297,6 +297,17 @@
     body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
     #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
     .m-only { display: none; }
+    .adm-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 18px; height: 18px; padding: 0 5px; margin-left: 6px; border-radius: 9px; background: #dc2626; color: #fff; font-size: 11px !important; font-weight: 800; line-height: 1; vertical-align: middle; }
+    #open-admin-btn { position: relative; }
+    #open-admin-btn .adm-badge { position: absolute; top: -7px; right: -7px; margin: 0; box-shadow: 0 0 0 2px #fff; }
+    body.dark-chess #open-admin-btn .adm-badge { box-shadow: 0 0 0 2px #262421; }
+    #rel-menu { position: fixed; z-index: 70; width: 270px; max-width: calc(100vw - 16px); background: #fff; color: #0f172a; border: 1px solid rgba(148,163,184,.5); border-radius: 14px; box-shadow: 0 12px 32px rgba(0,0,0,.25); padding: 6px; }
+    #rel-menu .rel-title { font-size: 12px; font-weight: 800; padding: 6px 10px 4px; opacity: .75; }
+    #rel-menu button { display: block; width: 100%; text-align: left; padding: 9px 10px; border-radius: 10px; cursor: pointer; background: transparent; border: 0; color: inherit; }
+    #rel-menu button:hover { background: rgba(100,116,139,.15); }
+    #rel-menu .rel-lbl { display: block; font-size: 13px; font-weight: 700; }
+    #rel-menu .rel-sub { display: block; font-size: 11px; opacity: .65; margin-top: 2px; line-height: 1.3; }
+    body.dark-chess #rel-menu { background: #312e2b; color: #e7e5e4; border-color: #4a4642; }
     #main-header button:not(#brand-home-btn):not(#open-auth-modal-btn):not(#finish-profile-btn) { filter: grayscale(1); }
     #main-header #user-menu-panel button { filter: none; }
     body.dark-chess *:not(.no-scrollbar) { scrollbar-color: #57534e #2a2826; scrollbar-width: thin; }
@@ -408,7 +419,7 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <button id="friends-filter-btn" type="button" title="Zobraziť len priateľov" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 (0)</button>
+        <button id="friends-filter-btn" type="button" title="Zobraziť len sledovaných a priateľov" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 (0)</button>
         <button id="celebrities-filter-btn" type="button" title="Zobraziť len známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ (0)</button>
         <div id="user-auth-controls" class="flex items-center gap-2 flex-wrap">
             <button id="my-profile-btn" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600/15 text-blue-700 cursor-pointer">
@@ -973,6 +984,7 @@
       </div>
       <p class="text-xs opacity-70">Vyber, o čom chceš dostávať upozornenia (červené číslo pri zvončeku).</p>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-friends" type="checkbox" class="mt-1"><span><strong>Priatelia</strong><br><span class="text-xs opacity-70">keď priateľ pridá nový výkon</span></span></label>
+      <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-freq" type="checkbox" class="mt-1"><span><strong>Žiadosti o priateľstvo</strong><br><span class="text-xs opacity-70">keď ťa niekto pridá ako priateľa alebo prijme tvoju žiadosť (sledovanie sa neoznamuje)</span></span></label>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-celebs" type="checkbox" class="mt-1"><span><strong>Známe osobnosti</strong><br><span class="text-xs opacity-70">keď známa osobnosť pridá nový výkon</span></span></label>
       <label class="flex items-start gap-3 text-sm cursor-pointer"><input id="np-challenges" type="checkbox" class="mt-1"><span><strong>Výzvy na súboj</strong><br><span class="text-xs opacity-70">keď ťa priateľ vyzve a keď sa súboj skončí</span></span></label>
       <label class="flex items-start gap-3 text-sm opacity-50"><input type="checkbox" disabled class="mt-1"><span><strong>Športové hry a udalosti</strong> <span class="text-[10px] font-bold">(pripravujeme)</span></span></label>
@@ -1804,13 +1816,97 @@
             }
           }
         } else {
-          db.athletes.forEach(a => { a.isFriend = false; });
+          db.athletes.forEach(a => { a.isFriend = false; a.relation = 'none'; a.reqId = null; });
+          friendReqs = [];
           db.deletionRequests = [];
           notifs = [];
         }
         updateAuthHeaderUi();
         updateAdminHeaderUi();
         refreshAllViews();
+      }
+
+      // ===== Sledovať / Priateľ (dvojitý model) =====
+      let friendReqs = [];
+      function computeRelations() {
+        const me = currentUserId;
+        db.athletes.forEach(a => { a.relation = a.isFriend ? 'following' : 'none'; a.reqId = null; });
+        if (!me) return;
+        friendReqs.forEach(q => {
+          const otherId = String(q.from_id) === String(me) ? q.to_id : (String(q.to_id) === String(me) ? q.from_id : null);
+          if (!otherId) return;
+          const a = db.athletes.find(x => String(x.id) === String(otherId));
+          if (!a) return;
+          if (q.status === 'accepted') { a.relation = 'friend'; a.reqId = q.id; }
+          else if (q.status === 'pending') {
+            a.reqId = q.id;
+            a.relation = String(q.from_id) === String(me) ? 'pending_out' : 'pending_in';
+          }
+        });
+      }
+      const REL_LABEL = { none: '＋', following: '👁', pending_out: '⏳', pending_in: '❗', friend: '🤝' };
+      const REL_TITLE = { none: 'Sledovať alebo pridať ako priateľa', following: 'Sleduješ', pending_out: 'Žiadosť odoslaná', pending_in: 'Žiadosť o priateľstvo čaká na teba', friend: 'Priateľ' };
+
+      async function relAction(kind, target) {
+        const me = getCurrentUser();
+        if (!me) { showToast('Najprv sa prihlás.'); openModal('auth-modal'); return; }
+        let error = null, data = null, msg = '';
+        try {
+          if (kind === 'follow') { ({ error } = await sb.from('friendships').insert({ user_id: me.id, friend_id: target.id })); msg = target.name + ' – sledovaný. Nikto sa o tom nedozvie.'; }
+          else if (kind === 'unfollow') { ({ error } = await sb.from('friendships').delete().eq('user_id', me.id).eq('friend_id', target.id)); msg = 'Prestal si sledovať: ' + target.name + '.'; }
+          else if (kind === 'request') { ({ data, error } = await sb.rpc('send_friend_request', { p_to: target.id })); msg = data === 'accepted' ? 'Ste priatelia.' : 'Žiadosť o priateľstvo bola odoslaná.'; }
+          else if (kind === 'cancel') { ({ error } = await sb.rpc('cancel_friend_request', { p_to: target.id })); msg = 'Žiadosť bola zrušená.'; }
+          else if (kind === 'accept' || kind === 'decline') { ({ error } = await sb.rpc('respond_friend_request', { p_id: target.reqId, p_accept: kind === 'accept' })); msg = kind === 'accept' ? 'Ste priatelia.' : 'Žiadosť bola odmietnutá.'; }
+          else if (kind === 'unfriend') { ({ error } = await sb.rpc('remove_friend', { p_other: target.id })); msg = 'Priateľstvo bolo zrušené.'; }
+        } catch (e) { error = e; }
+        if (error) { showToast('Zmenu sa nepodarilo uložiť: ' + (error.message || error)); return; }
+        await overlayOwn();
+        refreshAllViews();
+        loadNotifications();
+        showToast(msg);
+      }
+
+      function closeRelMenu() { const m = document.getElementById('rel-menu'); if (m) m.remove(); }
+      function openRelMenu(target, anchor) {
+        const me = getCurrentUser();
+        if (!me) { showToast('Najprv sa prihlás.'); openModal('auth-modal'); return; }
+        if (String(target.id) === String(me.id)) return;
+        closeRelMenu();
+        const rel = target.relation || (target.isFriend ? 'following' : 'none');
+        const opts = [];
+        const add = (k, label, sub) => opts.push({ k, label, sub });
+        if (rel === 'none') { add('follow', '👁 Sledovať', 'Tichá voľba: uvidíš jeho nové výkony, on sa to nedozvie.'); add('request', '🤝 Pridať ako priateľa', 'Pošle sa žiadosť. Po prijatí ste priatelia a môžete sa vyzývať na súboj.'); }
+        else if (rel === 'following') { add('request', '🤝 Pridať ako priateľa', 'Pošle sa žiadosť. Po prijatí ste priatelia a môžete sa vyzývať na súboj.'); add('unfollow', '✕ Prestať sledovať', ''); }
+        else if (rel === 'pending_out') { add('cancel', '⏳ Zrušiť žiadosť', 'Žiadosť čaká na odpoveď.'); add('unfollow', '✕ Prestať sledovať', ''); }
+        else if (rel === 'pending_in') { add('accept', '✓ Prijať žiadosť', target.name + ' ťa chce mať medzi priateľmi.'); add('decline', '✕ Odmietnuť', ''); }
+        else if (rel === 'friend') { add('unfriend', '✕ Zrušiť priateľstvo', 'Prestaneš ho aj sledovať.'); }
+        const m = document.createElement('div');
+        m.id = 'rel-menu';
+        m.setAttribute('role', 'menu');
+        m.innerHTML = '<div class="rel-title">' + escapeHtml(target.name) + '</div>' + opts.map(o => '<button type="button" role="menuitem" data-rel="' + o.k + '"><span class="rel-lbl">' + o.label + '</span>' + (o.sub ? '<span class="rel-sub">' + escapeHtml(o.sub) + '</span>' : '') + '</button>').join('');
+        document.body.appendChild(m);
+        const rect = anchor.getBoundingClientRect();
+        const w = m.offsetWidth, h = m.offsetHeight;
+        let left = Math.min(Math.max(8, rect.right - w), window.innerWidth - w - 8);
+        let top = rect.bottom + 6;
+        if (top + h > window.innerHeight - 8) top = Math.max(8, rect.top - h - 6);
+        m.style.left = left + 'px'; m.style.top = top + 'px';
+        m.addEventListener('click', (ev) => {
+          ev.stopPropagation();
+          const b = ev.target.closest('[data-rel]');
+          if (!b) return;
+          closeRelMenu();
+          relAction(b.getAttribute('data-rel'), target);
+        });
+      }
+      document.addEventListener('click', closeRelMenu);
+      document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape') closeRelMenu(); });
+      window.addEventListener('scroll', closeRelMenu, true);
+
+      async function respondFriend(reqId, accept) {
+        const q = friendReqs.find(x => String(x.id) === String(reqId));
+        const other = q ? db.athletes.find(a => String(a.id) === String(q.from_id)) : null;
+        await relAction(accept ? 'accept' : 'decline', { id: other ? other.id : null, name: other ? other.name : '', reqId });
       }
 
       // Doplní k verejným dátam vlastný plný profil, priateľov a vlastné čakajúce žiadosti
@@ -1827,12 +1923,15 @@
         if (p.role === 'moderator' || p.role === 'superadmin') {
           currentAdmin = { id: p.id, name: p.display_name, role: p.role };
         }
-        const [fr, rq] = await Promise.all([
+        const [fr, rq, frq] = await Promise.all([
           sb.from('friendships').select('friend_id'),
-          sb.from('deletion_requests').select('id,record_id,requested_by,status').eq('requested_by', p.id).eq('status', 'pending')
+          sb.from('deletion_requests').select('id,record_id,requested_by,status').eq('requested_by', p.id).eq('status', 'pending'),
+          (async () => { try { return await sb.from('friend_requests').select('id,from_id,to_id,status'); } catch (e) { return { data: [] }; } })()
         ]);
         const friendIds = new Set(((fr && fr.data) || []).map(f => f.friend_id));
         db.athletes.forEach(x => { x.isFriend = friendIds.has(x.id); });
+        friendReqs = (frq && Array.isArray(frq.data)) ? frq.data : [];
+        computeRelations();
         db.deletionRequests = ((rq && rq.data) || []).map(r => ({ id: r.id, athleteId: r.requested_by, recordId: r.record_id, status: r.status }));
       }
 
@@ -1923,8 +2022,8 @@
       function openChallenges(oppId, sportId) {
         if (!currentUserId) { showToast('Najprv sa prihlás.'); return; }
         const opp = document.getElementById('ch-opp'), sp = document.getElementById('ch-sport'), dl = document.getElementById('ch-deadline');
-        const friends = db.athletes.filter(a => a.isFriend);
-        opp.innerHTML = friends.length ? friends.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}</option>`).join('') : '<option value="">(najprv pridaj priateľov)</option>';
+        const friends = db.athletes.filter(a => a.relation === 'friend');
+        opp.innerHTML = friends.length ? friends.map(a => `<option value="${escapeHtml(a.id)}">${escapeHtml(a.name)}</option>`).join('') : '<option value="">(najprv pridaj priateľa a nech prijme žiadosť)</option>';
         sp.innerHTML = db.sports.map(x => `<option value="${escapeHtml(x.id)}">${escapeHtml(x.name)}</option>`).join('');
         if (oppId) opp.value = oppId;
         sp.value = sportId && db.sports.some(x => x.id === sportId) ? sportId : selectedSportId;
@@ -1976,7 +2075,7 @@
       // ===== Upozornenia =====
       let notifs = [];
       let notifTimer = null;
-      let notifPrefs = { friends: true, celebrities: false, challenges: true };
+      let notifPrefs = { friends: true, celebrities: false, challenges: true, friend_requests: true };
 
       function timeAgo(iso) {
         const t = new Date(iso).getTime();
@@ -2033,6 +2132,14 @@
         if (n.type === 'invite_joined') {
           return { icon: '🎉', html: `<strong>${escapeHtml(name)}</strong> sa zaregistroval(a) cez tvoju pozvánku`, actorId: actor ? actor.id : null };
         }
+        if (n.type === 'friend_request') {
+          const q = friendReqs.find(x => x.status === 'pending' && String(x.from_id) === String(n.actor_id) && String(x.to_id) === String(currentUserId));
+          const done = friendReqs.find(x => String(x.from_id) === String(n.actor_id) && String(x.to_id) === String(currentUserId));
+          return { icon: '🤝', html: `<strong>${escapeHtml(name)}</strong> ti poslal(a) žiadosť o priateľstvo`, actorId: actor ? actor.id : null, friendReqId: q ? q.id : null, note: (!q && done) ? (done.status === 'accepted' ? 'Prijatá – ste priatelia.' : 'Odmietnutá.') : '' };
+        }
+        if (n.type === 'friend_accepted') {
+          return { icon: '🤝', html: `<strong>${escapeHtml(name)}</strong> prijal(a) tvoju žiadosť o priateľstvo`, actorId: actor ? actor.id : null };
+        }
         const spn = getSportById(pl.sport_id);
         const spName = spn ? spn.name : '';
         if (n.type === 'challenge_invite') {
@@ -2065,13 +2172,17 @@
         panel.innerHTML = notifs.map(n => {
           const t = notifText(n);
           const unread = unreadIds.has(n.id);
-          const extra = t.challengeId
+          const extra = t.friendReqId
+            ? `<span class="block mt-1.5"><button type="button" class="ch-btn ch-yes" data-fr-accept="${escapeHtml(t.friendReqId)}">Prijať</button> <button type="button" class="ch-btn ch-no" data-fr-decline="${escapeHtml(t.friendReqId)}">Odmietnuť</button></span>`
+            : t.challengeId
             ? `<span class="block mt-1.5"><button type="button" class="ch-btn ch-yes" data-ch-accept="${escapeHtml(t.challengeId)}">Prijať</button> <button type="button" class="ch-btn ch-no" data-ch-decline="${escapeHtml(t.challengeId)}">Odmietnuť</button></span>`
             : (t.note ? `<span class="block mt-0.5 font-semibold opacity-80">${escapeHtml(t.note)}</span>` : '');
           return `<div role="button" tabindex="0" class="notif-item ${unread ? 'unread' : ''}" data-notif-actor="${escapeHtml(String(t.actorId || ''))}">
             <span class="notif-dot ${unread ? '' : 'read'}"></span>
             <span class="flex-1"><span class="block">${t.icon} ${t.html}</span><span class="block opacity-60 mt-0.5">${escapeHtml(timeAgo(n.created_at))}</span>${extra}</span></div>`;
         }).join('');
+        panel.querySelectorAll('[data-fr-accept]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondFriend(b.getAttribute('data-fr-accept'), true); }));
+        panel.querySelectorAll('[data-fr-decline]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondFriend(b.getAttribute('data-fr-decline'), false); }));
         panel.querySelectorAll('[data-ch-accept]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondChallenge(b.getAttribute('data-ch-accept'), true); }));
         panel.querySelectorAll('[data-ch-decline]').forEach(b => b.addEventListener('click', (e) => { e.stopPropagation(); respondChallenge(b.getAttribute('data-ch-decline'), false); }));
         panel.querySelectorAll('[data-notif-actor]').forEach(b => b.addEventListener('click', () => {
@@ -2100,18 +2211,19 @@
       async function openNotifSettings() {
         openModal('notif-settings-modal');
         const f = document.getElementById('np-friends'), c = document.getElementById('np-celebs');
-        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges;
+        f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; document.getElementById('np-freq').checked = notifPrefs.friend_requests;
         try {
           const { data } = await sb.from('notification_prefs').select('*').eq('user_id', authUser.id).maybeSingle();
-          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities, challenges: data.challenges !== false }; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; }
+          if (data) { notifPrefs = { friends: !!data.friends, celebrities: !!data.celebrities, challenges: data.challenges !== false, friend_requests: data.friend_requests !== false }; document.getElementById('np-freq').checked = notifPrefs.friend_requests; f.checked = notifPrefs.friends; c.checked = notifPrefs.celebrities; document.getElementById('np-challenges').checked = notifPrefs.challenges; }
         } catch (e) { /* tabuľka ešte nemusí existovať */ }
       }
 
       async function saveNotifPrefs() {
         if (!authUser) return;
-        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked, challenges: document.getElementById('np-challenges').checked };
+        notifPrefs = { friends: document.getElementById('np-friends').checked, celebrities: document.getElementById('np-celebs').checked, challenges: document.getElementById('np-challenges').checked, friend_requests: document.getElementById('np-freq').checked };
         try {
-          const { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges });
+          let { error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges, friend_requests: notifPrefs.friend_requests });
+          if (error) { ({ error } = await sb.from('notification_prefs').upsert({ user_id: authUser.id, friends: notifPrefs.friends, celebrities: notifPrefs.celebrities, challenges: notifPrefs.challenges })); }
           if (error) showToast('Nastavenie sa nepodarilo uložiť: ' + error.message);
         } catch (e) { showToast('Nastavenie sa nepodarilo uložiť.'); }
       }
@@ -2847,15 +2959,15 @@
                 <button
                   type="button"
                   data-toggle-friend="${escapeHtml(ath.id)}"
-                  title="${ath.isFriend ? 'Odobrať z priateľov' : 'Pridať medzi priateľov'}"
-                  aria-label="${ath.isFriend ? 'Odobrať z priateľov' : 'Pridať medzi priateľov'}"
+                  title="${REL_TITLE[ath.relation || 'none']}"
+                  aria-label="${REL_TITLE[ath.relation || 'none']}"
                   class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-bold border transition cursor-pointer ${
-                    ath.isFriend
+                    (ath.relation && ath.relation !== 'none')
                       ? 'bg-amber-500/20 border-amber-500/40 text-amber-700'
                       : 'bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'
                   }"
                 >
-                  ${ath.isFriend ? '✓' : '＋'}
+                  ${REL_LABEL[ath.relation || 'none']}
                 </button>
                 `}
               </div>
@@ -2891,13 +3003,12 @@
         });
 
         tbody.querySelectorAll('[data-toggle-friend]').forEach(btn => {
-          btn.addEventListener('click', async () => {
+          btn.addEventListener('click', async (ev) => {
             const aid = btn.getAttribute('data-toggle-friend');
             const target = db.athletes.find(a => a.id === aid);
             if (!target) return;
-            if (!(await toggleFriend(target))) return;
-            renderLeaderboard();
-            showToast(target.isFriend ? `${target.name} pridaný medzi priateľov.` : `${target.name} odstránený z priateľov.`);
+            ev.stopPropagation();
+            openRelMenu(target, btn);
           });
         });
 
@@ -3432,9 +3543,9 @@
 
         const friendBtn = document.getElementById('profile-friend-btn');
         if (friendBtn) {
-          friendBtn.textContent = athlete.isFriend ? '✓ Priateľ' : '+ Priateľ';
+          friendBtn.textContent = { none: '＋ Pridať', following: '👁 Sleduješ', pending_out: '⏳ Žiadosť', pending_in: '❗ Žiadosť', friend: '🤝 Priateľ' }[athlete.relation || 'none'];
           friendBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ' +
-            (athlete.isFriend
+            ((athlete.relation && athlete.relation !== 'none')
               ? 'bg-amber-500/20 border-amber-500/40 text-amber-700'
               : 'border-slate-300/80 bg-white hover:bg-slate-100');
           friendBtn.classList.toggle('hidden', String(athlete.id) === String(currentUserId));
@@ -3753,7 +3864,39 @@
         if (!btn) return;
         btn.textContent = currentAdmin ? `🛡️ ${currentAdmin.name}` : '🛡️ Admin';
         syncSuperAdminAccessVisibility();
+        updateAdminBadges();
       }
+
+      // ===== Červené odznaky v admin prostredí =====
+      const ADM_SEEN_KEY = 'porovnajsa_adm_seen_athletes';
+      function admSeenGet() { try { let v = localStorage.getItem(ADM_SEEN_KEY); if (!v) { v = new Date().toISOString(); localStorage.setItem(ADM_SEEN_KEY, v); } return v; } catch (e) { return new Date().toISOString(); } }
+      function admSeenSet() { try { localStorage.setItem(ADM_SEEN_KEY, new Date().toISOString()); } catch (e) {} }
+      function setBadge(el, n) {
+        if (!el) return;
+        let b = el.querySelector(':scope > .adm-badge');
+        if (!n) { if (b) b.remove(); return; }
+        if (!b) { b = document.createElement('span'); b.className = 'adm-badge'; el.appendChild(b); }
+        b.textContent = n > 99 ? '99+' : String(n);
+      }
+      async function updateAdminBadges() {
+        const hdr = document.getElementById('open-admin-btn');
+        if (!currentAdmin) { setBadge(hdr, 0); return; }
+        const modal = document.getElementById('admin-modal');
+        const open = modal && !modal.classList.contains('hidden');
+        if (open && activeAdminTab === 'athletes') admSeenSet();
+        let nReq = 0, nNew = 0;
+        try {
+          const a = await sb.from('deletion_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending');
+          nReq = (a && a.count) || 0;
+          const b = await sb.from('profiles').select('id', { count: 'exact', head: true }).gt('created_at', admSeenGet());
+          nNew = (b && b.count) || 0;
+        } catch (e) {}
+        if (open && activeAdminTab === 'athletes') nNew = 0;
+        setBadge(document.querySelector('[data-admin-tab="requests"]'), nReq);
+        setBadge(document.querySelector('[data-admin-tab="athletes"]'), nNew);
+        setBadge(hdr, nReq + nNew);
+      }
+      setInterval(() => { if (!document.hidden && typeof currentAdmin !== 'undefined' && currentAdmin) updateAdminBadges(); }, 60000);
 
       async function syncAdminModalView() {
         const dash = document.getElementById('admin-dashboard');
@@ -3796,6 +3939,7 @@
           return;
         }
 
+        updateAdminBadges();
         const btnBase = 'px-2.5 py-1 rounded-lg font-semibold cursor-pointer ';
         const invCount = {}; const invitedBy = {};
         invitesRows.forEach(r => { invCount[r.inviter_id] = (invCount[r.inviter_id] || 0) + 1; invitedBy[r.invitee_id] = r.inviter_id; });
@@ -4297,7 +4441,7 @@
         document.getElementById('profile-challenge-btn').addEventListener('click', () => {
           const t = db.athletes.find(a => String(a.id) === String(activeProfileAthleteId));
           if (!t) return;
-          if (!t.isFriend) { showToast('Vyzvať môžeš len priateľa. Najprv ho pridaj medzi priateľov.'); return; }
+          if (t.relation !== 'friend') { showToast('Vyzvať môžeš len priateľa, ktorý prijal tvoju žiadosť o priateľstvo.'); return; }
           openChallenges(t.id, selectedProfileSportId);
         });
         document.getElementById('close-challenges-btn').addEventListener('click', () => closeModal('challenges-modal'));
@@ -4305,14 +4449,12 @@
         document.getElementById('invite-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('invite-modal'); });
         document.getElementById('challenges-modal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closeModal('challenges-modal'); });
         document.getElementById('ch-create-btn').addEventListener('click', createChallenge);
-        document.getElementById('profile-friend-btn').addEventListener('click', async () => {
+        document.getElementById('profile-friend-btn').addEventListener('click', (ev) => {
+          ev.stopPropagation();
           if (!activeProfileAthleteId) return;
           const target = db.athletes.find(a => String(a.id) === String(activeProfileAthleteId));
           if (!target) return;
-          if (!(await toggleFriend(target))) return;
-          renderAthleteProfile(target.id);
-          renderLeaderboard();
-          showToast(target.isFriend ? `${target.name} pridaný medzi priateľov.` : `${target.name} odstránený z priateľov.`);
+          openRelMenu(target, ev.currentTarget);
         });
         document.getElementById('clear-age-filter-btn').addEventListener('click', () => {
           selectedAgeAtRecord = null;
@@ -4355,6 +4497,7 @@
         document.getElementById('np-friends').addEventListener('change', saveNotifPrefs);
         document.getElementById('np-celebs').addEventListener('change', saveNotifPrefs);
         document.getElementById('np-challenges').addEventListener('change', saveNotifPrefs);
+        document.getElementById('np-freq').addEventListener('change', saveNotifPrefs);
         document.addEventListener('click', (e) => { if (e.target.closest && e.target.closest('[data-invite]')) inviteFriend(); });
         document.getElementById('filters-toggle-btn').addEventListener('click', () => {
           document.getElementById('extra-filters').classList.toggle('hidden');
@@ -4475,6 +4618,7 @@
           syncAdminModalView();
           m.classList.remove('hidden');
           m.classList.add('flex');
+          setTimeout(updateAdminBadges, 300);
         });
 
         document.getElementById('close-admin-btn').addEventListener('click', () => {
