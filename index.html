@@ -158,6 +158,7 @@
     body.dark-chess #back-to-leaderboard-btn,
     body.dark-chess #profile-compare-btn,
     body.dark-chess #profile-friend-btn,
+    body.dark-chess #profile-challenge-btn,
     body.dark-chess #edit-account-btn {
       background-color: #312e2b;
       border-color: #4a4642;
@@ -167,6 +168,7 @@
     body.dark-chess #back-to-leaderboard-btn:hover,
     body.dark-chess #profile-compare-btn:hover,
     body.dark-chess #profile-friend-btn:hover,
+    body.dark-chess #profile-challenge-btn:hover,
     body.dark-chess #edit-account-btn:hover {
       background-color: #3c3834;
     }
@@ -289,6 +291,12 @@
     }
 
     .cn-short { display: none; }
+    #main-header #my-profile-btn, #main-header #open-admin-btn { background-color: rgba(100,116,139,.10) !important; border: 1px solid rgba(148,163,184,.45) !important; color: inherit !important; font-weight: 600; }
+    body.dark-chess #main-header #my-profile-btn, body.dark-chess #main-header #open-admin-btn { background-color: #3a3733 !important; border-color: #4a4642 !important; color: #e7e5e4 !important; }
+    body.dark-chess #main-header button:not(#brand-home-btn):not(#open-auth-modal-btn):not(#finish-profile-btn) { background-color: #3a3733 !important; border: 1px solid #4a4642 !important; color: #e7e5e4 !important; }
+    body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
+    #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
+    .m-only { display: none; }
     body.dark-chess *:not(.no-scrollbar) { scrollbar-color: #57534e #2a2826; scrollbar-width: thin; }
     body.dark-chess ::-webkit-scrollbar { width: 10px; height: 10px; }
     body.dark-chess ::-webkit-scrollbar-track { background: #2a2826; }
@@ -304,61 +312,54 @@
     main, section, .max-w-7xl, .max-w-5xl { min-width: 0; max-width: 100%; }
     section > div, #extra-filters { min-width: 0; }
     #extra-filters select, #extra-filters button { max-width: 100%; }
-    #main-header { position: static; }
-    #main-header > div { padding-top: 10px; padding-bottom: 10px; gap: 8px; align-items: center; flex-wrap: wrap; }
-    #main-header p, #main-header h1 + span { display: none; }
-    #main-header > div > div:first-child { order: 1; flex: 1 1 0; min-width: 0; }
-    #main-header > div > div:last-child { display: contents; }
-    #main-header button { padding: 6px 9px !important; font-size: 12px !important; }
-    #friends-filter-btn, #celebrities-filter-btn { padding: 6px 7px !important; }
-    #main-header h1 { font-size: 14px; }
-    #main-header > div > div:first-child > button { width: 34px; height: 34px; }
-    #friends-filter-btn { order: 2; } #celebrities-filter-btn { order: 3; }
-    #main-header #theme-toggle { order: 4; font-size: 0 !important; }
-    #main-header #open-admin-btn { order: 5; font-size: 0 !important; }
-    #main-header #open-admin-btn::before { content: '🛡️'; font-size: 14px; }
-    #main-header #user-auth-controls { order: 6; flex: 1 1 100%; width: 100%; }
-    #user-menu-wrap { display: flex !important; width: 100%; flex-wrap: nowrap; }
-    #my-profile-btn { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
-    #main-header #header-logout-btn { font-size: 0 !important; }
-    #main-header #header-logout-btn::before { content: '↩️'; font-size: 14px; }
-    .notif-panel { position: fixed !important; left: 8px; right: 8px; top: 110px !important; width: auto !important; }
-    #profile-theme-toggle { font-size: 0 !important; }
-    #theme-toggle::before, #profile-theme-toggle::before { content: '🌓'; font-size: 14px; }
-    [class*="auto-cols-"] { grid-auto-flow: row !important; grid-template-columns: 1fr 1fr; overflow: visible !important; }
-    #profile-sports-grid { grid-template-columns: 1fr !important; }
-    table:has(#profile-records-list) thead { display: none; }
-    table:has(#profile-records-list), #profile-records-list { display: block; width: 100%; }
-    #profile-records-list tr { display: grid !important; grid-template-columns: 96px 1fr auto auto; align-items: center; gap: 3px 8px; padding: 9px 10px; }
-    #profile-records-list td { display: block; padding: 0 !important; border: 0; min-width: 0; font-size: 12px; }
-    #profile-records-list td:nth-child(1) { grid-column: 1; grid-row: 1; }
-    #profile-records-list td:nth-child(2) { grid-column: 2; grid-row: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #profile-records-list td:nth-child(3) { grid-column: 1; grid-row: 2; white-space: nowrap; }
-    #profile-records-list td:nth-child(4) { grid-column: 2; grid-row: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    #profile-records-list td:nth-child(5) { grid-column: 3 / 5; grid-row: 2; text-align: right; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
-    #profile-records-list td:nth-child(6) { grid-column: 3; grid-row: 1; text-align: right; }
-    #profile-records-list td:nth-child(7) { grid-column: 4; grid-row: 1; }
-    #profile-records-list .pr-best { font-size: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; margin-left: 4px; }
-    #profile-records-list .pr-best::before { content: '⭐'; font-size: 12px; }
-    table th { padding-left: 6px; padding-right: 6px; }
+    #main-header { position: relative; z-index: 30; }
+    body #main-header #user-menu-panel button { text-align: left; width: 100%; height: auto; justify-content: flex-start; padding: 10px 12px !important; font-size: 13px !important; border: 0 !important; background: transparent !important; border-radius: 8px; }
+    body #main-header #user-menu-panel { padding: 6px; }
+    #main-header > div { padding: 8px 12px; gap: 6px; flex-wrap: nowrap; align-items: center; justify-content: space-between; }
+    #main-header > div > div:first-child { flex: 0 0 auto; }
+    #main-header > div > div:first-child > div { display: none; }
+    #brand-home-btn { width: 34px; height: 34px; }
+    #main-header > div > div:last-child { display: flex; flex: 1 1 auto; min-width: 0; justify-content: flex-end; flex-wrap: nowrap; gap: 6px; }
+    #main-header button { height: 34px; min-width: 34px; padding: 0 8px !important; font-size: 12px !important; display: inline-flex; align-items: center; justify-content: center; white-space: nowrap; }
+    #main-header #user-auth-controls { flex: 0 0 auto; width: auto; }
+    #user-menu-wrap { display: flex !important; gap: 6px; flex-wrap: nowrap; width: auto; }
+    #main-header #my-profile-btn, #main-header #open-admin-btn, #main-header #theme-toggle, #main-header #header-logout-btn { font-size: 0 !important; }
+    #main-header #my-profile-btn::before { content: '👤'; font-size: 15px; }
+    #main-header #open-admin-btn::before { content: '🛡️'; font-size: 15px; }
+    #main-header #theme-toggle::before { content: '🌓'; font-size: 15px; }
+    #main-header #header-logout-btn { display: none; }
+    #main-header:has(#user-menu-wrap) #theme-toggle { display: none; }
+    .m-only { display: block; }
+    #user-menu-panel .m-only:first-of-type { border-top: 1px solid rgba(148,163,184,.3); }
+    #main-header #open-auth-modal-btn { font-size: 12px !important; }
+    #athlete-profile-section > div:first-child { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; justify-content: flex-start; }
+    #athlete-profile-section > div:first-child > div { display: contents; }
+    #athlete-profile-section > div:first-child button { flex: 0 0 auto; height: 34px; padding: 0 10px !important; font-size: 12px !important; white-space: nowrap; display: inline-flex; align-items: center; }
     #athlete-profile-section .lbl-long { display: none; }
-    #athlete-profile-section > div:first-child { justify-content: flex-start; gap: 6px; }
-    #athlete-profile-section > div:first-child > div { gap: 6px; }
-    #athlete-profile-section > div:first-child button { padding: 6px 9px !important; font-size: 12px !important; }
     #profile-theme-toggle { display: none !important; }
     #athlete-profile-section > div:nth-child(2) { padding: 14px !important; }
+    [class*="auto-cols-"] { grid-auto-flow: row !important; grid-template-columns: 1fr 1fr; overflow: visible !important; }
     [class*="auto-cols-"] > div { padding: 8px 10px !important; }
     [class*="auto-cols-"] > div > div:first-child { font-size: 10px !important; }
     [class*="auto-cols-"] > div > div:last-child { font-size: 15px !important; margin-top: 2px !important; }
     [class*="auto-cols-"] > div:nth-child(5) { display: none; }
     #profile-name { font-size: 20px; }
-    input[type=date] { width: 100%; min-width: 0; max-width: 100%; -webkit-appearance: none; appearance: none; text-align: left; min-height: 38px; }
-    html { font-size: 14.5px; }
-    #leaderboard-section { --lbbg: #ffffff; }
-    body.dark-chess #leaderboard-section { --lbbg: #312e2b; }
-    #leaderboard-section table { min-width: 620px; }
-    #leaderboard-section th:nth-child(1) { font-size: 9px; letter-spacing: 0; padding-left: 4px !important; padding-right: 4px !important; }
-    #leaderboard-section .overflow-auto { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
+    #profile-sports-grid { grid-template-columns: 1fr !important; }
+    #profile-records-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; --rcbg: #ffffff; }
+    body.dark-chess #profile-records-wrap { --rcbg: #312e2b; }
+    #profile-records-wrap table { min-width: 560px; }
+    #profile-records-wrap th { padding: 8px 8px !important; font-size: 10px; white-space: nowrap; }
+    #profile-records-list td { padding: 7px 8px !important; font-size: 12px; white-space: nowrap; }
+    #profile-records-wrap th:nth-child(1), #profile-records-list td:nth-child(1) { position: sticky; left: 0; z-index: 2; background-color: var(--rcbg); box-shadow: 4px 0 6px -4px rgba(0,0,0,.35); }
+    #profile-records-list tr:nth-child(even) td:nth-child(1) { background-color: color-mix(in srgb, var(--rcbg) 94%, #94a3b8); }
+    #profile-records-filter-tags { flex-wrap: nowrap !important; overflow-x: auto; }
+    #profile-records-filter-tags button { flex: 0 0 auto; }
+    .notif-panel { position: fixed !important; left: 8px; right: 8px; top: 54px !important; width: auto !important; }
+    #profile-theme-toggle { font-size: 0 !important; }
+    #theme-toggle::before, #profile-theme-toggle::before { content: '🌓'; font-size: 14px; }
+    [class*="auto-cols-"] { grid-auto-flow: row !important; grid-template-columns: 1fr 1fr; overflow: visible !important; }
+    #profile-sports-grid { grid-template-columns: 1fr !important; }
+-section .overflow-auto { overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; }
     #leaderboard-section .sm-col { display: table-cell; }
     #leaderboard-section .mobile-only { display: none; }
     #leaderboard-section th { padding: 8px 8px !important; font-size: 10px; white-space: nowrap; }
@@ -572,13 +573,13 @@
           <button id="edit-account-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-blue-500/35 bg-blue-500/10 hover:bg-blue-500/20 text-blue-700 transition cursor-pointer">
             ✏️ Upraviť<span class="lbl-long"> údaje účtu</span>
           </button>
-          <button id="profile-share-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
-            🔗 Zdieľať<span class="lbl-long"> profil</span>
+          <button id="profile-share-btn" type="button" title="Zdieľať profil" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
+            🔗<span class="lbl-long"> Zdieľať profil</span>
           </button>
-          <button id="profile-compare-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
-            ⚖️ Porovnať<span class="lbl-long"> účastníka</span>
+          <button id="profile-compare-btn" type="button" title="Porovnať účastníka" class="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">
+            ⚖️<span class="lbl-long"> Porovnať účastníka</span>
           </button>
-          <button id="profile-challenge-btn" type="button" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">⚔️ Vyzvať na súboj</button>
+          <button id="profile-challenge-btn" type="button" class="hidden px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-300/80 bg-white hover:bg-slate-100 transition cursor-pointer">⚔️ Vyzvať<span class="lbl-long"> na súboj</span></button>
           <button id="profile-friend-btn" type="button" class="px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer border-slate-300/80 bg-white hover:bg-slate-100">+ Pridať priateľa</button>
           <button id="profile-theme-toggle" type="button" class="px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-300/80 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">🌙 Tmavý režim</button>
         </div>
@@ -876,7 +877,7 @@
         <div id="profile-records-filter-tags" class="flex items-center gap-2 flex-wrap"><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Všetky disciplíny (12)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Biceps 1 minúta (2)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Drepy 1 minúta (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-[#2563eb] text-white border-[#2563eb]">Benchpress 1 minúta (1)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Bežecký pás 10 minút (5)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Bežecký pás 20 minút (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Bežecký pás 30 minút (4)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Beh na páse 1 hodina (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Plávanie 25m (25) (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Plávanie 50m (25) (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">Plávanie 50m (50) (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">HB Sequence (0)</button><button type="button" class="px-3 py-1 rounded-full text-xs font-semibold border transition cursor-pointer bg-white hover:bg-slate-50 text-slate-700 border-slate-200/90">HB Number Memory (0)</button></div>
 
         <!-- Tabuľka meraní -->
-        <div class="overflow-x-auto rounded-xl border border-slate-200/80">
+        <div id="profile-records-wrap" class="overflow-x-auto rounded-xl border border-slate-200/80">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b border-slate-200/80 text-[11px] font-bold uppercase tracking-[0.06em] text-slate-500 bg-[#f8fafc]/70">
@@ -2606,16 +2607,21 @@
         const box = document.getElementById('sport-chips');
         if (!box) return;
         box.innerHTML = '';
-        db.sports.forEach(sp => {
+        const sportCnt = {};
+        db.sports.forEach(sp => { sportCnt[sp.id] = db.athletes.filter(a => a.gender === selectedGender && getAthleteBestInSport(a, sp.id) !== null).length; });
+        const sportTotal = {};
+        db.sports.forEach(sp => { sportTotal[sp.id] = db.athletes.filter(a => getAthleteBestInSport(a, sp.id) !== null).length; });
+        const sortedSports = db.sports.filter(sp => sportTotal[sp.id] > 0 || sp.id === selectedSportId).sort((a, b) => (sportCnt[b.id] - sportCnt[a.id]) || String(a.name).localeCompare(String(b.name), 'sk'));
+        sortedSports.forEach(sp => {
           const active = sp.id === selectedSportId;
-          const color = safeColor(sp.accent);
-          const cnt = db.athletes.filter(a => a.gender === selectedGender && getAthleteBestInSport(a, sp.id) !== null).length;
+          const color = '#2563eb';
+          const cnt = sportCnt[sp.id];
           const b = document.createElement('button');
           b.type = 'button';
           b.className = 'shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition cursor-pointer inline-flex items-center gap-1.5 ' +
             (active ? 'text-white border-transparent shadow-sm' : 'bg-slate-500/10 hover:bg-slate-500/20 border-slate-500/15');
           if (active) b.style.backgroundColor = color;
-          b.innerHTML = `<span class="rounded-full" style="width:8px;height:8px;background:${active ? '#fff' : color}"></span>${escapeHtml(sp.name)}<span class="ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums ${active ? 'bg-white/25' : 'bg-slate-500/20'}" title="Počet účastníkov">${cnt}</span>`;
+          b.innerHTML = `${escapeHtml(sp.name)}<span class="ml-0.5 px-1.5 py-0.5 rounded-md text-[10px] font-bold tabular-nums ${active ? 'bg-white/25' : 'bg-slate-500/20'}" title="Počet účastníkov">${cnt}</span>`;
           b.addEventListener('click', () => {
             selectedSportId = sp.id;
             const sel = document.getElementById('header-sport-select');
@@ -3427,7 +3433,7 @@
 
         const friendBtn = document.getElementById('profile-friend-btn');
         if (friendBtn) {
-          friendBtn.textContent = athlete.isFriend ? '✓ Priateľ' : '+ Pridať priateľa';
+          friendBtn.textContent = athlete.isFriend ? '✓ Priateľ' : '+ Priateľ';
           friendBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold border transition cursor-pointer ' +
             (athlete.isFriend
               ? 'bg-amber-500/20 border-amber-500/40 text-amber-700'
@@ -3679,6 +3685,8 @@
                 <button type="button" role="menuitem" data-menu="notif" class="${itemCls}">🔔 Nastavenia upozornení</button>
                 <button type="button" role="menuitem" data-menu="invite" class="${itemCls}">📨 Pozvať kamaráta</button>
                 <button type="button" role="menuitem" data-menu="edit" class="${itemCls}">✏️ Upraviť údaje</button>
+                <button type="button" role="menuitem" data-menu="theme" class="${itemCls} m-only">🌓 Tmavý / svetlý režim</button>
+                <button type="button" role="menuitem" data-menu="logout" class="${itemCls} m-only">↩️ Odhlásiť sa</button>
               </div>
             </div>
           `;
@@ -3704,6 +3712,7 @@
             else if (a === 'notif') openNotifSettings();
             else if (a === 'invite') inviteFriend();
             else if (a === 'logout') doLogout();
+            else if (a === 'theme') { const tb = document.getElementById('theme-toggle'); if (tb) tb.click(); }
             else if (a === 'delete') doDeleteAccount();
           });
           if (!userMenuBound) {
