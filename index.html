@@ -327,8 +327,19 @@
     #theme-toggle::before, #profile-theme-toggle::before { content: '🌓'; font-size: 14px; }
     [class*="auto-cols-"] { grid-auto-flow: row !important; grid-template-columns: 1fr 1fr; overflow: visible !important; }
     #profile-sports-grid { grid-template-columns: 1fr !important; }
-    #profile-records-list td, #profile-records-list th { padding: 8px 6px !important; }
-    #profile-records-list td { white-space: normal !important; }
+    table:has(#profile-records-list) thead { display: none; }
+    table:has(#profile-records-list), #profile-records-list { display: block; width: 100%; }
+    #profile-records-list tr { display: grid !important; grid-template-columns: 96px 1fr auto auto; align-items: center; gap: 3px 8px; padding: 9px 10px; }
+    #profile-records-list td { display: block; padding: 0 !important; border: 0; min-width: 0; font-size: 12px; }
+    #profile-records-list td:nth-child(1) { grid-column: 1; grid-row: 1; }
+    #profile-records-list td:nth-child(2) { grid-column: 2; grid-row: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #profile-records-list td:nth-child(3) { grid-column: 1; grid-row: 2; white-space: nowrap; }
+    #profile-records-list td:nth-child(4) { grid-column: 2; grid-row: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #profile-records-list td:nth-child(5) { grid-column: 3 / 5; grid-row: 2; text-align: right; white-space: nowrap; max-width: 110px; overflow: hidden; text-overflow: ellipsis; }
+    #profile-records-list td:nth-child(6) { grid-column: 3; grid-row: 1; text-align: right; }
+    #profile-records-list td:nth-child(7) { grid-column: 4; grid-row: 1; }
+    #profile-records-list .pr-best { font-size: 0 !important; padding: 0 !important; background: none !important; border: 0 !important; margin-left: 4px; }
+    #profile-records-list .pr-best::before { content: '⭐'; font-size: 12px; }
     table th { padding-left: 6px; padding-right: 6px; }
     #athlete-profile-section .lbl-long { display: none; }
     #athlete-profile-section > div:first-child { justify-content: flex-start; gap: 6px; }
@@ -3578,7 +3589,7 @@
           tr.innerHTML = `
             <td class="py-3 px-3.5 font-bold text-slate-900 whitespace-nowrap">${escapeHtml(rec.date || '—')}</td>
             <td class="py-3 px-3.5 font-semibold text-slate-800">${escapeHtml(sp ? sp.name : rec.sportId)}</td>
-            <td class="py-3 px-3.5 font-extrabold text-[#2563eb] whitespace-nowrap">${escapeHtml(formatVal(rec.value, sp ? sp.unit : ''))}${(prInfo[rec.id] && prInfo[rec.id].isBest) ? '<span class="pr-badge" title="Najlepší výkon v tejto disciplíne">⭐ osobný rekord</span>' : ((prInfo[rec.id] && prInfo[rec.id].wasPr) ? '<span class="pr-badge" title="V tom čase nový osobný rekord">▲ PR</span>' : '')}</td>
+            <td class="py-3 px-3.5 font-extrabold text-[#2563eb] whitespace-nowrap">${escapeHtml(formatVal(rec.value, sp ? sp.unit : ''))}${(prInfo[rec.id] && prInfo[rec.id].isBest) ? '<span class="pr-badge pr-best" title="Najlepší výkon v tejto disciplíne">⭐ osobný rekord</span>' : ((prInfo[rec.id] && prInfo[rec.id].wasPr) ? '<span class="pr-badge" title="V tom čase nový osobný rekord">▲ PR</span>' : '')}</td>
             <td class="py-3 px-3.5 font-medium text-slate-700 whitespace-nowrap">${getFlag(recCountry)} ${escapeHtml(recCountry)}</td>
             <td class="py-3 px-3.5 text-slate-500">${escapeHtml(rec.city || '—')}</td>
             <td class="py-3 px-3.5 text-center">
