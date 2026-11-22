@@ -297,8 +297,8 @@
     body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
     #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
     .m-only { display: none; }
-    #site-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
-    @media (max-width: 640px) { #site-stats { font-size: 11.5px; gap: 2px 12px; } }
+    #site-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px; }
+    #site-stats + div { margin-bottom: 56px; }
     #help-fab { position: fixed; right: 16px; bottom: 16px; z-index: 40; width: 46px; height: 46px; border-radius: 9999px; background: #2563eb; color: #fff; font-weight: 800; font-size: 20px; border: 0; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
     #help-fab:hover { background: #1d4ed8; }
     #help-panel { position: fixed; right: 16px; bottom: 72px; z-index: 40; width: 380px; max-width: calc(100vw - 32px); max-height: min(72vh, 620px); display: flex; flex-direction: column; background: #fff; color: #0f172a; border: 1px solid rgba(148,163,184,.5); border-radius: 16px; box-shadow: 0 14px 40px rgba(0,0,0,.3); }
@@ -453,7 +453,6 @@
   <!-- Hlavný obsah -->
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
     <!-- Ovládací panel pre rebríček -->
-    <div id="site-stats" class="flex flex-wrap items-center justify-center gap-x-5 gap-y-1 text-xs sm:text-sm font-semibold opacity-80" aria-label="Štatistiky stránky"></div>
     <section id="controls-panel" class="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm space-y-4">
       <div id="sport-chips" class="flex gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-1"></div>
 
@@ -1442,7 +1441,8 @@
   </div>
 
   <!-- Toast notifikácia -->
-  <div class="text-center text-xs opacity-60 py-6"><button type="button" data-invite class="underline cursor-pointer" style="margin-right:1rem">📨 Pozvať kamaráta</button><button type="button" data-open-privacy class="underline cursor-pointer">Ochrana osobných údajov</button></div>
+  <div id="site-stats" class="text-center text-xs opacity-70 pt-6 font-semibold" aria-label="Štatistiky stránky"></div>
+  <div class="text-center text-xs opacity-60 pb-6 pt-2"><button type="button" data-invite class="underline cursor-pointer" style="margin-right:1rem">📨 Pozvať kamaráta</button><button type="button" data-open-privacy class="underline cursor-pointer">Ochrana osobných údajov</button></div>
 
   <div id="app-toast" style="position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:calc(100% - 32px);max-width:420px;z-index:100;text-align:center;" class="rounded-xl bg-slate-900 text-white px-4 py-3 text-xs sm:text-sm font-medium shadow-xl items-center gap-3 hidden">
     <span id="app-toast-text" class="flex-1">Skopíroval som posledné vložené údaje (disciplína, dátum, krajina, mesto).</span>
