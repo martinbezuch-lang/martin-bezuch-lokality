@@ -297,6 +297,7 @@
     body.dark-chess #main-header button:not(#brand-home-btn):hover { background-color: #45413c !important; }
     #main-header span.bg-blue-500\/10 { background: rgba(100,116,139,.12) !important; color: inherit !important; opacity: .8; }
     .m-only { display: none; }
+    #profile-progress-chart, #profile-age-percentile-chart { max-width: 600px; }
     #site-stats { display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 16px; }
     #site-stats + div { margin-bottom: 56px; }
     #help-fab { position: fixed; right: 16px; bottom: 16px; z-index: 40; width: 46px; height: 46px; border-radius: 9999px; background: #2563eb; color: #fff; font-weight: 800; font-size: 20px; border: 0; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.35); }
@@ -882,6 +883,7 @@
               </span>
             </div>
             <input id="rec-video-input" type="url" placeholder="https://youtube.com/..." class="w-full px-3 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm outline-none">
+            <label class="mt-1.5 inline-flex items-center gap-2 text-xs cursor-pointer"><input id="rec-video-public" type="checkbox" checked> Zverejniť video (inak ho uvidíš len ty a admin)</label>
           </div>
           <div class="sm:col-span-2 lg:col-span-6 flex justify-end pt-1">
             <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold transition cursor-pointer">
@@ -993,6 +995,13 @@
       <input id="fb-website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;height:0;opacity:0">
       <div class="flex justify-end"><button id="fb-send" type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Odoslať</button></div>
     </form>
+  </div>
+
+  <div id="history-modal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6">
+    <div class="max-w-2xl w-full max-h-[88vh] flex flex-col rounded-2xl border border-slate-200/20 bg-white text-slate-900 shadow-2xl">
+      <div class="flex items-center justify-between p-4 sm:p-5 pb-2"><h3 id="history-title" class="text-lg font-extrabold">🕘 História zmien</h3><button id="close-history-btn" type="button" class="w-8 h-8 rounded-lg bg-slate-500/10 font-bold cursor-pointer">✕</button></div>
+      <div id="history-body" class="p-4 sm:p-5 pt-2 overflow-y-auto space-y-2 text-xs"></div>
+    </div>
   </div>
 
   <div id="lists-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-3 sm:p-6">
@@ -1117,6 +1126,7 @@
           </div>
         </div>
         
+        <label class="flex items-start gap-2 text-xs cursor-pointer pt-1"><input id="edit-acc-video-default" type="checkbox" class="mt-0.5" checked><span><strong>Nové videá zverejňovať predvolene</strong><br><span class="opacity-70">Pri každom výsledku to môžeš zmeniť zvlášť. Skryté video uvidíš len ty a admin.</span></span></label>
         <div class="space-y-2 pt-1">
           <div class="text-xs font-semibold">Odkazy na tvoje siete (nepovinné, zobrazia sa v profile)</div>
           <input id="edit-soc-youtube" type="text" maxlength="300" placeholder="YouTube – odkaz na kanál" class="w-full px-3 py-2 rounded-xl border text-sm">
@@ -1176,6 +1186,7 @@
           <div>
             <label for="edit-rec-video" class="block text-xs font-semibold mb-1">Odkaz na video (YouTube)</label>
             <input id="edit-rec-video" type="url" placeholder="https://youtube.com/..." class="w-full px-3 py-2 rounded-xl border text-sm">
+            <label class="mt-1.5 inline-flex items-center gap-2 text-xs cursor-pointer"><input id="edit-rec-video-public" type="checkbox" checked> Video je verejné (sivé tlačidlo = skryté pred ostatnými)</label>
           </div>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
@@ -1758,10 +1769,10 @@
       const AUTH_ERROR_IN_URL = (URL_PARAMS.match(/(^|&)error_description=([^&]*)/) || [])[2] || '';
       const sb = window.supabase.createClient('https://khduswpbhozkqjxnqufk.supabase.co', 'sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8');
 
-      async function fetchAllRows(table, orderCol) {
+      async function fetchAllRows(table, orderCol, cols) {
         const out = [];
         for (let from = 0; ; from += 1000) {
-          const { data, error } = await sb.from(table).select('*').order(orderCol).range(from, from + 999);
+          const { data, error } = await sb.from(table).select(cols || '*').order(orderCol).range(from, from + 999);
           if (error) throw error;
           out.push(...data);
           if (data.length < 1000) break;
@@ -1774,8 +1785,17 @@
           const [sp, pr, rc] = await Promise.all([
             fetchAllRows('sports', 'sort_order'),
             fetchAllRows('public_profiles', 'created_at'),
-            fetchAllRows('records', 'created_at')
+            fetchAllRows('records', 'created_at', 'id,user_id,sport_id,value,record_date,country,city,created_at,verified,video_public').catch(() => fetchAllRows('records', 'created_at', 'id,user_id,sport_id,value,record_date,country,city,created_at'))
           ]);
+          // videá: verejné + vlastné + (admin) všetky; ak funkcia ešte neexistuje, načíta sa starým spôsobom
+          const vmap = new Map();
+          try {
+            const { data: vd, error: ve } = await sb.rpc('get_record_videos');
+            if (ve) throw ve;
+            (vd || []).forEach(v => vmap.set(String(v.record_id), v));
+          } catch (e) {
+            try { const old = await fetchAllRows('records', 'created_at', 'id,video_url'); old.forEach(v => { if (v.video_url) vmap.set(String(v.id), { video_url: v.video_url, video_public: true }); }); } catch (e2) {}
+          }
           const byId = new Map();
           const athletes = pr.map(p => {
             const a = { id: p.id, name: p.display_name, country: p.country || '', gender: p.gender || 'M',
@@ -1787,7 +1807,7 @@
           rc.forEach(r => {
             const a = byId.get(r.user_id);
             if (a) a.records.push({ id: r.id, sportId: r.sport_id, value: Number(r.value), date: r.record_date,
-              country: r.country || '', city: r.city || '', videoUrl: r.video_url || '', createdAt: r.created_at || '' });
+              country: r.country || '', city: r.city || '', videoUrl: (vmap.get(String(r.id)) || {}).video_url || '', videoPublic: (vmap.get(String(r.id)) || {}).video_public !== false, createdAt: r.created_at || '' });
           });
           db = {
             sports: sp.map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent })),
@@ -2002,6 +2022,33 @@
         document.getElementById('fb-message').value = '';
         toggleHelp(false);
         showToast('Ďakujeme! Správu sme dostali.');
+      }
+
+      // ===== Admin: história zmien používateľa =====
+      const HIST_LABELS = { display_name: 'Meno', country: 'Krajina', gender: 'Pohlavie', birth_year: 'Rok narodenia', weight_kg: 'Váha', height_cm: 'Výška', show_body_data: 'Zobrazenie údajov', is_celebrity: 'Celebrita', celebrity_type: 'Typ celebrity', is_trusted: 'Dôveryhodný', video_default_public: 'Videá predvolene verejné', social_youtube: 'YouTube', social_instagram: 'Instagram', social_facebook: 'Facebook', social_tiktok: 'TikTok', value: 'Výsledok', record_date: 'Dátum výkonu', sport_id: 'Disciplína', city: 'Mesto', video_url: 'Video', video_public: 'Video verejné', verified: 'Overené', verified_at: 'Overené kedy', verified_by: 'Overil' };
+      async function openHistory(userId) {
+        const ath = db.athletes.find(a => String(a.id) === String(userId));
+        document.getElementById('history-title').textContent = '🕘 História zmien: ' + (ath ? ath.name : '');
+        const body = document.getElementById('history-body');
+        body.innerHTML = '<div class="opacity-70">Načítavam…</div>';
+        openModal('history-modal');
+        const { data, error } = await sb.rpc('admin_user_history', { p_user: userId });
+        if (error) { body.innerHTML = '<div class="text-rose-600">Nepodarilo sa načítať (spustil si 18_video_sukromie_historia.sql?): ' + escapeHtml(error.message) + '</div>'; return; }
+        const val = (k, v) => v === null || v === undefined || v === '' ? '—' : (k === 'sport_id' ? ((getSportById(v) || {}).name || v) : (typeof v === 'boolean' ? (v ? 'áno' : 'nie') : String(v)));
+        const skip = new Set(['id', 'user_id', 'created_at']);
+        body.innerHTML = (data || []).length ? data.map(h => {
+          const when = new Date(h.at).toLocaleString('sk-SK');
+          const what = h.table_name === 'profiles' ? 'Profil' : 'Výsledok';
+          let det = '';
+          if (h.action === 'update') {
+            det = Object.keys(h.new_data || {}).filter(k => !skip.has(k)).map(k => `<div>${escapeHtml(HIST_LABELS[k] || k)}: <span class="opacity-60">${escapeHtml(val(k, (h.old_data || {})[k]))}</span> → <strong>${escapeHtml(val(k, h.new_data[k]))}</strong></div>`).join('');
+          } else {
+            const d = h.action === 'insert' ? h.new_data : h.old_data;
+            det = `<div>${escapeHtml(val('sport_id', d.sport_id))}: <strong>${escapeHtml(String(d.value))}</strong> (${escapeHtml(d.record_date || '')})</div>`;
+          }
+          const act = { insert: 'pridané', update: 'upravené', delete: 'zmazané' }[h.action] || h.action;
+          return `<div class="p-2.5 rounded-xl border"><div class="flex justify-between gap-2 opacity-70"><span>${what} ${act} · ${escapeHtml(h.actor_name || '')}</span><span>${escapeHtml(when)}</span></div>${det}</div>`;
+        }).join('') : '<div class="opacity-70">Zatiaľ žiadne zaznamenané zmeny (história sa zapisuje od spustenia SQL).</div>';
       }
 
       // ===== Typy celebrít =====
@@ -2798,7 +2845,7 @@
         if (ss) {
           const nUsers = db.athletes.length;
           let nRec = 0, nVid = 0;
-          db.athletes.forEach(a => (a.records || []).forEach(x => { nRec++; if (x.videoUrl) nVid++; }));
+          db.athletes.forEach(a => (a.records || []).forEach(x => { nRec++; if (x.videoUrl && x.videoPublic !== false) nVid++; }));
           const f = (n) => n.toLocaleString('sk-SK');
           ss.innerHTML = `<span title="Registrovaní športovci">👥 ${f(nUsers)} ${slPlural(nUsers, 'používateľ', 'používatelia', 'používateľov')}</span><span title="Všetky zapísané výsledky">🏋️ ${f(nRec)} ${slPlural(nRec, 'meranie', 'merania', 'meraní')}</span><span title="Merania s priloženým videom">🎥 ${f(nVid)} ${slPlural(nVid, 'meranie s videom', 'merania s videom', 'meraní s videom')}</span>`;
         }
@@ -3235,7 +3282,7 @@
                 ${rowPct !== null ? `<span class="mobile-only px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums ${pctClass(rowPct)}" title="Percentil">${escapeHtml(rowPctText)}</span>` : ''}
                 ${isRecentBest ? '<span class="text-emerald-600 text-xs font-bold" title="Najlepší výkon z posledných 90 dní">▲</span>' : ''}
                 ${videoUrl
-                  ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="Prehrať video záznam" class="w-7 h-6 rounded-md bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
+                  ? `<button type="button" data-row-video="${escapeHtml(ath.id)}" title="${entry.bestRecord.videoPublic === false ? 'Video je skryté pred verejnosťou (vidíš ho len ty a admin)' : 'Prehrať video záznam'}" class="w-7 h-6 rounded-md ${entry.bestRecord.videoPublic === false ? 'bg-slate-500 hover:bg-slate-600' : 'bg-red-600 hover:bg-red-700'} text-white text-[11px] font-bold inline-flex items-center justify-center shadow-xs transition cursor-pointer">▶</button>`
                   : ''}
               </div>
             </td>
@@ -3682,6 +3729,7 @@
         document.getElementById('edit-acc-birth-year').value = athlete.birthYear || '';
         document.getElementById('edit-acc-weight').value = athlete.weightKg ?? '';
         document.getElementById('edit-acc-height').value = athlete.heightCm ?? '';
+        document.getElementById('edit-acc-video-default').checked = !(ownProfileRow && ownProfileRow.video_default_public === false);
         SOCIALS.forEach(x => { document.getElementById('edit-soc-' + x.key).value = athlete['social' + x.key[0].toUpperCase() + x.key.slice(1)] || ''; });
 
         const m = document.getElementById('edit-account-modal');
@@ -3709,6 +3757,7 @@
         document.getElementById('edit-rec-country').value = record.country || athlete.country || 'Slovensko';
         document.getElementById('edit-rec-city').value = record.city || '';
         document.getElementById('edit-rec-video').value = record.videoUrl || '';
+        document.getElementById('edit-rec-video-public').checked = record.videoPublic !== false;
 
         const rdb = document.getElementById('req-del-rec-btn');
         if (rdb) {
@@ -3883,7 +3932,7 @@
         banner.innerHTML = `
           <span class="font-bold text-slate-900">${escapeHtml(sport.name)}:</span>
           ${bestRecord && bestRecord.videoUrl
-            ? `<button type="button" id="banner-play-record-btn" class="px-3 py-1.5 rounded-lg bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition cursor-pointer">▶ Prehrať rekord</button>`
+            ? `<button type="button" id="banner-play-record-btn" title="${bestRecord.videoPublic === false ? 'Video je skryté pred verejnosťou' : ''}" class="px-3 py-1.5 rounded-lg ${bestRecord.videoPublic === false ? 'bg-slate-500 hover:bg-slate-600' : 'bg-[#dc2626] hover:bg-[#b91c1c]'} text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs transition cursor-pointer">▶ Prehrať rekord</button>`
             : ''}
           <span class="text-slate-700">Rekord: <strong class="font-bold text-[#2563eb]">${best !== null ? escapeHtml(formatVal(best, sport.unit)) : '—'}</strong></span>
           <span class="text-slate-700">Percentil vo svete: <strong class="font-bold text-slate-900">${wPct !== null ? wPct.toFixed(1) : '—'}</strong></span>
@@ -3911,6 +3960,7 @@
         document.getElementById('profile-country-pill').textContent = `${getFlag(athlete.country)} ${athlete.country}`;
         document.getElementById('profile-gender-pill').textContent = athlete.gender === 'Z' ? '♀ Žena' : '♂ Muž';
         renderSocialLinks(athlete);
+        { const rvp = document.getElementById('rec-video-public'); if (rvp && !document.getElementById('rec-video-input').value) rvp.checked = !(ownProfileRow && ownProfileRow.video_default_public === false); }
         document.getElementById('profile-celeb-pill').classList.toggle('hidden', !athlete.isCelebrity);
         document.getElementById('profile-celeb-pill').textContent = '⭐ Známa osobnosť' + (athlete.celebrityType && celebKindLabel(athlete.celebrityType) ? ' · ' + celebKindLabel(athlete.celebrityType) : '');
 
@@ -4112,7 +4162,7 @@
             <td class="py-3 px-3.5 text-slate-500">${escapeHtml(rec.city || '—')}</td>
             <td class="py-3 px-3.5 text-center">
               ${rec.videoUrl
-                ? `<button type="button" data-play-rec="${escapeHtml(rec.id)}" title="Prehrať video" class="w-8 h-6 rounded-md bg-[#dc2626] hover:bg-[#b91c1c] text-white text-[11px] font-bold inline-flex items-center justify-center shadow-2xs transition cursor-pointer">▶</button>`
+                ? `<button type="button" data-play-rec="${escapeHtml(rec.id)}" title="${rec.videoPublic === false ? 'Video je skryté pred verejnosťou (vidíš ho len ty a admin)' : 'Video je verejné'}" class="w-8 h-6 rounded-md ${rec.videoPublic === false ? 'bg-slate-500 hover:bg-slate-600' : 'bg-[#dc2626] hover:bg-[#b91c1c]'} text-white text-[11px] font-bold inline-flex items-center justify-center shadow-2xs transition cursor-pointer">▶</button>`
                 : '<span class="text-slate-300">—</span>'}
             </td>
             ${isOwnProfile
@@ -4404,7 +4454,7 @@
             <div><strong>${escapeHtml(p.display_name)}</strong> · ${getFlag(p.country)} ${escapeHtml(p.country || '—')} ${p.is_celebrity ? '⭐' : ''}
               ${p.role !== 'user' ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-blue-500/15 text-blue-700 font-semibold">${escapeHtml(roleLabel(p.role))}</span>` : ''}
               ${p.consent_at ? '' : '<span class="ml-1 opacity-60">(profil nedokončený)</span>'}
-              ${invCount[p.id] ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/15 font-semibold">pozval: ${invCount[p.id]}</span>` : ''}
+              <button type="button" data-adm-hist="${escapeHtml(p.id)}" class="ml-1 px-1.5 py-0.5 rounded bg-slate-500/15 font-semibold cursor-pointer" title="História zmien">🕘 história</button>${invCount[p.id] ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-emerald-500/15 font-semibold">pozval: ${invCount[p.id]}</span>` : ''}
               ${invitedBy[p.id] ? `<span class="ml-1 opacity-60">pozval ho: ${escapeHtml(nameOf(invitedBy[p.id]))}</span>` : ''}</div>
             <div class="flex items-center gap-1.5">
               <button type="button" data-adm-celeb="${escapeHtml(p.id)}" data-flag="${p.is_celebrity ? '0' : '1'}" class="${btnBase}bg-purple-500/15 text-purple-700">${p.is_celebrity ? 'Zrušiť ★' : 'Označiť ★'}</button>
@@ -4428,6 +4478,8 @@
           </div>`).join('') : '<div class="text-xs opacity-70 py-4">Žiadne čakajúce žiadosti o zmazanie.</div>';
 
         renderAdminRecords();
+
+        document.querySelectorAll('[data-adm-hist]').forEach(b => b.addEventListener('click', () => openHistory(b.getAttribute('data-adm-hist'))));
 
         (function renderFeedback() {
           const box = document.getElementById('admin-panel-feedback');
@@ -4913,7 +4965,9 @@
             weight_kg: weightRaw !== '' ? Number(weightRaw) : null,
             height_cm: heightRaw !== '' ? Number(heightRaw) : null
           };
-          let { error } = await sb.from('profiles').update(Object.assign({}, baseUpd, soc)).eq('id', user.id);
+          const vdef = { video_default_public: document.getElementById('edit-acc-video-default').checked };
+          let { error } = await sb.from('profiles').update(Object.assign({}, baseUpd, soc, vdef)).eq('id', user.id);
+          if (error && /video_default/.test(String(error.message || ''))) ({ error } = await sb.from('profiles').update(Object.assign({}, baseUpd, soc)).eq('id', user.id));
           if (error && /social_/.test(String(error.message || ''))) ({ error } = await sb.from('profiles').update(baseUpd).eq('id', user.id));
           if (error) { showToast('Uloženie zlyhalo: ' + error.message); return; }
           await refreshOwn();
@@ -4957,9 +5011,9 @@
           if (!date) { showToast('Zadaj dátum merania.'); return; }
           if (date > todayIso()) { showToast('Dátum merania nemôže byť v budúcnosti.'); return; }
           if (videoUrl && (!/^https:\/\//i.test(videoUrl) || videoUrl.length > 300)) { showToast('Odkaz na video musí začínať https:// (max. 300 znakov).'); return; }
-          const { error } = await sb.from('records').update({
-            sport_id: sportId, value, record_date: date, country, city, video_url: videoUrl
-          }).eq('id', recId).eq('user_id', user.id);
+          const updBase = { sport_id: sportId, value, record_date: date, country, city, video_url: videoUrl };
+          let { error } = await sb.from('records').update(Object.assign({}, updBase, { video_public: document.getElementById('edit-rec-video-public').checked })).eq('id', recId).eq('user_id', user.id);
+          if (error && /video_public/.test(String(error.message || ''))) ({ error } = await sb.from('records').update(updBase).eq('id', recId).eq('user_id', user.id));
           if (error) { showToast('Uloženie zlyhalo: ' + error.message); return; }
           await reloadData();
           closeEditRecordModal();
@@ -5017,6 +5071,7 @@
 
         document.getElementById('adm-rec-sport').addEventListener('change', (e) => { admRecSport = e.target.value; renderAdminRecords(); });
         document.getElementById('adm-rec-susp').addEventListener('change', (e) => { admRecSusp = e.target.checked; renderAdminRecords(); });
+        document.getElementById('close-history-btn').addEventListener('click', () => closeModal('history-modal'));
         document.getElementById('help-fab').addEventListener('click', (e) => { e.stopPropagation(); toggleHelp(); });
         document.getElementById('help-close').addEventListener('click', () => toggleHelp(false));
         document.getElementById('help-panel').addEventListener('click', (e) => e.stopPropagation());
@@ -5131,12 +5186,13 @@
           if (!(value > 0)) { showToast('Zadaj hodnotu väčšiu ako 0.'); return; }
           if (!date) { showToast('Zadaj dátum merania.'); return; }
           if (videoUrl && (!/^https:\/\//i.test(videoUrl) || videoUrl.length > 300)) { showToast('Odkaz na video musí začínať https:// (max. 300 znakov).'); return; }
-          const { data: ins, error } = await sb.from('records').insert({
-            user_id: user.id, sport_id: sportId, value, record_date: date, country, city, video_url: videoUrl
-          }).select().single();
+          const insBase = { user_id: user.id, sport_id: sportId, value, record_date: date, country, city, video_url: videoUrl };
+          let { data: ins, error } = await sb.from('records').insert(Object.assign({}, insBase, { video_public: document.getElementById('rec-video-public').checked })).select('id').single();
+          if (error && /video_public/.test(String(error.message || ''))) ({ data: ins, error } = await sb.from('records').insert(insBase).select('id').single());
           if (error) { showToast('Výkon sa nepodarilo uložiť: ' + error.message); return; }
           saveLastInsertedRecord(user.id, { id: ins.id, sportId, value, date, country, city, videoUrl });
           form.reset();
+          const rvp = document.getElementById('rec-video-public'); if (rvp) rvp.checked = !(ownProfileRow && ownProfileRow.video_default_public === false);
           await reloadData();
           refreshAllViews();
           showToast('Výkon bol uložený.');
