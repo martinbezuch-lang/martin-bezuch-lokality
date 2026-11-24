@@ -944,6 +944,32 @@
 
   <!-- Modálne okno úpravy používateľského konta -->
   <!-- Pozvať kamaráta -->
+  <div id="welcome-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+    <div class="max-w-md w-full max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-3">
+      <div class="flex items-start justify-between gap-3">
+        <h3 class="text-lg font-extrabold leading-tight">👋 Vitaj na Porovnaj sa</h3>
+        <button id="welcome-x" type="button" class="w-8 h-8 shrink-0 rounded-lg bg-slate-500/10 font-bold cursor-pointer" aria-label="Zavrieť">✕</button>
+      </div>
+      <div id="welcome-video" class="hidden"></div>
+      <p class="text-sm">Porovnaj sa ti ukáže, <strong>ako si na tom oproti ľuďom ako ty</strong>: rovnakého veku, pohlavia a krajiny. Telo aj hlava.</p>
+      <ul class="text-sm space-y-1.5">
+        <li>🏋️ Zapíš si výkony a sleduj, ako sa zlepšuješ.</li>
+        <li>📊 Zisti svoj percentil medzi rovesníkmi.</li>
+        <li>🤝 Pridaj si priateľov a porovnávajte sa.</li>
+        <li>⚔️ Vyzvi kamaráta na súboj.</li>
+        <li>🎥 Ku výkonu môžeš pridať video.</li>
+      </ul>
+      <p class="text-xs opacity-70">Registrácia je zadarmo. Tvoj e-mail nikto nevidí.</p>
+      <div class="flex gap-2 justify-end">
+        <button id="welcome-close" type="button" class="px-3 py-2 rounded-xl text-xs font-semibold border border-slate-300/70 cursor-pointer">Pozrieť si stránku</button>
+        <button id="welcome-register" type="button" class="px-3 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white cursor-pointer">Registrovať sa</button>
+      </div>
+      <label class="flex items-center gap-2 text-xs opacity-80 cursor-pointer select-none">
+        <input id="welcome-never" type="checkbox" class="w-3.5 h-3.5 cursor-pointer"> Nabudúce nezobrazovať
+      </label>
+    </div>
+  </div>
+
   <div id="invite-welcome-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-xs p-4">
     <div class="max-w-sm w-full rounded-2xl border border-slate-200/20 bg-white text-slate-900 p-5 sm:p-6 shadow-2xl space-y-3">
       <h3 class="text-lg font-extrabold">👋 Vitaj!</h3>
@@ -5278,6 +5304,37 @@
 
         }
 
+
+      // ---------- Uvítacie okno ----------
+      // Sem vlož odkaz na YouTube video (napr. 'https://youtu.be/XXXXXXXXXXX'). Prázdne = okno bez videa.
+      const WELCOME_VIDEO_URL = '';
+      function maybeShowWelcome() {
+        try {
+          let off = null; try { off = localStorage.getItem('porovnajsa_welcome_off'); } catch (e) {}
+          if (off === '1') return;
+          if (currentUserId) return;
+          if (['invite-welcome-modal', 'reset-modal', 'auth-modal'].some(id => { const m = document.getElementById(id); return m && !m.classList.contains('hidden'); })) return;
+          const yt = WELCOME_VIDEO_URL ? parseYoutubeUrl(WELCOME_VIDEO_URL) : null;
+          const vbox = document.getElementById('welcome-video');
+          if (yt && vbox) {
+            vbox.innerHTML = '<div style="position:relative;padding-top:56.25%"><iframe src="https://www.youtube-nocookie.com/embed/' + yt.id + '?rel=0' + (yt.start ? '&start=' + yt.start : '') + '" title="Ako funguje Porovnaj sa" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:12px" allow="accelerometer; encrypted-media; picture-in-picture" allowfullscreen loading="lazy"></iframe></div>';
+            vbox.classList.remove('hidden');
+          }
+          const done = () => {
+            const cb = document.getElementById('welcome-never');
+            if (cb && cb.checked) { try { localStorage.setItem('porovnajsa_welcome_off', '1'); } catch (e) {} }
+            if (vbox) vbox.innerHTML = '';
+            closeModal('welcome-modal');
+          };
+          document.getElementById('welcome-x').onclick = done;
+          document.getElementById('welcome-close').onclick = done;
+          document.getElementById('welcome-register').onclick = () => {
+            done();
+            const b = document.getElementById('open-auth-modal-btn'); if (b) b.click();
+          };
+          openModal('welcome-modal');
+        } catch (e) { /* uvítanie je doplnok */ }
+      }
       window.addEventListener('DOMContentLoaded', async () => {
         try {
           db = loadDb();
@@ -5317,6 +5374,7 @@
           } else if (AUTH_ERROR_IN_URL) {
             showToast('Odkaz z e-mailu je neplatný alebo vypršal. Pošli si nový cez „Zabudnuté heslo“.');
           }
+          if (!RECOVERY_IN_URL && !AUTH_ERROR_IN_URL) setTimeout(maybeShowWelcome, 700);
         } catch (err) {
           console.error('Chyba pri štarte aplikácie:', err);
           showToast('Nastala chyba pri načítaní aplikácie.');
