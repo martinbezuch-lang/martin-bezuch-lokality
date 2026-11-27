@@ -32,6 +32,10 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .logo b{display:block;font-weight:800;font-size:17px;line-height:1.2}.logo small{display:block;font-size:12px;color:var(--mut);font-weight:600}
 .hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 @media(max-width:520px){.logo>span:last-child,#allT{display:none}}
+.thtop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}.thtop .back{margin:0}
+.qrbtn{cursor:pointer;font-family:inherit;color:var(--ink)}
+.qr{background:#fff;border-radius:16px;padding:10px;width:min(70vw,260px);aspect-ratio:1;margin:8px auto;display:grid;place-items:center;color:#0f1a2b}.qr svg{width:100%;height:100%;display:block}
+.qrbox{text-align:center}.qrurl{font-weight:600;overflow-wrap:anywhere;margin:6px 0 14px!important}
 .langsel{appearance:auto;font-family:inherit;color:var(--ink);cursor:pointer;max-width:9.5em}
 .pill{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;text-decoration:none}
 .save{font-weight:600;margin:0}.save a{color:#fff}
@@ -522,9 +526,10 @@ function fresh(){const o=document.getElementById('arena'),n=document.createEleme
 
 function home(){cleanup();const best=getBest(),VT=visibleTests();const n=VT.filter(t=>best[t.id]!=null).length;
  app.innerHTML=`<section class="band hero"><div class=wrap><h1>${tx('title')}</h1><p class=lead>${tx('sub').replace('{n}',VT.length)}</p>
- <div class=stats><div class=chip><b>${n}/${VT.length}</b>${tx('tested')}</div>${VT.length?`<a class=btn href="#${VT[R(0,VT.length-1)].id}">${tx('random')}</a>`:''}${isStaff()?`<a class="btn ghost" href="#dohlad">${ps('homeBtn')}</a>`:''}</div></div></section>
+ <div class=stats><div class=chip><b>${n}/${VT.length}</b>${tx('tested')}</div>${VT.length?`<a class=btn href="#${VT[R(0,VT.length-1)].id}">${tx('random')}</a>`:''}<button class="btn ghost" type=button id=qrh>📱 ${qs('btn')}</button>${isStaff()?`<a class="btn ghost" href="#dohlad">${ps('homeBtn')}</a>`:''}</div></div></section>
  <section class=band><div class="wrap grid">${VT.map(t=>`<a class=card href="#${t.id}"><span class=glyph style="--g:${t.col}">${t.g}</span><span class=ct><b>${L(t.name)}</b><small>${first(t)}</small><em>${best[t.id]!=null?tx('best')+': '+fmt(t,best[t.id]):tx('none')}</em></span></a>`).join('')}</div>
  <div class="wrap tools"><button class="btn line" id=reset>${tx('reset')}</button></div></section>`;
+ document.getElementById('qrh').onclick=()=>qrModal(null);
  const rb=document.getElementById('reset');let armed=false;
  rb.onclick=()=>{if(!armed){armed=true;rb.textContent=tx('sure');return}store.set('best',{});store.set('hist',{});home()}}
 
@@ -560,10 +565,10 @@ function stats(t){const el=document.getElementById('stats');if(!el)return;const 
  const ai=el.querySelector('#age');if(ai)ai.onchange=()=>{const v=parseInt(ai.value,10);store.set('age',v>0&&v<120?v:null);stats(t)}}
 
 function openTest(t){cleanup();
- app.innerHTML=`<section class="band testhead"><div class=wrap><a href="#" class=back>← ${tx('back')}</a><h1>${L(t.name)}</h1><p>${L(t.desc)}</p></div></section>
+ app.innerHTML=`<section class="band testhead"><div class=wrap><div class=thtop><a href="#" class=back>← ${tx('back')}</a><button class="pill qrbtn" type=button id=qrb>📱 ${qs('btn')}</button></div><h1>${L(t.name)}</h1><p>${L(t.desc)}</p></div></section>
  <div id=arena class=arena><div class=intro><div class="glyph big">${t.g}</div><button class=btn id=go>${tx('start')}</button></div></div>
  <section class=band><div class=wrap><div id=cmp></div><div id=stats></div></div></section>`;
- stats(t);cmpLoad(t);document.getElementById('go').onclick=()=>start(t)}
+ stats(t);cmpLoad(t);document.getElementById('go').onclick=()=>start(t);document.getElementById('qrb').onclick=()=>qrModal(t)}
 
 function runTest(t,cb){cleanup();const a=fresh();flags=new Set();running=true;runDev=defDev();
  a.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.pointerType==='pen')runDev='touch';else if(e.pointerType==='mouse')runDev='mouse'},true);
@@ -576,6 +581,7 @@ function finish(t,v,detail){cleanup();const a=fresh();const G=gated(),best=G?{}:
  if(!G&&!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
  if(G){const s=sportOf(t);if(s&&!sus.length)store.set('pending',{sport:s.id,score:v,detail:detail||null,device:runDev,lang,ts:Date.now()});else store.set('pending',null);setTimeout(()=>gateModal(t,v),700)}
  a.innerHTML=`<p class=lbl>${tx('score')}</p><div class=huge>${fmt(t,v)}</div><p class=save id=save></p>${detail?`<p>${esc(detail)}</p>`:''}${sus.length?`<div class=sus><b>${tx('sus')}</b>${sus.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div>`:''}${rec&&old!=null?`<p class=rec>${tx('newBest')}</p>`:''}${best[t.id]!=null?`<p class=lbl>${tx('best')}: ${fmt(t,best[t.id])}</p>`:''}<div class=row><button class=btn id=again>${tx('again')}</button><a class="btn ghost" href="#">${tx('back')}</a></div>`;
+ {const rw=a.querySelector('.row');if(rw){const qb=document.createElement('button');qb.type='button';qb.className='btn ghost';qb.textContent='📱 '+qs('btn');qb.onclick=()=>qrModal(t);rw.appendChild(qb)}}
  document.getElementById('again').onclick=()=>start(t);stats(t);submitRun(t,v,detail,sus).finally(()=>cmpLoad(t))}
 
 /* ===== Testovanie pod dohľadom ===== */
@@ -798,6 +804,24 @@ function cmpHtml(t,s,d,typ,dev){const n=+d.n||0;
  h+=`<p><a href="index.html?sport=${encodeURIComponent(s.id)}">${rs('board')} →</a></p>`;
  return h}
 
+
+/* ===== QR kód: kamarát naskenuje a hneď hrá ===== */
+const QS={"sk": {"btn": "QR kód", "t": "Naskenuj a otestuj sa", "b": "Namier fotoaparát telefónu na kód a test sa hneď otvorí.", "share": "Zdieľať odkaz", "copy": "Skopírovať odkaz", "copied": "Skopírované", "close": "Zavrieť", "err": "QR kód sa nepodarilo načítať. Použi odkaz nižšie."}, "cz": {"btn": "QR kód", "t": "Naskenuj a otestuj se", "b": "Namiř fotoaparát telefonu na kód a test se hned otevře.", "share": "Sdílet odkaz", "copy": "Zkopírovat odkaz", "copied": "Zkopírováno", "close": "Zavřít", "err": "QR kód se nepodařilo načíst. Použij odkaz níže."}, "en": {"btn": "QR code", "t": "Scan and take the test", "b": "Point your phone camera at the code and the test opens right away.", "share": "Share link", "copy": "Copy link", "copied": "Copied", "close": "Close", "err": "The QR code could not be loaded. Use the link below."}, "de": {"btn": "QR-Code", "t": "Scannen und testen", "b": "Richte die Handykamera auf den Code, der Test öffnet sich sofort.", "share": "Link teilen", "copy": "Link kopieren", "copied": "Kopiert", "close": "Schließen", "err": "Der QR-Code konnte nicht geladen werden. Nutze den Link unten."}, "fr": {"btn": "QR code", "t": "Scanne et fais le test", "b": "Vise le code avec l’appareil photo du téléphone, le test s’ouvre aussitôt.", "share": "Partager le lien", "copy": "Copier le lien", "copied": "Copié", "close": "Fermer", "err": "Impossible de charger le QR code. Utilise le lien ci-dessous."}, "es": {"btn": "Código QR", "t": "Escanea y haz la prueba", "b": "Apunta la cámara del móvil al código y la prueba se abre al instante.", "share": "Compartir enlace", "copy": "Copiar enlace", "copied": "Copiado", "close": "Cerrar", "err": "No se pudo cargar el código QR. Usa el enlace de abajo."}, "it": {"btn": "Codice QR", "t": "Scansiona e fai il test", "b": "Inquadra il codice con la fotocamera del telefono e il test si apre subito.", "share": "Condividi link", "copy": "Copia link", "copied": "Copiato", "close": "Chiudi", "err": "Impossibile caricare il codice QR. Usa il link qui sotto."}, "pt": {"btn": "Código QR", "t": "Lê e faz o teste", "b": "Aponta a câmara do telemóvel ao código e o teste abre logo.", "share": "Partilhar link", "copy": "Copiar link", "copied": "Copiado", "close": "Fechar", "err": "Não foi possível carregar o código QR. Usa o link abaixo."}, "pl": {"btn": "Kod QR", "t": "Zeskanuj i zrób test", "b": "Skieruj aparat telefonu na kod, a test od razu się otworzy.", "share": "Udostępnij link", "copy": "Kopiuj link", "copied": "Skopiowano", "close": "Zamknij", "err": "Nie udało się wczytać kodu QR. Użyj linku poniżej."}, "hu": {"btn": "QR-kód", "t": "Olvasd be és teszteld magad", "b": "Irányítsd a telefon kameráját a kódra, és a teszt azonnal megnyílik.", "share": "Link megosztása", "copy": "Link másolása", "copied": "Másolva", "close": "Bezárás", "err": "A QR-kódot nem sikerült betölteni. Használd az alábbi linket."}, "uk": {"btn": "QR-код", "t": "Скануй і пройди тест", "b": "Наведи камеру телефона на код, і тест одразу відкриється.", "share": "Поділитися посиланням", "copy": "Копіювати посилання", "copied": "Скопійовано", "close": "Закрити", "err": "Не вдалося завантажити QR-код. Скористайся посиланням нижче."}, "ro": {"btn": "Cod QR", "t": "Scanează și fă testul", "b": "Îndreaptă camera telefonului spre cod și testul se deschide imediat.", "share": "Distribuie linkul", "copy": "Copiază linkul", "copied": "Copiat", "close": "Închide", "err": "Codul QR nu s-a putut încărca. Folosește linkul de mai jos."}, "nl": {"btn": "QR-code", "t": "Scan en doe de test", "b": "Richt de camera van je telefoon op de code en de test opent meteen.", "share": "Link delen", "copy": "Link kopiëren", "copied": "Gekopieerd", "close": "Sluiten", "err": "De QR-code kon niet worden geladen. Gebruik de link hieronder."}, "hi": {"btn": "QR कोड", "t": "स्कैन करें और टेस्ट दें", "b": "फ़ोन का कैमरा कोड पर रखें, टेस्ट तुरंत खुल जाएगा।", "share": "लिंक शेयर करें", "copy": "लिंक कॉपी करें", "copied": "कॉपी हो गया", "close": "बंद करें", "err": "QR कोड लोड नहीं हो सका। नीचे दिया लिंक इस्तेमाल करें।"}, "zh": {"btn": "二维码", "t": "扫码测一测", "b": "用手机相机对准二维码，测试会立即打开。", "share": "分享链接", "copy": "复制链接", "copied": "已复制", "close": "关闭", "err": "二维码加载失败，请使用下方链接。"}, "ja": {"btn": "QRコード", "t": "スキャンしてテスト", "b": "スマホのカメラをコードに向けると、すぐにテストが開きます。", "share": "リンクを共有", "copy": "リンクをコピー", "copied": "コピーしました", "close": "閉じる", "err": "QRコードを読み込めませんでした。下のリンクを使ってください。"}, "ko": {"btn": "QR 코드", "t": "스캔하고 테스트하기", "b": "휴대폰 카메라를 코드에 비추면 바로 테스트가 열립니다.", "share": "링크 공유", "copy": "링크 복사", "copied": "복사됨", "close": "닫기", "err": "QR 코드를 불러오지 못했습니다. 아래 링크를 이용하세요."}, "id": {"btn": "Kode QR", "t": "Pindai dan ikuti tes", "b": "Arahkan kamera ponsel ke kode, tes langsung terbuka.", "share": "Bagikan tautan", "copy": "Salin tautan", "copied": "Disalin", "close": "Tutup", "err": "Kode QR gagal dimuat. Gunakan tautan di bawah."}, "th": {"btn": "คิวอาร์โค้ด", "t": "สแกนแล้วทดสอบเลย", "b": "ส่องกล้องโทรศัพท์ไปที่โค้ด แบบทดสอบจะเปิดทันที", "share": "แชร์ลิงก์", "copy": "คัดลอกลิงก์", "copied": "คัดลอกแล้ว", "close": "ปิด", "err": "โหลดคิวอาร์โค้ดไม่ได้ ใช้ลิงก์ด้านล่างแทน"}, "fil": {"btn": "QR code", "t": "I-scan at subukan", "b": "Itutok ang camera ng telepono sa code at agad bubukas ang pagsusulit.", "share": "Ibahagi ang link", "copy": "Kopyahin ang link", "copied": "Nakopya", "close": "Isara", "err": "Hindi ma-load ang QR code. Gamitin ang link sa ibaba."}};
+const qs=k=>(QS[lang]||QS.en)[k];
+let qrLib=null;
+const loadQr=()=>qrLib||(qrLib=new Promise((res,rej)=>{if(window.qrcode)return res();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js';s.onload=res;s.onerror=()=>{qrLib=null;rej()};document.head.appendChild(s)}));
+async function qrModal(t){if(document.querySelector('.gate'))return;
+ const base=/^https?:/.test(location.origin)?location.origin+location.pathname:'https://porovnajsa.sk/benchmark.html',url=base+(t?'#'+t.id:'');
+ const o=document.createElement('div');o.className='gate';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','qrT');
+ o.innerHTML=`<div class="gbox qrbox"><h2 id=qrT>${qs('t')}</h2><p class=gscore><b>${esc(t?L(t.name):tx('title'))}</b></p><div class=qr id=qrc aria-label="QR"></div><p class=gsmall>${qs('b')}</p><p class=qrurl>${esc(url.replace(/^https:\/\//,''))}</p>
+ <div class=gbtns><button class="btn red" type=button id=qrsh>${navigator.share?qs('share'):qs('copy')}</button><button class="btn line" type=button id=qrx>${qs('close')}</button></div></div>`;
+ const close=()=>{o.remove();document.removeEventListener('keydown',esck)};const esck=e=>{if(e.key==='Escape')close()};
+ o.addEventListener('click',e=>{if(e.target===o)close()});document.addEventListener('keydown',esck);document.body.appendChild(o);
+ o.querySelector('#qrx').onclick=close;
+ const sh=o.querySelector('#qrsh');sh.onclick=async()=>{try{if(navigator.share)await navigator.share({title:t?L(t.name):tx('title'),url});else{await navigator.clipboard.writeText(url);sh.textContent=qs('copied')}}catch(e){}};
+ const box=o.querySelector('#qrc');box.textContent='…';
+ try{await loadQr();const q=window.qrcode(0,'M');q.addData(url);q.make();box.innerHTML=q.createSvgTag({cellSize:8,margin:2,scalable:true})}catch(e){box.textContent=qs('err')}
+ sh.focus()}
 function route(){const id=location.hash.slice(1);
  if(P&&!P.done&&id!=='dohlad'){P.nav++;location.hash='dohlad';return}
  if(id==='dohlad'){proctor();window.scrollTo(0,0);return}
