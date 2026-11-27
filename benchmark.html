@@ -37,7 +37,7 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .save{font-weight:600;margin:0}.save a{color:#fff}
 .cmph{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.cmph h2{font-size:22px;margin:0}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:14px 0}
-.tile{background:var(--card);border-radius:14px;padding:12px 14px}.tile b{display:block;font-size:24px;font-weight:800;line-height:1.2;white-space:nowrap}.tile small{display:block;color:var(--mut);font-size:13px}
+.tile{background:var(--card);border-radius:14px;padding:12px 14px}.tile b{display:block;font-size:24px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}.tile small{display:block;color:var(--mut);font-size:13px}
 .pct{font-size:18px;margin:6px 0 10px}#cmp{margin-bottom:40px}#cmp h3{font-size:17px;margin:18px 0 8px}#cmp:empty{display:none}
 .lock{position:relative;border-radius:16px;overflow:hidden;margin:12px 0 8px}
 .lockfake{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none;padding:4px}
@@ -86,7 +86,7 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 @keyframes bad{30%{background:#c2121a}}
 .hud{position:absolute;top:16px;left:0;right:0;font-weight:600;font-size:15px;opacity:.9}
 .big{font:800 clamp(30px,6vw,56px)/1.1 Inter}
-.huge{font-size:clamp(44px,10vw,96px);font-weight:800;line-height:1;white-space:nowrap}
+.huge{font-size:clamp(40px,10vw,96px);font-weight:800;line-height:1.05;text-wrap:balance;overflow-wrap:anywhere;max-width:100%}
 .lbl{margin:0;text-transform:none;opacity:.8;font-size:15px}
 .sus{background:#fff;color:#8a0d12;border-left:6px solid var(--red);border-radius:12px;padding:12px 16px;text-align:left;max-width:min(92vw,460px);display:flex;flex-direction:column;gap:4px;font-size:15px}
 .rec{background:var(--red);padding:6px 14px;border-radius:999px;font-weight:700;margin:0}
@@ -367,8 +367,8 @@ run(a,done){let solved=0,ans;const end=performance.now()+60000;
  Q(a,'.ask button').onclick=gen;
  const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('solved')}: ${solved}`;if(r<=0){mi.disabled=true;return done(solved)}later(tick,200)};
  gen();tick()}},
-{id:'cas',g:'5,0',low:1,u:U('ms odchýlka','ms odchylka'),name:U('Odhad času','Odhad času'),desc:U('Zastav stopky presne po zadanom čase, bez pozerania na hodiny. Tri pokusy, počíta sa priemerná odchýlka.','Zastav stopky přesně po zadaném čase, bez dívání na hodiny. Tři pokusy, počítá se průměrná odchylka.'),
-run(a,done){const tg=shuf([3,5,7,10]).slice(0,3);let i=0,errs=[];
+{id:'cas',g:'5,0',low:1,u:U('ms odchýlka','ms odchylka'),name:U('Odhad času','Odhad času'),desc:U('Zastav stopky presne po zadanom čase, bez pozerania na hodiny. Tri pokusy (3, 5 a 7 sekúnd, pre všetkých rovnaké), počíta sa priemerná odchýlka.','Zastav stopky přesně po zadaném čase, bez dívání na hodiny. Tři pokusy (3, 5 a 7 sekund, pro všechny stejné), počítá se průměrná odchylka.'),
+run(a,done){const tg=shuf([3,5,7]);let i=0,errs=[];
  const ready=()=>{a.innerHTML=`<div class=hud>${i+1}/3</div><p class=lbl>${tx('target')}</p><div class=huge>${tg[i]} s</div><button class=btn>${tx('go')}</button>`;
   Q(a,'button').onclick=()=>{const t0=performance.now();
    a.innerHTML=`<div class=hud>${i+1}/3</div><p class=lbl>${tx('counting')}</p><div class=huge>${tg[i]} s</div><button class="btn red">${tx('stop')}</button>`;
