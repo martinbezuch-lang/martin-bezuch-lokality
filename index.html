@@ -35,6 +35,18 @@
     body.dark-chess .kind-btn{background:#14203a;border-color:#2b3b5c;color:#eef2f8}
     body.dark-chess .kind-btn:hover{background:#1b2a4a}
     body.dark-chess .kind-btn[aria-pressed="true"]{background:#2563eb;border-color:#2563eb;color:#fff}
+.hb-hero{position:relative;overflow:hidden;border-radius:1rem;padding:1.25rem 1.5rem;background:#1d4ed8;color:#fff;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;box-shadow:0 10px 28px rgba(15,23,42,.12)}
+    .hb-hero::after{content:"";position:absolute;right:-50px;bottom:-90px;width:220px;height:220px;border-radius:50%;border:30px solid rgba(255,255,255,.12);pointer-events:none}
+    .hb-hero-text{position:relative;z-index:1;min-width:0;flex:1 1 320px}
+    .hb-hero h2{font-size:clamp(1.25rem,3vw,1.75rem);font-weight:800;line-height:1.15;margin:0 0 .35rem}
+    .hb-hero p{margin:0;opacity:.9;font-size:.95rem;max-width:60ch}
+    .hb-hero-btns{position:relative;z-index:1;display:flex;gap:.5rem;flex-wrap:wrap}
+    .hb-hero-btns a{display:inline-flex;align-items:center;min-height:44px;padding:0 1.1rem;border-radius:999px;font-weight:700;font-size:.95rem;text-decoration:none;white-space:nowrap}
+    .hb-btn1{background:#fff;color:#1d4ed8}.hb-btn1:hover{background:#e0ecff}
+    .hb-btn2{color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}.hb-btn2:hover{background:rgba(255,255,255,.1)}
+    body.dark-chess .hb-hero{background:#22447a}
+    body.dark-chess .hb-hero::after{border-color:#b8312c}
+    body.dark-chess .hb-btn1{color:#22447a}
     body.dark-chess {
       background-color: #0b1422;
       color: #eef2f8;
@@ -365,6 +377,7 @@
     .m-only { display: block; }
     #user-menu-panel .m-only:first-of-type { border-top: 1px solid rgba(148,163,184,.3); }
     #main-header #open-auth-modal-btn { font-size: 12px !important; }
+    #main-header #hb-testy-link { display: none; }
     #athlete-profile-section > div:first-child { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; justify-content: flex-start; }
     #athlete-profile-section > div:first-child > div { display: contents; }
     #athlete-profile-section > div:first-child button { flex: 0 0 auto; height: 34px; padding: 0 10px !important; font-size: 12px !important; white-space: nowrap; display: inline-flex; align-items: center; }
@@ -439,7 +452,7 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
-        <a href="benchmark.html" title="Kognitívne testy: reakcia, pamäť, postreh" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 transition no-underline">🧠 Testy</a>
+        <a id="hb-testy-link" href="benchmark.html" title="Kognitívne testy: reakcia, pamäť, postreh" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 transition no-underline">🧠 Testy</a>
         <button id="open-friends-list-btn" type="button" title="Moji priatelia a sledovaní" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 (0)</button>
         <button id="open-celebs-list-btn" type="button" title="Známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ (0)</button>
         <div id="user-auth-controls" class="flex items-center gap-2 flex-wrap">
@@ -461,6 +474,17 @@
   <!-- Hlavný obsah -->
   <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
     <!-- Ovládací panel pre rebríček -->
+    <section id="hb-hero" class="hb-hero">
+      <div class="hb-hero-text">
+        <h2>Aký rýchly je tvoj mozog?</h2>
+        <p>Reakcia, pamäť a postreh v 25 krátkych testoch. Otestuj sa za minútu a porovnaj sa s ostatnými.</p>
+      </div>
+      <div class="hb-hero-btns">
+        <a href="benchmark.html#reakcia" class="hb-btn1">⚡ Spusti test</a>
+        <a href="benchmark.html" class="hb-btn2">🧠 Všetky testy</a>
+      </div>
+    </section>
+
     <section id="controls-panel" class="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 shadow-sm space-y-4">
       <div id="sport-chips" class="flex gap-2 overflow-x-auto sm:overflow-visible sm:flex-wrap no-scrollbar pb-1"></div>
 
@@ -1962,6 +1986,19 @@
         } catch (e) { /* pozvánky sú doplnok, chyba nesmie blokovať web */ }
       }
 
+      async function submitPendingHb() {
+        let p = null; try { p = JSON.parse(localStorage.getItem('hb-pending') || 'null'); } catch (e) {}
+        if (!p || !currentUserId) return;
+        const drop = () => { try { localStorage.setItem('hb-pending', 'null'); } catch (e) {} };
+        if (Date.now() - (p.ts || 0) > 86400000) { drop(); return; }
+        try {
+          const { data, error } = await sb.rpc('hb_submit', { p_sport: p.sport, p_score: p.score, p_device: p.device, p_lang: p.lang, p_flags: [], p_detail: p.detail || null });
+          if (error && /no_profile/.test(error.message || '')) return;
+          drop();
+          if (!error && data && data.status === 'ok') { showToast('Tvoj výsledok z testu sa uložil do rebríčka.'); await reloadData(); }
+        } catch (e) {}
+      }
+
       async function applySession(session) {
         authUser = session ? session.user : null;
         lastAuthUserId = authUser ? authUser.id : null;
@@ -1984,6 +2021,7 @@
               ownProfileRow = p;
               await reloadData();
               handleInvite();
+              submitPendingHb();
             }
           }
         } else {
@@ -3859,6 +3897,7 @@
         profileSportFilterId = null;
 
         document.getElementById('controls-panel').classList.add('hidden');
+        { const hh = document.getElementById('hb-hero'); if (hh) hh.classList.add('hidden'); }
         document.getElementById('leaderboard-section').classList.add('hidden');
         document.getElementById('athlete-profile-section').classList.remove('hidden');
 
@@ -3898,6 +3937,7 @@
 
         document.getElementById('athlete-profile-section').classList.add('hidden');
         document.getElementById('controls-panel').classList.remove('hidden');
+        { const hh = document.getElementById('hb-hero'); if (hh) hh.classList.remove('hidden'); }
         document.getElementById('leaderboard-section').classList.remove('hidden');
         try {
           if (/^#profil=/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search);
@@ -5411,7 +5451,11 @@
           } else if (AUTH_ERROR_IN_URL) {
             showToast('Odkaz z e-mailu je neplatný alebo vypršal. Pošli si nový cez „Zabudnuté heslo“.');
           }
-          if (!RECOVERY_IN_URL && !AUTH_ERROR_IN_URL) setTimeout(maybeShowWelcome, 700);
+          const AUTH_IN_URL = (URL_PARAMS.match(/(^|&)auth=(register|login)(&|$)/) || [])[2] || '';
+          if (AUTH_IN_URL && !sess.session) {
+            openModal('auth-modal');
+            if (AUTH_IN_URL === 'register') { const rb = document.getElementById('switch-to-register-btn'); if (rb) rb.click(); }
+          } else if (!RECOVERY_IN_URL && !AUTH_ERROR_IN_URL) setTimeout(maybeShowWelcome, 700);
         } catch (err) {
           console.error('Chyba pri štarte aplikácie:', err);
           showToast('Nastala chyba pri načítaní aplikácie.');

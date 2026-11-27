@@ -37,6 +37,18 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:14px 0}
 .tile{background:var(--card);border-radius:14px;padding:12px 14px}.tile b{display:block;font-size:24px;font-weight:800;line-height:1.2;white-space:nowrap}.tile small{display:block;color:var(--mut);font-size:13px}
 .pct{font-size:18px;margin:6px 0 10px}#cmp{margin-bottom:40px}#cmp h3{font-size:17px;margin:18px 0 8px}#cmp:empty{display:none}
+.lock{position:relative;border-radius:16px;overflow:hidden;margin:12px 0 8px}
+.lockfake{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none;padding:4px}
+.lockmsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;background:color-mix(in srgb,var(--bg) 40%,transparent)}
+.lockmsg b{font-size:18px}.lockmsg span{color:var(--mut);max-width:40ch}.lockmsg a:not(.btn){font-weight:600}
+.gate{position:fixed;inset:0;z-index:50;background:rgba(5,10,20,.6);display:grid;place-items:center;padding:16px;animation:fade .2s}
+@keyframes fade{from{opacity:0}}
+.gbox{background:var(--bg);color:var(--ink);border-radius:20px;padding:clamp(20px,4vw,32px);max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.gbox h2{font-size:clamp(22px,4vw,28px);line-height:1.15;margin:4px 0 8px}.gbox p{margin:0 0 8px}.gbox ul{margin:0 0 16px;padding-left:20px}.gbox li{margin:3px 0}
+.gscore{color:var(--mut);font-size:15px}.gscore b{color:var(--ink)}
+.gbtns{display:flex;gap:10px;flex-wrap:wrap}.gbtns .btn{flex:1 1 180px}.gsmall{font-size:13px;color:var(--mut);margin-top:12px!important}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;background:#0f1a2b;color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.3);max-width:calc(100vw - 32px)}
+@media(prefers-reduced-motion:reduce){.gate{animation:none}}
 .seg{display:flex;border:2px solid var(--blue);border-radius:999px;overflow:hidden}
 .seg button{border:0;background:transparent;color:var(--ink);font:700 15px Inter;min-height:40px;min-width:52px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--blue);color:#fff}
@@ -535,7 +547,8 @@ function world(t){const r=REF[t.id];if(!r)return '';const best=getBest()[t.id],a
  if(r.kind==='dist'&&best!=null){const p=Math.min(99,Math.max(1,Math.round(50*(1+erf((best-r.mean)/r.sd/Math.SQRT2)))));h+=`<p><b>${tx('pct').replace('{p}',p)}</b></p>`}
  return `<div class=world><h2>${tx('world')}</h2><p class=mut>${L(r.note)}</p>${h}<p class=src>${tx('src')}: ${r.src.map(s=>`<a href="${s[1]}" target=_blank rel=noopener>${s[0]}</a>`).join(' · ')}</p></div>`}
 function stats(t){const el=document.getElementById('stats');if(!el)return;const h=(store.get('hist')||{})[t.id]||[],best=getBest()[t.id];let out;
- if(!h.length)out=`<div class=hist><h2>${tx('hist')}</h2><p class=mut>${tx('histNone')}</p></div>`;
+ if(gated())out=`<div class=hist><h2>${tx('hist')}</h2>${lockBox()}</div>`;
+ else if(!h.length)out=`<div class=hist><h2>${tx('hist')}</h2><p class=mut>${tx('histNone')}</p></div>`;
  else{const mx=Math.max(...h,1);
  out=`<div class=hist><h2>${tx('hist')}</h2><p class=mut>${tx('best')}: <b>${fmt(t,best)}</b> · ${tx('better')} ${t.low?tx('lower'):tx('higher')}</p>${h.slice().reverse().map((v,i)=>`<div class=hrow><span class=mut>#${h.length-i}</span><i class="${v===best?'b':''}" style="width:${Math.max(2,v/mx*100)}%"></i><span>${fmt(t,v)}</span></div>`).join('')}</div>`}
  el.innerHTML=`<div class=sgrid>${out}${world(t)}</div>`;
@@ -553,9 +566,10 @@ function runTest(t,cb){cleanup();const a=fresh();flags=new Set();running=true;ru
  t.run(a,(v,d)=>{const fl=[...flags];cleanup();cb(v,d,fl)})}
 function start(t){runTest(t,(v,d)=>finish(t,v,d))}
 
-function finish(t,v,detail){cleanup();const a=fresh();const best=getBest(),old=best[t.id],sus=[...flags];
- const rec=!sus.length&&(old==null||(t.low?v<old:v>old));if(rec){best[t.id]=v;store.set('best',best)}
- if(!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
+function finish(t,v,detail){cleanup();const a=fresh();const G=gated(),best=G?{}:getBest(),old=best[t.id],sus=[...flags];
+ const rec=!G&&!sus.length&&(old==null||(t.low?v<old:v>old));if(rec){best[t.id]=v;store.set('best',best)}
+ if(!G&&!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
+ if(G){const s=sportOf(t);if(s&&!sus.length)store.set('pending',{sport:s.id,score:v,detail:detail||null,device:runDev,lang,ts:Date.now()});else store.set('pending',null);setTimeout(()=>gateModal(t,v),700)}
  a.innerHTML=`<p class=lbl>${tx('score')}</p><div class=huge>${fmt(t,v)}</div><p class=save id=save></p>${detail?`<p>${esc(detail)}</p>`:''}${sus.length?`<div class=sus><b>${tx('sus')}</b>${sus.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div>`:''}${rec&&old!=null?`<p class=rec>${tx('newBest')}</p>`:''}${best[t.id]!=null?`<p class=lbl>${tx('best')}: ${fmt(t,best[t.id])}</p>`:''}<div class=row><button class=btn id=again>${tx('again')}</button><a class="btn ghost" href="#">${tx('back')}</a></div>`;
  document.getElementById('again').onclick=()=>start(t);stats(t);submitRun(t,v,detail,sus).finally(()=>cmpLoad(t))}
 
@@ -690,12 +704,15 @@ function cert(s){cleanup();const tests=Object.keys(s.res).map(byId).filter(Boole
 /* ===== Napojenie na porovnajsa.sk (Supabase) ===== */
 const SB_URL='https://khduswpbhozkqjxnqufk.supabase.co',SB_KEY='sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8';
 const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
-let ME=null,SP={},remoteOk=false,cmpDev=null,runDev='mouse';
+let ME=null,SP={},remoteOk=false,cmpDev=null,runDev='mouse',authChecked=false;
+const gated=()=>!!sb&&!ME;
 const RS={
 sk:{login:'Prihlásiť sa',saveLogin:'Prihlás sa na porovnajsa.sk a výsledok sa uloží do rebríčka.',saving:'Ukladám do rebríčka…',saved:'Uložené do rebríčka.',savedPb:'Nový osobný rekord v rebríčku porovnajsa.sk!',savedNoPb:'Uložené. Tvoj rekord v rebríčku je stále lepší.',savedFlag:'Pokus sa uložil ako podozrivý a do rebríčka nejde.',saveErr:'Výsledok sa nepodarilo uložiť',offline:'Tento test zatiaľ nie je zapojený do rebríčka.',cmp:'Porovnaj sa s ostatnými',players:'Hráčov',fewPlayers:'Zatiaľ {n} hráčov. Percentil ukážeme, keď ich bude aspoň {m}.',pctTxt:'Si lepší ako {p} % hráčov',eqTxt:'rovnaký výsledok má {e}',median:'Medián hráčov',myBest:'Tvoj rekord',typical:'Tvoj bežný výkon',typHelp:'posledné pokusy bez najhoršieho',mouse:'Myš',touch:'Dotyk',byAge:'Medián podľa veku',ageNote:'Vekové skupiny sa ukážu, keď v nich bude aspoň 5 hráčov.',board:'Rebríček na porovnajsa.sk',loginCmp:'Prihlás sa a uvidíš, ako si na tom v porovnaní s ostatnými.',noStats:'Štatistiky sa nepodarilo načítať.',loading:'Načítavam…',
- err_not_authenticated:'nie si prihlásený',err_no_profile:'najprv dokonči profil na porovnajsa.sk',err_unknown_test:'test nie je aktívny',err_implausible_score:'výsledok je mimo možného rozsahu',err_rate_limited:'príliš veľa pokusov za minútu, skús o chvíľu',err_bad_device:'neznáme zariadenie'},
+ err_not_authenticated:'nie si prihlásený',err_no_profile:'najprv dokonči profil na porovnajsa.sk',err_unknown_test:'test nie je aktívny',err_implausible_score:'výsledok je mimo možného rozsahu',err_rate_limited:'príliš veľa pokusov za minútu, skús o chvíľu',err_bad_device:'neznáme zariadenie',
+ notSaved:'Výsledok sa neuložil. Bez registrácie sa nikam neukladá.',gateT:'Chceš vedieť, ako si na tom?',gateB:'Zaregistruj sa zadarmo a uvidíš:',gate1:'svoje poradie a percentil medzi ostatnými',gate2:'porovnanie s rovesníkmi podľa veku',gate3:'históriu výsledkov a svoj bežný výkon',gate4:'výzvy kamarátom a rebríčky',reg:'Zaregistrovať sa zadarmo',notNow:'Teraz nie',haveAcc:'Už mám účet',gateNote:'Bez registrácie sa výsledok nikam neuloží. Ak sa zaregistruješ teraz, tento výsledok sa ti uloží automaticky.',lockT:'Iba pre registrovaných',lockB:'Poradie, percentil, porovnanie podľa veku a história výsledkov.',pendingSaved:'Tvoj posledný výsledok z testu sa uložil do rebríčka.'},
 cz:{login:'Přihlásit se',saveLogin:'Přihlas se na porovnajsa.sk a výsledek se uloží do žebříčku.',saving:'Ukládám do žebříčku…',saved:'Uloženo do žebříčku.',savedPb:'Nový osobní rekord v žebříčku porovnajsa.sk!',savedNoPb:'Uloženo. Tvůj rekord v žebříčku je stále lepší.',savedFlag:'Pokus se uložil jako podezřelý a do žebříčku nejde.',saveErr:'Výsledek se nepodařilo uložit',offline:'Tento test zatím není zapojený do žebříčku.',cmp:'Porovnej se s ostatními',players:'Hráčů',fewPlayers:'Zatím {n} hráčů. Percentil ukážeme, až jich bude alespoň {m}.',pctTxt:'Jsi lepší než {p} % hráčů',eqTxt:'stejný výsledek má {e}',median:'Medián hráčů',myBest:'Tvůj rekord',typical:'Tvůj běžný výkon',typHelp:'poslední pokusy bez nejhoršího',mouse:'Myš',touch:'Dotyk',byAge:'Medián podle věku',ageNote:'Věkové skupiny se ukážou, až v nich bude alespoň 5 hráčů.',board:'Žebříček na porovnajsa.sk',loginCmp:'Přihlas se a uvidíš, jak si stojíš v porovnání s ostatními.',noStats:'Statistiky se nepodařilo načíst.',loading:'Načítám…',
- err_not_authenticated:'nejsi přihlášený',err_no_profile:'nejdřív dokonči profil na porovnajsa.sk',err_unknown_test:'test není aktivní',err_implausible_score:'výsledek je mimo možný rozsah',err_rate_limited:'příliš mnoho pokusů za minutu, zkus to za chvíli',err_bad_device:'neznámé zařízení'}};
+ err_not_authenticated:'nejsi přihlášený',err_no_profile:'nejdřív dokonči profil na porovnajsa.sk',err_unknown_test:'test není aktivní',err_implausible_score:'výsledek je mimo možný rozsah',err_rate_limited:'příliš mnoho pokusů za minutu, zkus to za chvíli',err_bad_device:'neznámé zařízení',
+ notSaved:'Výsledek se neuložil. Bez registrace se nikam neukládá.',gateT:'Chceš vědět, jak si stojíš?',gateB:'Zaregistruj se zdarma a uvidíš:',gate1:'své pořadí a percentil mezi ostatními',gate2:'srovnání s vrstevníky podle věku',gate3:'historii výsledků a svůj běžný výkon',gate4:'výzvy kamarádům a žebříčky',reg:'Zaregistrovat se zdarma',notNow:'Teď ne',haveAcc:'Už mám účet',gateNote:'Bez registrace se výsledek nikam neuloží. Pokud se zaregistruješ teď, tento výsledek se ti uloží automaticky.',lockT:'Jen pro registrované',lockB:'Pořadí, percentil, srovnání podle věku a historie výsledků.',pendingSaved:'Tvůj poslední výsledek z testu se uložil do žebříčku.'}};
 const rs=k=>RS[lang][k];
 const MINP=30;
 const sportOf=t=>SP[t.id];
@@ -709,16 +726,32 @@ const r1=v=>Math.round(v*10)/10;
 async function initRemote(){if(!sb)return;
  try{const {data}=await sb.auth.getSession();const u=data&&data.session&&data.session.user;
   if(u){const r=await sb.from('profiles').select('id,display_name,birth_year,role').eq('id',u.id).maybeSingle();ME=r.data||{id:u.id}}}catch(e){}
+ authChecked=true;
  try{const {data,error}=await sb.from('sports').select('id,name,unit,kind,hb_test,active').eq('kind','cognitive');
   if(!error&&data){SP={};data.forEach(s=>{if(s.hb_test)SP[s.hb_test]=s});remoteOk=true}}catch(e){}
- renderAuth();if(!(P&&!P.done))route()}
+ renderAuth();if(!(P&&!P.done))route();if(ME)submitPending()}
+async function submitPending(){const p=store.get('pending');if(!p||!sb||!ME)return;
+ if(Date.now()-(p.ts||0)>864e5){store.set('pending',null);return}
+ try{const {data,error}=await sb.rpc('hb_submit',{p_sport:p.sport,p_score:p.score,p_device:p.device,p_lang:p.lang,p_flags:[],p_detail:p.detail});
+  if(error&&/no_profile/.test(error.message||''))return;
+  store.set('pending',null);if(!error&&data&&data.status==='ok')toast(rs('pendingSaved'))}catch(e){}}
+function toast(msg){const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}
+function lockBox(){return `<div class=lock><div class=lockfake aria-hidden=true><div class=tiles>${['#7','63 %','248','41'].map(x=>`<div class=tile><small>—</small><b>${x}</b></div>`).join('')}</div><div class="hrow wr"><span>25–34</span><i style="width:80%"></i><span>—</span></div><div class="hrow wr"><span>35–44</span><i style="width:65%"></i><span>—</span></div></div>
+ <div class=lockmsg><b>🔒 ${rs('lockT')}</b><span>${rs('lockB')}</span><a class="btn red" href="index.html?auth=register">${rs('reg')}</a><a href="index.html?auth=login">${rs('haveAcc')}</a></div></div>`}
+function gateModal(t,v){if(!gated()||document.querySelector('.gate'))return;
+ const o=document.createElement('div');o.className='gate';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','gateT');
+ o.innerHTML=`<div class=gbox><p class=gscore>${esc(L(t.name))}: <b>${fmt(t,v)}</b></p><h2 id=gateT>${rs('gateT')}</h2><p>${rs('gateB')}</p><ul>${['gate1','gate2','gate3','gate4'].map(k=>`<li>${rs(k)}</li>`).join('')}</ul>
+ <div class=gbtns><a class="btn red" href="index.html?auth=register">${rs('reg')}</a><button class="btn line" type=button id=gclose>${rs('notNow')}</button></div><p class=gsmall>${rs('gateNote')} <a href="index.html?auth=login">${rs('haveAcc')}</a></p></div>`;
+ const close=()=>{o.remove();document.removeEventListener('keydown',esck)};const esck=e=>{if(e.key==='Escape')close()};
+ o.addEventListener('click',e=>{if(e.target===o)close()});document.addEventListener('keydown',esck);document.body.appendChild(o);
+ const c=o.querySelector('#gclose');c.onclick=close;c.focus()}
 
 function renderAuth(){const el=document.getElementById('auth');if(!el)return;
  el.innerHTML=ME?`<a class=pill href="index.html#profil=${encodeURIComponent(ME.id)}">👤 ${esc(ME.display_name||'')}</a>`:`<a class=pill href="index.html">${rs('login')}</a>`}
 
 async function submitRun(t,v,detail,fl){const el=document.getElementById('save');if(!el)return;const s=sportOf(t);
  if(!sb||!s||s.active===false){el.textContent=remoteOk?rs('offline'):'';return}
- if(!ME){el.innerHTML=`<a href="index.html">${rs('saveLogin')}</a>`;return}
+ if(!ME){el.textContent=rs('notSaved');return}
  el.textContent=rs('saving');
  try{const {data,error}=await sb.rpc('hb_submit',{p_sport:s.id,p_score:v,p_device:runDev,p_lang:lang,p_flags:fl,p_detail:detail||null});
   if(error)throw error;
@@ -747,7 +780,7 @@ function cmpHtml(t,s,d,typ,dev){const n=+d.n||0;
  if(d.median!=null)tiles.push([rs('median'),fmt(t,r1(+d.median))]);
  tiles.push([rs('players'),String(n)]);
  h+=`<div class=tiles>${tiles.map(x=>`<div class=tile><small>${x[0]}</small><b>${x[1]}</b>${x[2]?`<small>${x[2]}</small>`:''}</div>`).join('')}</div>`;
- if(!ME)h+=`<p><a href="index.html">${rs('loginCmp')}</a></p>`;
+ if(!ME)return `<div class=cmph><h2>${rs('cmp')}</h2></div>${lockBox()}`;
  else if(d.my_best!=null){
   if(n>=MINP){const p=Math.round((+d.worse+0.5*+d.equal)/(n-1)*100);h+=`<p class=pct><b>${rs('pctTxt').replace('{p}',p)}</b>${+d.equal?' · '+rs('eqTxt').replace('{e}',d.equal):''}</p>`}
   else h+=`<p class=mut>${rs('fewPlayers').replace('{n}',n).replace('{m}',MINP)}</p>`}
