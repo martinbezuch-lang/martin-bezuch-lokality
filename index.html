@@ -1644,7 +1644,8 @@
       let isDarkMode = false;
       let selectedSportId = 'biceps_1m';
       let selectedCountry = 'Slovensko';
-      let selectedGender = 'M';
+      let selectedGender = 'M'; // 'M', 'Z' alebo 'ALL' (obe tlačidlá vypnuté = všetci)
+      const genderOk = (a) => selectedGender === 'ALL' || a.gender === selectedGender;
       let onlyFriends = false;
       let onlyCelebrities = false;
       let selectedWeight = '';
@@ -2888,7 +2889,7 @@
         const q = searchQuery.trim().toLowerCase();
 
         const matchingAthletes = db.athletes.filter(a => {
-          if (a.gender !== selectedGender) return false;
+          if (!genderOk(a)) return false;
           if (!passesWeight(a)) return false;
           if (onlyFriends && !a.isFriend) return false;
           if (onlyCelebrities && !a.isCelebrity) return false;
@@ -2946,7 +2947,7 @@
         });
 
         const baseFilterPool = db.athletes.filter(a => {
-          if (a.gender !== selectedGender) return false;
+          if (!genderOk(a)) return false;
           if (!passesWeight(a)) return false;
           if (selectedCountry !== 'ALL' && a.country !== selectedCountry) return false;
           if (q && !(a.name || '').toLowerCase().includes(q) && !(a.country || '').toLowerCase().includes(q)) return false;
@@ -3181,7 +3182,7 @@
         if (!box) return;
         box.innerHTML = '';
         const sportCnt = {};
-        db.sports.forEach(sp => { sportCnt[sp.id] = db.athletes.filter(a => a.gender === selectedGender && getAthleteBestInSport(a, sp.id) !== null).length; });
+        db.sports.forEach(sp => { sportCnt[sp.id] = db.athletes.filter(a => genderOk(a) && getAthleteBestInSport(a, sp.id) !== null).length; });
         const sportTotal = {};
         db.sports.forEach(sp => { sportTotal[sp.id] = db.athletes.filter(a => getAthleteBestInSport(a, sp.id) !== null).length; });
         const sortedSports = db.sports.filter(sp => sportTotal[sp.id] > 0 || sp.id === selectedSportId).sort((a, b) => ((a.kind === 'cognitive' ? 0 : 1) - (b.kind === 'cognitive' ? 0 : 1)) || (sportCnt[b.id] - sportCnt[a.id]) || String(a.name).localeCompare(String(b.name), 'sk'));
@@ -3255,7 +3256,7 @@
         if (logoEl) logoEl.innerHTML = getSportMiniLogoHtml(sport);
         if (titleEl) {
           const scopeText = selectedCountry === 'ALL' ? 'Svet' : `${getFlag(selectedCountry)} ${selectedCountry}`;
-          const genderText = selectedGender === 'Z' ? 'Ženy' : 'Muži';
+          const genderText = selectedGender === 'Z' ? 'Ženy' : selectedGender === 'M' ? 'Muži' : 'Všetci';
           titleEl.textContent = `${sport.name} — ${scopeText} (${genderText})`;
         }
 
@@ -3264,7 +3265,7 @@
         // Skupina, voči ktorej sa počíta percentil: pohlavie, krajina, váha, rok a (ak je zvolený) vek.
         // Vyhľadávanie, priatelia a známe osobnosti percentil neovplyvňujú.
         const pool = db.athletes
-          .filter(a => a.gender === selectedGender && (selectedCountry === 'ALL' || a.country === selectedCountry) && passesWeight(a))
+          .filter(a => genderOk(a) && (selectedCountry === 'ALL' || a.country === selectedCountry) && passesWeight(a))
           .map(a => ({ a, bestRec: getAthleteBestRecordInSport(a, sport.id) }))
           .filter(x => x.bestRec)
           .filter(x => selectedAgeAtRecord === null || getAgeAtRecord(x.a, x.bestRec) === selectedAgeAtRecord)
@@ -3316,7 +3317,7 @@
             const myPct = poolVals.length >= 2 ? pctOf(mine.metric, mine.athlete.id) : null;
             let pctSentence = '';
             if (myPct !== null) {
-              const whoLabel = selectedGender === 'Z' ? 'žien' : 'mužov';
+              const whoLabel = selectedGender === 'Z' ? 'žien' : selectedGender === 'M' ? 'mužov' : 'ľudí';
               const betterLabel = selectedGender === 'Z' ? 'lepšia' : 'lepší';
               const parts = [];
               if (selectedAgeAtRecord !== null) parts.push(`vo veku ${selectedAgeAtRecord} r.`);
@@ -5234,7 +5235,9 @@
 
         document.querySelectorAll('.gender-btn').forEach(btn => {
           btn.addEventListener('click', () => {
-            selectedGender = btn.getAttribute('data-gender') || 'M';
+            const g = btn.getAttribute('data-gender') || 'M';
+            // klik na aktívne tlačidlo ho vypne; keď sú obe vypnuté, zobrazia sa všetci
+            selectedGender = selectedGender === g ? 'ALL' : g;
             currentPage = 1;
             document.querySelectorAll('.gender-btn').forEach(b => {
               const active = b.getAttribute('data-gender') === selectedGender;
