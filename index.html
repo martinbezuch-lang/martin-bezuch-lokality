@@ -359,6 +359,7 @@
     body.dark-chess ::-webkit-scrollbar-track { background: #101a2f; }
     body.dark-chess ::-webkit-scrollbar-thumb { background: #3d4f74; border-radius: 6px; }
   @media (min-width: 640px) { #search-toggle-btn { display: none !important; } }
+  .gender-btn { display: inline-flex; align-items: center; justify-content: center; gap: 5px; line-height: 1; }
   @media (max-width: 640px) {
     html, body { overflow-x: hidden; max-width: 100%; }
     .cn-full { display: none; }
@@ -369,7 +370,7 @@
       #search-row:not(.open) { display: none; }
       #open-compare-btn { display: none; }
       #extra-filters #country-tabs { width: 100%; padding-top: 4px; }
-      .gender-btn { font-size: 16px !important; line-height: 1; padding: 6px 12px !important; }
+      .gender-btn { padding: 7px 14px !important; }
     }
     #search-input { min-width: 0; }
     #main-header #user-auth-controls { max-width: 100%; }
@@ -519,10 +520,10 @@
 
           <div class="inline-flex rounded-xl p-1 bg-slate-500/10 border border-slate-500/15">
             <button type="button" data-gender="M" class="gender-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-blue-600 text-white shadow-sm">
-              ♂<span class="hide-sm"> Muži</span>
+              <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="6"/><path d="M14.5 9.5L20 4M15 4h5v5"/></svg><span class="hide-sm">Muži</span>
             </button>
             <button type="button" data-gender="Z" class="gender-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20">
-              ♀<span class="hide-sm"> Ženy</span>
+              <svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="6"/><path d="M12 15v7M8.5 19h7"/></svg><span class="hide-sm">Ženy</span>
             </button>
           </div>
 
@@ -577,8 +578,8 @@
     <section id="leaderboard-section" class="rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden">
       <div class="px-4 sm:px-6 py-3.5 border-b border-slate-200/70 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2.5 min-w-0 flex-1 flex-wrap">
-          <span id="leaderboard-sport-logo"><span class="w-7 h-7 rounded-lg inline-flex items-center justify-center text-[11px] font-bold border shrink-0" style="background:#2563eb14;border-color:#2563eb38;color:#2563eb">B</span></span>
-          <h2 id="leaderboard-title" class="text-sm sm:text-base font-bold">Biceps 1 minúta — 🇸🇰 Slovensko (Muži)</h2>
+          <span id="leaderboard-sport-logo" class="shrink-0"><span class="w-7 h-7 rounded-lg inline-flex items-center justify-center text-[11px] font-bold border shrink-0" style="background:#2563eb14;border-color:#2563eb38;color:#2563eb">B</span></span>
+          <h2 id="leaderboard-title" class="flex-1 basis-0 min-w-[9rem] text-sm sm:text-base font-bold leading-snug">Biceps 1 minúta — 🇸🇰 Slovensko (Muži)</h2>
           <button id="clear-age-filter-btn" type="button" class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600/15 text-blue-700 hover:bg-blue-600/25 transition cursor-pointer">
             Vek: <span id="active-age-filter-label"></span> ✕
           </button>
