@@ -16,7 +16,7 @@
    PICTURE: samotná aréna testu, cez celú šírku, je obrazom stránky
    COLOUR and TYPE: biela, vlajková modrá #11457E, červená #D7141A; Archivo 800 + Inter
    LAYOUT: hlavička, modrý hero s profilom, mriežka testov; test = nadpis, aréna, história */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0b1422);--ink:light-dark(#0f1a2b,#eef2f8);--mut:light-dark(#5a6678,#9aa7ba);--card:light-dark(#f2f4f8,#14203a);--line:light-dark(#dfe4ec,#24324f);--blue:#2563eb;--red:#D7141A;--deep:light-dark(#1d4ed8,#22447a);--g1:light-dark(#2563eb,#22447a);--g2:light-dark(#dc2626,#c8302a);--ring:light-dark(rgba(255,255,255,.12),#b8312c)}
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0b1422);--ink:light-dark(#0f1a2b,#eef2f8);--mut:light-dark(#5a6678,#9aa7ba);--card:light-dark(#f2f4f8,#14203a);--line:light-dark(#dfe4ec,#24324f);--blue:#2563eb;--red:#D7141A;--deep:light-dark(#1d4ed8,#22447a);--g1:light-dark(#2563eb,#22447a);--g2:light-dark(#dc2626,#c8302a);--c-rych:light-dark(#ea580c,#c2410c);--c-pam:light-dark(#7c3aed,#6d28d9);--c-post:light-dark(#2563eb,#1d4ed8);--c-jaz:light-dark(#16a34a,#15803d);--c-log:light-dark(#0d9488,#0f766e);--ring:light-dark(rgba(255,255,255,.12),#b8312c)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
@@ -522,7 +522,13 @@ run(a,done){let i=0,pen=0;const t0=performance.now();
    else if(!b.classList.contains('x')){pen+=1000;b.classList.add('x')}})};
  round()}}
 ];
-TESTS.forEach((t,i)=>t.col=i%2?'var(--g2)':'var(--g1)');
+// Farba ikony podľa typu testu: rýchlosť, pamäť, postreh, jazyk, počty a odhad
+const CAT={reakcia:'rych',mierenie:'rych',klikanie:'rych',gonogo:'rych',ciara:'rych',
+ sekvencia:'pam',cisla:'pam',slova:'pam',simpanz:'pam',vizualna:'pam',nback:'pam',
+ stroop:'post',farby:'post',bodky:'post',schulte:'post',lopticky:'post',pismeno:'post',
+ pisanie:'jaz',skcz:'jaz',vybrane:'jaz',anagramy:'jaz',
+ pocty:'log',cas:'log',uhol:'log',rotacia:'log'};
+TESTS.forEach(t=>t.col='var(--c-'+(CAT[t.id]||'post')+')');
 
 const fmt=(t,v)=>{const x=dec(v),u=L(t.u);return u.startsWith('/')?x+u:x+' '+u};
 const first=t=>{const d=L(t.desc),s=d.split('. ')[0];return s===d?d:s+'.'};
