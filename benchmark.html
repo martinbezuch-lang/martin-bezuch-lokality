@@ -89,6 +89,7 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .arena.bad{animation:bad .5s}
 @keyframes bad{30%{background:#c2121a}}
 .hud{position:absolute;top:16px;left:0;right:0;font-weight:600;font-size:15px;opacity:.9}
+.sndb{position:absolute;top:8px;right:10px;z-index:2;background:rgba(255,255,255,.15);border:0;border-radius:999px;width:38px;height:38px;font-size:18px;cursor:pointer}
 .big{font:800 clamp(30px,6vw,56px)/1.1 Inter}
 .huge{font-size:clamp(40px,10vw,96px);font-weight:800;line-height:1.05;text-wrap:balance;overflow-wrap:anywhere;max-width:100%}
 .lbl{margin:0;text-transform:none;opacity:.8;font-size:15px}
@@ -206,6 +207,10 @@ const detectLang=()=>{const s=store.get('lang');if(LCODES.includes(s))return s;
 let lang=detectLang();
 let T=[];
 const later=(f,ms)=>{const id=setTimeout(f,ms);T.push(id);return id};
+let AC=null,SND=(()=>{try{return localStorage.getItem('hb-sound')!=='0'}catch(e){return true}})();
+const audio=()=>{try{if(navigator.audioSession)navigator.audioSession.type='playback';if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();if(AC.state!=='running')AC.resume();}catch(e){}return AC};
+const tone=(f,d=.22,type='sine',v=.18)=>{if(!SND)return;const c=audio();if(!c)return;const o=c.createOscillator(),g=c.createGain(),n=c.currentTime;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(0,n);g.gain.linearRampToValueAtTime(v,n+.01);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g).connect(c.destination);o.start(n);o.stop(n+d+.02)};
+const NOTES=[262,294,330,392,440,523,587,659,784];
 const cleanup=()=>{T.forEach(clearTimeout);T=[];running=false};
 /* anti-cheat: flags collected during one run */
 let running=false,flags=new Set();
@@ -261,14 +266,15 @@ run(a,done){let n=0,res=[],t0,st;
  round()}},
 {id:'sekvencia',g:'▦',u:U('úroveň','úroveň'),name:U('Sekvenčná pamäť','Sekvenční paměť'),desc:U('Zapamätaj si poradie, v akom sa políčka rozsvietia, a zopakuj ho. Každé kolo pribudne jedno.','Zapamatuj si pořadí, v jakém se políčka rozsvítí, a zopakuj ho. Každé kolo přibude jedno.'),
 run(a,done){let seq=[],idx=0,ok=false;
- a.innerHTML=`<div class=hud></div><div class="cells g3">${'<button class=cell aria-label="políčko"></button>'.repeat(9)}</div>`;
- const cs=[...a.querySelectorAll('.cell')],hud=Q(a,'.hud');
- const flash=(k,c='on')=>{cs[k].classList.add(c);later(()=>cs[k].classList.remove(c),300)};
+ a.innerHTML=`<div class=hud></div><button class=sndb aria-label="zvuk">${SND?'🔊':'🔇'}</button><div class="cells g3">${'<button class=cell aria-label="políčko"></button>'.repeat(9)}</div>`;
+ const cs=[...a.querySelectorAll('.cell')],hud=Q(a,'.hud'),sb=Q(a,'.sndb');audio();
+ sb.onclick=e=>{e.stopPropagation();SND=!SND;try{localStorage.setItem('hb-sound',SND?'1':'0')}catch(x){}sb.textContent=SND?'🔊':'🔇';if(SND)tone(523,.12)};
+ const flash=(k,c='on')=>{cs[k].classList.add(c);tone(NOTES[k],c==='tap'?.18:.3);later(()=>cs[k].classList.remove(c),300)};
  const next=()=>{seq.push(R(0,8));idx=0;ok=false;hud.textContent=tx('level')+' '+seq.length;
   seq.forEach((k,i)=>later(()=>flash(k),700+i*550));later(()=>ok=true,700+seq.length*550)};
  cs.forEach((c,k)=>c.onpointerdown=e=>{e.preventDefault();if(!ok)return;flash(k,'tap');
-  if(seq[idx]===k){if(++idx===seq.length){ok=false;later(next,500)}}
-  else{ok=false;a.classList.add('bad');later(()=>done(seq.length-1),600)}});
+  if(seq[idx]===k){if(++idx===seq.length){ok=false;later(()=>{tone(784,.1);later(()=>tone(1047,.14),90)},200);later(next,600)}}
+  else{ok=false;tone(110,.45,'sawtooth',.12);a.classList.add('bad');later(()=>done(seq.length-1),600)}});
  next()}},
 {id:'mierenie',g:'◎',low:1,u:U('ms / terč'),name:U('Mierenie','Míření'),desc:U('Zasiahni 30 terčov čo najrýchlejšie. Meria sa priemerný čas na jeden terč.','Zasáhni 30 terčů co nejrychleji. Měří se průměrný čas na jeden terč.'),
 run(a,done){let left=30,t0=0,moves=0,jumps=0,last=0;const hits=[];
