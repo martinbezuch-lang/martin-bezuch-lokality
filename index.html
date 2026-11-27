@@ -1898,8 +1898,12 @@
           db = {
             allSports: sp.map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent, kind: x.kind || 'sport', hbTest: x.hb_test || '', active: x.active !== false })),
             sports: sp.filter(x => x.active !== false).map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent, kind: x.kind || 'sport', hbTest: x.hb_test || '' })),
-            admins: [], deletionRequests: [], auditLog: [], athletes
+            admins: [], deletionRequests: [], auditLog: [], athletes, hbTops: null
           };
+          try {
+            const { data: tp, error: te } = await sb.rpc('hb_tops');
+            if (!te && Array.isArray(tp)) { const m = new Map(); tp.forEach(x => m.set(x.user_id + '|' + x.sport_id, (x.tops || []).map(Number))); db.hbTops = m; }
+          } catch (e) {}
           return true;
         } catch (err) {
           console.error('Supabase:', err);
@@ -3012,6 +3016,23 @@
         return /^#[0-9a-fA-F]{3,8}$/.test(String(c || '')) ? c : '#2563eb';
       }
 
+      // Zhody v testoch rozhoduje 2., 3., 4. a 5. najlepší pokus (kto ich nemá, je za tým, kto ich má).
+      function hbTopsOf(athleteId, sportId) {
+        return (db && db.hbTops && db.hbTops.get(String(athleteId) + '|' + sportId)) || null;
+      }
+      function hbTieCmp(sport, idA, idB) {
+        if (!sport || sport.kind !== 'cognitive' || !db || !db.hbTops) return 0;
+        const a = hbTopsOf(idA, sport.id) || [], b = hbTopsOf(idB, sport.id) || [];
+        for (let i = 1; i < 5; i++) {
+          const x = a[i], y = b[i];
+          if (x === undefined && y === undefined) return 0;
+          if (x === undefined) return 1;
+          if (y === undefined) return -1;
+          if (x !== y) return sport.lowerIsBetter ? x - y : y - x;
+        }
+        return 0;
+      }
+
       function getAthleteBestInSport(athlete, sportId) {
         if (!athlete || !Array.isArray(athlete.records)) return null;
         const sport = getSportById(sportId);
@@ -3239,10 +3260,13 @@
           .filter(x => !perKg || Number(x.a.weightKg) > 0);
         const metricOf = (x) => perKg ? x.bestRec.value / Number(x.a.weightKg) : x.bestRec.value;
         const poolVals = pool.map(metricOf);
-        const pctOf = (v) => {
+        const useTie = sport.kind === 'cognitive' && !perKg;
+        const pctOf = (v, id) => {
           if (poolVals.length === 0) return null;
           let worse = 0, equal = 0;
-          poolVals.forEach(o => { if (o === v) equal++; else if (sport.lowerIsBetter ? o > v : o < v) worse++; });
+          pool.forEach((x, i) => { const o = poolVals[i];
+            const c = o !== v ? 0 : (useTie && id != null ? hbTieCmp(sport, id, x.a.id) : 0);
+            if (o === v && c === 0) equal++; else if (o === v ? c < 0 : (sport.lowerIsBetter ? o > v : o < v)) worse++; });
           return Math.max(0, Math.min(99.9, ((worse + equal / 2) / poolVals.length) * 100));
         };
 
@@ -3260,7 +3284,8 @@
             bestRecord: x.bestRec,
             ageAtRecord: getAgeAtRecord(x.a, x.bestRec)
           }))
-          .sort((x, y) => sport.lowerIsBetter ? x.metric - y.metric : y.metric - x.metric);
+          .sort((x, y) => (sport.lowerIsBetter ? x.metric - y.metric : y.metric - x.metric) || (useTie ? hbTieCmp(sport, x.athlete.id, y.athlete.id) : 0));
+        const tiedMetrics = new Set(); { const seen = new Set(); rows.forEach(r => { if (seen.has(r.metric)) tiedMetrics.add(r.metric); seen.add(r.metric); }); }
 
         if (countEl) countEl.textContent = `${rows.length} účastníkov`;
 
@@ -3273,7 +3298,7 @@
           } else {
             const mine = rows[myIdx];
             banner.classList.remove('hidden');
-            const myPct = poolVals.length >= 2 ? pctOf(mine.metric) : null;
+            const myPct = poolVals.length >= 2 ? pctOf(mine.metric, mine.athlete.id) : null;
             let pctSentence = '';
             if (myPct !== null) {
               const whoLabel = selectedGender === 'Z' ? 'žien' : 'mužov';
@@ -3366,7 +3391,8 @@
                 : 'bg-slate-500/10 text-current border-slate-500/15';
 
           const videoUrl = entry.bestRecord && entry.bestRecord.videoUrl ? entry.bestRecord.videoUrl : '';
-          const rowPct = pctOf(entry.metric);
+          const rowPct = pctOf(entry.metric, ath.id);
+          const rowTops = useTie && tiedMetrics.has(entry.metric) ? (hbTopsOf(ath.id, sport.id) || []).slice(1) : null;
           const rowPctText = rowPct !== null ? rowPct.toFixed(1) : '—';
           const isRecentBest = entry.bestRecord && entry.bestRecord.date &&
             (Date.now() - new Date(entry.bestRecord.date).getTime()) < 90 * 86400000;
@@ -3388,6 +3414,7 @@
             <td class="py-3 px-4">
               <div class="inline-flex items-center gap-2 flex-wrap">
                 <span class="font-extrabold text-base text-blue-600">${escapeHtml(formatVal(entry.best, sport.unit))}</span>
+                ${rowTops ? `<span class="text-xs opacity-70 tabular-nums" title="Pri rovnakom najlepšom výsledku rozhoduje 2., 3., 4. a 5. najlepší pokus">ďalšie: ${rowTops.length ? escapeHtml(rowTops.map(x => String(x).replace('.', ',')).join(' · ')) : '—'}</span>` : ''}
                 ${perKg && entry.metric !== entry.best ? `<span class="text-xs opacity-70 tabular-nums" title="Výkon na kg telesnej váhy">(${escapeHtml(entry.metric.toFixed(2).replace('.', ','))} /kg)</span>` : ''}
                 ${rowPct !== null ? `<span class="mobile-only px-1.5 py-0.5 rounded-md bg-slate-500/10 text-[11px] font-bold tabular-nums ${pctClass(rowPct)}" title="Percentil">${escapeHtml(rowPctText)}</span>` : ''}
                 ${isRecentBest ? '<span class="text-emerald-600 text-xs font-bold" title="Najlepší výkon z posledných 90 dní">▲</span>' : ''}
@@ -3518,7 +3545,7 @@
           .filter(a => a.gender === athlete.gender)
           .map(a => ({ id: a.id, best: getAthleteBestInSport(a, sportId) }))
           .filter(x => x.best !== null)
-          .sort((a, b) => sport.lowerIsBetter ? a.best - b.best : b.best - a.best);
+          .sort((a, b) => (sport.lowerIsBetter ? a.best - b.best : b.best - a.best) || hbTieCmp(sport, a.id, b.id));
 
         const pos = ranked.findIndex(x => x.id === athlete.id);
         if (pos === -1) return null;
