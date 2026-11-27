@@ -16,7 +16,7 @@
    PICTURE: samotná aréna testu, cez celú šírku, je obrazom stránky
    COLOUR and TYPE: biela, vlajková modrá #11457E, červená #D7141A; Archivo 800 + Inter
    LAYOUT: hlavička, modrý hero s profilom, mriežka testov; test = nadpis, aréna, história */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0b1422);--ink:light-dark(#0f1a2b,#eef2f8);--mut:light-dark(#5a6678,#9aa7ba);--card:light-dark(#f2f4f8,#14203a);--line:light-dark(#dfe4ec,#24324f);--blue:#2563eb;--red:#D7141A}
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0b1422);--ink:light-dark(#0f1a2b,#eef2f8);--mut:light-dark(#5a6678,#9aa7ba);--card:light-dark(#f2f4f8,#14203a);--line:light-dark(#dfe4ec,#24324f);--blue:#2563eb;--red:#D7141A;--deep:light-dark(#1d4ed8,#22447a);--g1:light-dark(#2563eb,#22447a);--g2:light-dark(#dc2626,#c8302a);--ring:light-dark(rgba(255,255,255,.12),#b8312c)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
@@ -40,8 +40,8 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .seg{display:flex;border:2px solid var(--blue);border-radius:999px;overflow:hidden}
 .seg button{border:0;background:transparent;color:var(--ink);font:700 15px Inter;min-height:40px;min-width:52px;cursor:pointer}
 .seg button[aria-pressed=true]{background:var(--blue);color:#fff}
-.hero{background:#1d4ed8;color:#fff;position:relative;overflow:hidden}
-.hero::after{content:"";position:absolute;right:-60px;bottom:-80px;width:340px;height:340px;border-radius:50%;border:46px solid rgba(255,255,255,.12)}
+.hero{background:var(--deep);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;bottom:-80px;width:340px;height:340px;border-radius:50%;border:46px solid var(--ring)}
 .hero .wrap{position:relative;z-index:1}
 .lead{font-size:17px;max-width:60ch;margin:0 0 18px;opacity:.92}
 .stats{display:flex;flex-wrap:wrap;gap:10px}
@@ -66,7 +66,7 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .testhead{padding-bottom:18px}
 .testhead p{margin:0;color:var(--mut);max-width:70ch}
 .back{display:inline-block;margin-bottom:10px;font-weight:600;text-decoration:none;color:var(--mut)}
-.arena{background:#1d4ed8;color:#fff;min-height:clamp(400px,58vh,600px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:64px 16px 28px;text-align:center;position:relative;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
+.arena{background:var(--deep);color:#fff;min-height:clamp(400px,58vh,600px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:64px 16px 28px;text-align:center;position:relative;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
 .arena.red{background:#c2121a}.arena.green{background:#16a34a}
 .arena.bad{animation:bad .5s}
 @keyframes bad{30%{background:#c2121a}}
@@ -174,7 +174,7 @@ textarea.cp{width:100%;min-height:120px;margin-top:10px;font:14px Inter;border-r
 <body>
 <header class="band top"><div class="wrap head">
   <a href="index.html" class="logo" title="Späť na rebríčky"><span class="brand"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="12" width="5" height="9" rx="1.2" fill="#fff" fill-opacity=".65"/><rect x="9.5" y="3" width="5" height="18" rx="1.2" fill="#fff"/><rect x="16" y="15" width="5" height="6" rx="1.2" fill="#fff" fill-opacity=".45"/></svg></span><span><b>Porovnaj sa</b><small id="logoT">Kognitívne testy</small></span></a>
-  <div class="hr"><a href="#" class="pill" id="allT">🧠</a><div id="auth"></div><div class="seg" role="group" aria-label="Jazyk / Jazyk"><button data-l="sk">SK</button><button data-l="cz">CZ</button></div></div>
+  <div class="hr"><a href="#" class="pill" id="allT">🧠</a><div id="auth"></div><button class="pill" id="thm" type="button" aria-label="Tmavý / svetlý režim"></button><div class="seg" role="group" aria-label="Jazyk / Jazyk"><button data-l="sk">SK</button><button data-l="cz">CZ</button></div></div>
 </div></header>
 <main id="app"></main>
 <footer class="band foot"><div class="wrap"><span id="foot"></span> <a href="ochrana-udajov.html">Ochrana údajov</a></div></footer>
@@ -495,7 +495,7 @@ run(a,done){let i=0,pen=0;const t0=performance.now();
    else if(!b.classList.contains('x')){pen+=1000;b.classList.add('x')}})};
  round()}}
 ];
-TESTS.forEach((t,i)=>t.col=i%2?'var(--red)':'var(--blue)');
+TESTS.forEach((t,i)=>t.col=i%2?'var(--g2)':'var(--g1)');
 
 const fmt=(t,v)=>{const x=dec(v),u=L(t.u);return u.startsWith('/')?x+u:x+' '+u};
 const first=t=>L(t.desc).split('. ')[0].replace(/\.$/,'')+'.';
@@ -768,6 +768,11 @@ function setLang(l){lang=l;store.set('lang',l);document.documentElement.lang=l==
  document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===l))}
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{setLang(b.dataset.l);route()});
 window.addEventListener('hashchange',route);
+const thm=document.getElementById('thm');
+const getTheme=()=>{try{const v=localStorage.getItem('biceps_theme');if(v==='dark'||v==='light')return v}catch(e){}try{return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}catch(e){return 'light'}};
+const applyTheme=v=>{document.documentElement.dataset.theme=v;thm.textContent=v==='dark'?'☀️':'🌙';thm.title=v==='dark'?'Svetlý režim':'Tmavý režim'};
+thm.onclick=()=>{const v=document.documentElement.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('biceps_theme',v)}catch(e){}applyTheme(v)};
+applyTheme(getTheme());
 setLang(lang);route();initRemote();
 }
 </script>
