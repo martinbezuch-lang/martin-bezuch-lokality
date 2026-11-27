@@ -4021,11 +4021,15 @@
           box.innerHTML = title + '<div class="text-xs opacity-70">Na graf sú potrebné aspoň 2 merania v tejto disciplíne.</div>';
           return;
         }
-        const W = 640, H = 200, L = 56, R = 16, T = 14, B = 30;
         const vals = pts.map(p => p.value);
         let lo = Math.min(...vals), hi = Math.max(...vals);
         if (hi === lo) { hi += 1; lo -= 1; }
         const padV = (hi - lo) * 0.1; lo -= padV; hi += padV;
+        // os Y: čísla bez jednotky (jednotka je nad osou), ľavý okraj podľa najdlhšieho čísla, aby sa nič neorezalo
+        const fmt = v => formatVal((hi - lo) >= 10 ? Math.round(v) : Math.round(v * 10) / 10, '');
+        const ticks = [hi, (hi + lo) / 2, lo];
+        const W = 640, H = 200, R = 16, T = 22, B = 30;
+        const L = Math.max(36, 12 + 7 * Math.max(...ticks.map(v => fmt(v).length)));
         const n = pts.length;
         const x0 = L + 14, x1 = W - R - 14;
         const xi = (i) => n === 1 ? (x0 + x1) / 2 : x0 + (i / (n - 1)) * (x1 - x0);
@@ -4037,7 +4041,6 @@
           const isBest = p.value === bestVal;
           return `<circle cx="${xi(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="${isBest ? 6 : 4}" fill="${color}" ${isBest ? 'stroke="#f59e0b" stroke-width="3"' : ''}><title>${escapeHtml(formatVal(p.value, sport.unit))} · ${escapeHtml(p.date)}</title></circle>`;
         }).join('');
-        const fmt = v => formatVal(Math.round(v * 10) / 10, sport.unit);
         const step = Math.max(1, Math.ceil(n / 8));
         const shortDate = d => { const m = String(d).match(/^(\d{4})-(\d{2})-(\d{2})/); return m ? `${Number(m[3])}.${Number(m[2])}.${m[1].slice(2)}` : String(d); };
         const xLabels = pts.map((p, i) => (i % step === 0 || i === n - 1)
@@ -4046,8 +4049,8 @@
         box.innerHTML = title + `<svg viewBox="0 0 ${W} ${H + 10}" class="w-full h-auto" role="img" aria-label="Graf vývoja výkonov">
           <line x1="${L}" y1="${H - B}" x2="${W - R}" y2="${H - B}" stroke="currentColor" stroke-opacity="0.2"/>
           <line x1="${L}" y1="${T}" x2="${L}" y2="${H - B}" stroke="currentColor" stroke-opacity="0.2"/>
-          <text x="${L - 6}" y="${T + 8}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(hi))}</text>
-          <text x="${L - 6}" y="${H - B}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(lo))}</text>
+          ${ticks.map(v => `<line x1="${L}" y1="${y(v).toFixed(1)}" x2="${W - R}" y2="${y(v).toFixed(1)}" stroke="currentColor" stroke-opacity="0.12" stroke-dasharray="3 3"/><text x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" font-size="11" fill="currentColor" fill-opacity="0.65">${escapeHtml(fmt(v))}</text>`).join('')}
+          ${sport.unit ? `<text x="4" y="11" text-anchor="start" font-size="10" font-weight="700" fill="currentColor" fill-opacity="0.75">${escapeHtml(sport.unit)}</text>` : ''}
           ${xLabels}
           <polyline points="${line}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
           ${dots}
