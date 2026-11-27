@@ -1779,6 +1779,12 @@
         return p >= 99 ? 'pct-top1' : (p >= 90 ? 'pct-top10' : (p >= 75 ? 'pct-top25' : ''));
       }
 
+      // V rebríčku sa meno zobrazuje ako „Priezvisko Meno“ (uložené je „Meno Priezvisko“)
+      function surnameFirst(name) {
+        const parts = String(name || '').trim().split(/\s+/);
+        return parts.length < 2 ? parts.join(' ') : parts[parts.length - 1] + ' ' + parts.slice(0, -1).join(' ');
+      }
+
       function getFlag(country) {
         return COUNTRY_FLAGS[country] || '🌍';
       }
@@ -3419,7 +3425,7 @@
             </td>
             <td class="py-3 px-4">
               <span class="mobile-only mr-1">${getFlag(ath.country)}</span><button type="button" data-open-profile="${escapeHtml(ath.id)}" class="font-bold text-sm hover:text-blue-600 transition cursor-pointer text-left">
-                ${escapeHtml(ath.name)}
+                ${escapeHtml(surnameFirst(ath.name))}
               </button>
               ${ath.isCelebrity ? '<span class="ml-1.5 text-xs" title="Známa osobnosť">⭐</span>' : ''}
               ${isOwnRow ? '<span class="ml-1.5 px-1.5 py-0.5 rounded-md bg-blue-600 text-white text-[10px] font-bold align-middle">TY</span>' : ''}
