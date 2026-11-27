@@ -5000,10 +5000,16 @@
           ? rowsData.filter(r => r.hasBoth)
           : rowsData;
 
+        // Skóre ako v zápase: priezvisko – priezvisko výhry A : výhry B (rovnaké výsledky sa nepočítajú)
+        const surname = (nm) => { const parts = String(nm || '').trim().split(/\s+/); return parts[parts.length - 1] || String(nm || ''); };
+        let shortA = surname(athA.name), shortB = surname(athB.name);
+        if (shortA === shortB) { shortA = athA.name; shortB = athB.name; }
+        const scoreCls = (w, o) => w > o ? 'text-emerald-600' : (w < o ? 'opacity-60' : '');
         summaryEl.innerHTML = `
-          <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">${escapeHtml(athA.name)}: ${winsA} disciplín</span>
-          <span class="px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-500/10 border border-slate-500/20">Rovnosti: ${ties}</span>
-          <span class="px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-700 border border-emerald-500/30">${escapeHtml(athB.name)}: ${winsB} disciplín</span>
+          <span class="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-slate-500/10 border border-slate-500/20 text-sm sm:text-base font-bold">
+            <span>${escapeHtml(shortA)} – ${escapeHtml(shortB)}</span>
+            <span class="text-lg sm:text-xl font-extrabold tabular-nums"><span class="${scoreCls(winsA, winsB)}">${winsA}</span><span class="opacity-50 mx-0.5">:</span><span class="${scoreCls(winsB, winsA)}">${winsB}</span></span>
+          </span>
         `;
 
         bodyEl.innerHTML = '';
