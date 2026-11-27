@@ -29,6 +29,12 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       color: #1e293b;
     }
+.kind-btn{padding:.25rem .75rem;border-radius:9999px;font-size:.75rem;font-weight:600;border:1px solid #e2e8f0;background:#fff;color:#334155;cursor:pointer;transition:background .15s}
+    .kind-btn:hover{background:#f8fafc}
+    .kind-btn[aria-pressed="true"]{background:#2563eb;border-color:#2563eb;color:#fff}
+    body.dark-chess .kind-btn{background:#14203a;border-color:#2b3b5c;color:#eef2f8}
+    body.dark-chess .kind-btn:hover{background:#1b2a4a}
+    body.dark-chess .kind-btn[aria-pressed="true"]{background:#2563eb;border-color:#2563eb;color:#fff}
     body.dark-chess {
       background-color: #0b1422;
       color: #eef2f8;
@@ -678,7 +684,11 @@
             <p class="text-xs font-medium text-slate-500 mt-0.5">Kliknutím na disciplínu zobrazíš rekord, poradie, percentil a vyfiltruješ merania (druhým kliknutím filter zrušíš)</p>
           </div>
 
-          <button id="toggle-age-bests-btn" type="button" class="px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer inline-flex items-center gap-1.5 shrink-0"><span>📈 História</span></button>
+          <div class="flex items-center gap-1.5 flex-wrap shrink-0">
+            <button id="toggle-age-bests-btn" type="button" class="px-3 py-1 rounded-full text-xs font-semibold border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition cursor-pointer inline-flex items-center gap-1.5 shrink-0"><span>📈 História</span></button>
+            <button type="button" class="kind-btn" data-kind="body" aria-pressed="false" title="Iba športové disciplíny (druhým kliknutím zobrazíš všetko)">💪 Telo</button>
+            <button type="button" class="kind-btn" data-kind="mind" aria-pressed="false" title="Iba kognitívne testy (druhým kliknutím zobrazíš všetko)">🧠 Hlava</button>
+          </div>
         </div>
 
         <!-- Prehľad najlepších výsledkov podľa veku pri výkone pre vybranú disciplínu -->
@@ -1604,6 +1614,8 @@
       let currentPage = 1;
       const PAGE_SIZE = 100;
       let activeProfileAthleteId = null;
+      let profileKind = (() => { try { const v = localStorage.getItem('profile_kind'); return v === 'body' || v === 'mind' ? v : ''; } catch (e) { return ''; } })();
+      const profileKindMatch = sp => !profileKind || (profileKind === 'mind' ? sp.kind === 'cognitive' : sp.kind !== 'cognitive');
       let selectedProfileSportId = null;
       let profileSportFilterId = null;
       let ageBestsCollapsed = true;
@@ -4025,8 +4037,11 @@
 
         const sportsHeadingEl = document.getElementById('profile-sports-heading');
         if (sportsHeadingEl) {
-          sportsHeadingEl.textContent = `Športové a kognitívne disciplíny — najlepšie výkony účastníka (${db.sports.length})`;
+          const shownCount = db.sports.filter(profileKindMatch).length;
+          const headLabel = profileKind === 'body' ? 'Telo — športové disciplíny' : profileKind === 'mind' ? 'Hlava — kognitívne testy' : 'Športové a kognitívne disciplíny';
+          sportsHeadingEl.textContent = `${headLabel} — najlepšie výkony účastníka (${shownCount})`;
         }
+        document.querySelectorAll('.kind-btn').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.kind === profileKind)));
 
         const age = athlete.birthYear ? (2026 - Number(athlete.birthYear)) : null;
         document.getElementById('profile-age-year').textContent = athlete.birthYear
@@ -4043,6 +4058,7 @@
         grid.className = 'grid grid-cols-2 sm:grid-cols-4 gap-2.5';
 
         const rankedSports = db.sports
+          .filter(profileKindMatch)
           .map(sp => {
             const best = getAthleteBestInSport(athlete, sp.id);
             const count = records.filter(r => r.sportId === sp.id).length;
@@ -4968,6 +4984,11 @@
           showToast(ok ? 'Odkaz na profil bol skopírovaný.' : 'Skopíruj odkaz: ' + url);
         });
         window.addEventListener('hashchange', routeFromHash);
+        document.querySelectorAll('.kind-btn').forEach(b => b.addEventListener('click', () => {
+          profileKind = profileKind === b.dataset.kind ? '' : b.dataset.kind;
+          try { localStorage.setItem('profile_kind', profileKind); } catch (e) {}
+          if (activeProfileAthleteId) renderAthleteProfile(activeProfileAthleteId);
+        }));
         document.getElementById('toggle-age-bests-btn').addEventListener('click', () => {
           ageBestsCollapsed = !ageBestsCollapsed;
           const ath = activeProfileAthleteId ? db.athletes.find(a => String(a.id) === String(activeProfileAthleteId)) : null;
