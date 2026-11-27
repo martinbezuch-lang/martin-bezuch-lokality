@@ -5022,7 +5022,7 @@
 
           tr.innerHTML = `
             <td class="py-3 px-4 font-semibold text-sm">
-              <div class="flex items-center gap-2.5">${getSportMiniLogoHtml(item.sport)}<span>${escapeHtml(item.sport.name)}</span></div>
+              <div class="flex items-center gap-2.5">${getSportMiniLogoHtml(item.sport)}<div class="min-w-0"><span>${escapeHtml(item.sport.name)}</span>${item.sport.kind === 'cognitive' && item.sport.hbTest ? `<a href="benchmark.html#${encodeURIComponent(item.sport.hbTest)}" class="mt-1 flex w-fit items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-bold bg-blue-600 text-white hover:bg-blue-700 no-underline whitespace-nowrap">🧠 Otestuj sa</a>` : ''}</div></div>
             </td>
             <td class="py-3 px-4 text-sm">
               ${item.bestA !== null
