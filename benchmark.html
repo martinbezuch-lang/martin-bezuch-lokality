@@ -588,7 +588,7 @@ function runTest(t,cb){cleanup();const a=fresh();flags=new Set();running=true;ru
  t.run(a,(v,d)=>{const fl=[...flags];cleanup();cb(v,d,fl)})}
 function start(t){runTest(t,(v,d)=>finish(t,v,d))}
 
-function finish(t,v,detail){cleanup();const a=fresh();const G=gated(),best=G?{}:getBest(),old=best[t.id],sus=[...flags];
+function finish(t,v,detail){cleanup();logEv('test_done',t.id);const a=fresh();const G=gated(),best=G?{}:getBest(),old=best[t.id],sus=[...flags];
  const rec=!G&&!sus.length&&(old==null||(t.low?v<old:v>old));if(rec){best[t.id]=v;store.set('best',best)}
  if(!G&&!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
  if(G){const s=sportOf(t);if(s&&!sus.length)store.set('pending',{sport:s.id,score:v,detail:detail||null,device:runDev,lang,ts:Date.now()});else store.set('pending',null);setTimeout(()=>gateModal(t,v),700)}
@@ -729,6 +729,10 @@ function cert(s){cleanup();const tests=Object.keys(s.res).map(byId).filter(Boole
 /* ===== Napojenie na porovnajsa.sk (Supabase) ===== */
 const SB_URL='https://khduswpbhozkqjxnqufk.supabase.co',SB_KEY='sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8';
 const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+// anonymná štatistika: náhodné ID prehliadača (spoločné s hlavnou stránkou), návšteva raz za deň a dokončené testy
+const VID=(()=>{let v=store.get('vid');if(!v){v=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);store.set('vid',v)}return v})();
+function logEv(kind,detail){try{if(sb&&VID)sb.rpc('hb_log',{p_visitor:VID,p_kind:kind,p_page:'tests',p_detail:detail||null,p_lang:lang}).then(()=>{},()=>{})}catch(e){}}
+logEv('visit');
 let ME=null,SP={},remoteOk=false,cmpDev=null,runDev='mouse',authChecked=false;
 const gated=()=>!!sb&&!ME;
 const RS={
