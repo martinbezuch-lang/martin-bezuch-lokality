@@ -433,6 +433,7 @@
       </div>
 
       <div class="flex items-center gap-2 flex-wrap">
+        <a href="benchmark.html" title="Kognitívne testy: reakcia, pamäť, postreh" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 transition no-underline">🧠 Testy</a>
         <button id="open-friends-list-btn" type="button" title="Moji priatelia a sledovaní" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">🤝 (0)</button>
         <button id="open-celebs-list-btn" type="button" title="Známe osobnosti" class="h-9 px-2.5 inline-flex items-center justify-center rounded-xl text-xs font-semibold border border-slate-300/70 bg-slate-500/10 hover:bg-slate-500/20 cursor-pointer">⭐ (0)</button>
         <div id="user-auth-controls" class="flex items-center gap-2 flex-wrap">
@@ -530,6 +531,7 @@
           </button>
           <span id="leaderboard-count" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-500/15 whitespace-nowrap">1 účastníkov</span>
         </div>
+        <a id="hb-cta" href="benchmark.html" class="hidden px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition no-underline">🧠 Otestuj sa</a>
       </div>
 
       <div id="my-rank-banner" class="hidden px-4 sm:px-6 py-2.5 border-b border-blue-500/25 bg-blue-500/10 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"></div>
@@ -1793,6 +1795,7 @@
             const URL_PARAMS = (location.hash + '&' + location.search).replace(/[?#]/g, '&');
       const RECOVERY_IN_URL = /(^|&)type=recovery(&|$)/.test(URL_PARAMS);
       const AUTH_ERROR_IN_URL = (URL_PARAMS.match(/(^|&)error_description=([^&]*)/) || [])[2] || '';
+      const SPORT_IN_URL = (URL_PARAMS.match(/(^|&)sport=([A-Za-z0-9_]+)/) || [])[2] || '';
       const sb = window.supabase.createClient('https://khduswpbhozkqjxnqufk.supabase.co', 'sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8');
 
       async function fetchAllRows(table, orderCol, cols) {
@@ -1836,7 +1839,8 @@
               country: r.country || '', city: r.city || '', videoUrl: (vmap.get(String(r.id)) || {}).video_url || '', videoPublic: (vmap.get(String(r.id)) || {}).video_public !== false, createdAt: r.created_at || '' });
           });
           db = {
-            sports: sp.map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent })),
+            allSports: sp.map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent, kind: x.kind || 'sport', hbTest: x.hb_test || '', active: x.active !== false })),
+            sports: sp.filter(x => x.active !== false).map(x => ({ id: x.id, name: x.name, unit: x.unit, lowerIsBetter: x.lower_is_better, accent: x.accent, kind: x.kind || 'sport', hbTest: x.hb_test || '' })),
             admins: [], deletionRequests: [], auditLog: [], athletes
           };
           return true;
@@ -2764,7 +2768,9 @@
         });
       }
 
+      let sportUrlUsed = false;
       function populateSportSelects() {
+        if (SPORT_IN_URL && !sportUrlUsed && db.sports.some(s => s.id === SPORT_IN_URL)) { selectedSportId = SPORT_IN_URL; sportUrlUsed = true; }
         if (!db.sports.some(s => s.id === selectedSportId)) {
           selectedSportId = db.sports[0] ? db.sports[0].id : '';
         }
@@ -2778,8 +2784,9 @@
           const sel = document.getElementById(id);
           if (!sel) return;
           const prev = sel.value;
-          sel.innerHTML = db.sports.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.unit)})</option>`).join('');
-          if (prev && db.sports.some(s => s.id === prev)) sel.value = prev;
+          const manual = db.sports.filter(s => s.kind !== 'cognitive');
+          sel.innerHTML = manual.map(s => `<option value="${escapeHtml(s.id)}">${escapeHtml(s.name)} (${escapeHtml(s.unit)})</option>`).join('');
+          if (prev && manual.some(s => s.id === prev)) sel.value = prev;
         });
       }
 
@@ -3130,6 +3137,12 @@
         if (perKg && sport.unit !== 'kg') perKg = false;
         syncFiltersUi();
 
+        const hbCta = document.getElementById('hb-cta');
+        if (hbCta) {
+          const isTest = sport.kind === 'cognitive' && sport.hbTest;
+          hbCta.classList.toggle('hidden', !isTest);
+          if (isTest) hbCta.href = 'benchmark.html#' + encodeURIComponent(sport.hbTest);
+        }
         const lbSection = document.getElementById('leaderboard-section');
         if (lbSection) lbSection.style.borderTop = '3px solid ' + safeColor(sport.accent);
         const pctTh = document.getElementById('pct-th');
@@ -4488,10 +4501,10 @@
             </div>
           </div>`).join('') : '<div class="text-xs opacity-70 py-3">Žiadni športovci.</div>';
 
-        document.getElementById('admin-sports-list').innerHTML = db.sports.map(sp => `
-          <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs">
-            <div><strong>${escapeHtml(sp.name)}</strong> (${escapeHtml(sp.unit)})</div>
-            ${isSuper ? `<button type="button" data-adm-del-sp="${escapeHtml(sp.id)}" data-name="${escapeHtml(sp.name)}" class="${btnBase}bg-rose-500/15 text-rose-700">Odstrániť</button>` : ''}
+        document.getElementById('admin-sports-list').innerHTML = (db.allSports || db.sports).map(sp => `
+          <div class="p-2.5 rounded-xl border flex items-center justify-between gap-2 text-xs ${sp.active === false ? 'opacity-60' : ''}">
+            <div><strong>${escapeHtml(sp.name)}</strong> (${escapeHtml(sp.unit)})${sp.kind === 'cognitive' ? ' <span class="px-1.5 py-0.5 rounded-md bg-purple-500/15 text-purple-700 font-semibold">🧠 test</span>' : ''}${sp.active === false ? ' <span class="px-1.5 py-0.5 rounded-md bg-slate-500/20 font-semibold">skrytá</span>' : ''}</div>
+            ${isSuper ? `<div class="flex gap-1.5"><button type="button" data-adm-act-sp="${escapeHtml(sp.id)}" data-flag="${sp.active === false ? '1' : '0'}" class="${btnBase}bg-slate-500/15">${sp.active === false ? 'Zobraziť' : 'Skryť'}</button><button type="button" data-adm-del-sp="${escapeHtml(sp.id)}" data-name="${escapeHtml(sp.name)}" class="${btnBase}bg-rose-500/15 text-rose-700">Odstrániť</button></div>` : ''}
           </div>`).join('');
 
         document.getElementById('admin-panel-requests').innerHTML = requests.length ? requests.map(r => `
@@ -4605,6 +4618,9 @@
               if (!confirm(`Naozaj zmazať športovca ${g('data-name')} aj s jeho výkonmi? Nedá sa to vrátiť.`)) return;
               await rpcOrThrow('admin_delete_athlete', { p_user: g('data-adm-del-ath') });
               showToast('Športovec bol zmazaný.');
+            } else if (btn.hasAttribute('data-adm-act-sp')) {
+              await rpcOrThrow('admin_set_sport_active', { p_id: g('data-adm-act-sp'), p_active: g('data-flag') === '1' });
+              showToast(g('data-flag') === '1' ? 'Disciplína je znova viditeľná.' : 'Disciplína je skrytá, výsledky zostali.');
             } else if (btn.hasAttribute('data-adm-del-sp')) {
               if (!confirm(`Naozaj odstrániť disciplínu ${g('data-name')} aj so všetkými výkonmi v nej? Nedá sa to vrátiť.`)) return;
               await rpcOrThrow('admin_delete_sport', { p_id: g('data-adm-del-sp') });

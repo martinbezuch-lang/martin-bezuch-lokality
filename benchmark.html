@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kognitívne testy · Porovnaj sa</title>
+<meta name="description" content="Zmeraj si reakcie, pamäť a postreh v testoch po slovensky a po česky a porovnaj sa s ostatnými hráčmi.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://khduswpbhozkqjxnqufk.supabase.co; object-src 'none'; base-uri 'self'; form-action 'self'">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%232563eb'/%3E%3Ctext x='50' y='66' font-size='46' font-weight='800' text-anchor='middle' fill='white' font-family='Arial,sans-serif'%3EB1%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<style>
+/* VOICE: hravý, športový, ako tester reflexov na jarmoku – jasné úlohy, žiadne kecy
+   IDEA: testovacia plocha (arena) ako veľká modrá tabuľa z vlajok SK/CZ
+   PICTURE: samotná aréna testu, cez celú šírku, je obrazom stránky
+   COLOUR and TYPE: biela, vlajková modrá #11457E, červená #D7141A; Archivo 800 + Inter
+   LAYOUT: hlavička, modrý hero s profilom, mriežka testov; test = nadpis, aréna, história */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0b1422);--ink:light-dark(#0f1a2b,#eef2f8);--mut:light-dark(#5a6678,#9aa7ba);--card:light-dark(#f2f4f8,#14203a);--line:light-dark(#dfe4ec,#24324f);--blue:#2563eb;--red:#D7141A}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+a{color:inherit}
+.band{padding:clamp(24px,4vw,56px) max(5vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+h1,h2,.logo b,.huge,.num,.word,.glyph{font-family:Inter,system-ui,sans-serif}
+h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:balance;font-weight:800}
+.top{padding-block:14px;border-bottom:1px solid var(--line)}
+.head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;font-size:18px}
+.brand{width:40px;height:40px;border-radius:12px;background:#2563eb;display:grid;place-items:center;flex:none}
+.logo b{display:block;font-weight:800;font-size:17px;line-height:1.2}.logo small{display:block;font-size:12px;color:var(--mut);font-weight:600}
+.hr{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pill{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600;font-size:14px;text-decoration:none}
+.save{font-weight:600;margin:0}.save a{color:#fff}
+.cmph{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.cmph h2{font-size:22px;margin:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:14px 0}
+.tile{background:var(--card);border-radius:14px;padding:12px 14px}.tile b{display:block;font-size:24px;font-weight:800;line-height:1.2;white-space:nowrap}.tile small{display:block;color:var(--mut);font-size:13px}
+.pct{font-size:18px;margin:6px 0 10px}#cmp{margin-bottom:40px}#cmp h3{font-size:17px;margin:18px 0 8px}#cmp:empty{display:none}
+.seg{display:flex;border:2px solid var(--blue);border-radius:999px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);font:700 15px Inter;min-height:40px;min-width:52px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--blue);color:#fff}
+.hero{background:#1d4ed8;color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;right:-60px;bottom:-80px;width:340px;height:340px;border-radius:50%;border:46px solid rgba(255,255,255,.12)}
+.hero .wrap{position:relative;z-index:1}
+.lead{font-size:17px;max-width:60ch;margin:0 0 18px;opacity:.92}
+.stats{display:flex;flex-wrap:wrap;gap:10px}
+.chip{background:rgba(255,255,255,.14);border-radius:12px;padding:10px 14px;font-size:14px}
+.chip b{display:block;font:800 26px Inter}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:14px}
+.card{display:flex;gap:14px;align-items:flex-start;text-decoration:none;background:var(--card);border-radius:16px;padding:16px;transition:transform .15s}
+.card:hover{transform:translateY(-2px)}.card:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.glyph{flex:none;width:58px;height:58px;border-radius:14px;display:grid;place-items:center;background:var(--g);color:#fff;font-weight:800;font-size:19px}
+.glyph.big{width:96px;height:96px;font-size:30px;border-radius:22px;margin:0 auto 18px;background:rgba(255,255,255,.16)}
+.ct b{display:block;font-size:17px;line-height:1.25}
+.ct small{display:block;color:var(--mut);font-size:14px;line-height:1.4;margin:3px 0 6px}
+.ct em{font-style:normal;font-size:13px;font-weight:600;color:var(--blue)}
+:root:not([data-theme=light]) .ct em{color:light-dark(var(--blue),#8fb6ec)}
+.tools{margin-top:22px}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 24px;border-radius:999px;border:0;background:#fff;color:var(--blue);font:700 17px Inter;cursor:pointer;text-decoration:none;touch-action:manipulation}
+.btn:focus-visible,.cell:focus-visible,.cc:focus-visible{outline:3px solid #ffd400;outline-offset:2px}
+.btn.ghost{background:transparent;color:#fff;box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 2px var(--line);font-size:15px}
+.btn.red{background:var(--red);color:#fff}
+.btn.sm{min-height:44px;padding:0 16px;font-size:15px}
+.testhead{padding-bottom:18px}
+.testhead p{margin:0;color:var(--mut);max-width:70ch}
+.back{display:inline-block;margin-bottom:10px;font-weight:600;text-decoration:none;color:var(--mut)}
+.arena{background:#1d4ed8;color:#fff;min-height:clamp(400px,58vh,600px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:64px 16px 28px;text-align:center;position:relative;user-select:none;-webkit-user-select:none;touch-action:manipulation;overflow:hidden}
+.arena.red{background:#c2121a}.arena.green{background:#16a34a}
+.arena.bad{animation:bad .5s}
+@keyframes bad{30%{background:#c2121a}}
+.hud{position:absolute;top:16px;left:0;right:0;font-weight:600;font-size:15px;opacity:.9}
+.big{font:800 clamp(30px,6vw,56px)/1.1 Inter}
+.huge{font-size:clamp(44px,10vw,96px);font-weight:800;line-height:1;white-space:nowrap}
+.lbl{margin:0;text-transform:none;opacity:.8;font-size:15px}
+.sus{background:#fff;color:#8a0d12;border-left:6px solid var(--red);border-radius:12px;padding:12px 16px;text-align:left;max-width:min(92vw,460px);display:flex;flex-direction:column;gap:4px;font-size:15px}
+.rec{background:var(--red);padding:6px 14px;border-radius:999px;font-weight:700;margin:0}
+.row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.cells{display:grid;gap:10px}
+.g3{grid-template-columns:repeat(3,minmax(0,1fr));width:min(80vw,340px)}
+.cell{aspect-ratio:1;border:0;border-radius:12px;background:rgba(255,255,255,.18);cursor:pointer;transition:background .12s}
+.cell.on{background:#fff}.cell.tap{background:#8fb6ec}.cell.miss{background:#0a2547}
+.tight{gap:6px}.cc{aspect-ratio:1;border:0;border-radius:8px;cursor:pointer}.cc.hint{outline:4px solid #fff}
+.chimp{grid-template-columns:repeat(8,minmax(0,1fr));width:min(94vw,640px);gap:6px}
+.chimp span,.cn{aspect-ratio:1}
+.cn{border:2px solid #fff;border-radius:10px;background:transparent;color:#fff;font:800 clamp(14px,3.4vw,24px) Inter;cursor:pointer}
+.cn.mask{background:#fff;color:transparent}.cn.gone{visibility:hidden}
+.target{position:absolute;width:72px;height:72px;border-radius:50%;border:0;cursor:crosshair;background:radial-gradient(circle,#fff 0 18%,var(--red) 19% 42%,#fff 43% 62%,var(--red) 63%)}
+.num{font-size:clamp(32px,8vw,72px);font-weight:800;letter-spacing:.06em;overflow-wrap:anywhere;max-width:100%}
+.num.x{text-decoration:line-through;text-decoration-color:var(--red)}
+.bar{width:min(70vw,360px);height:8px;background:rgba(255,255,255,.2);border-radius:9px;overflow:hidden}
+.bar i{display:block;height:100%;background:#fff;animation:shrink linear forwards}
+@keyframes shrink{from{width:100%}to{width:0}}
+.ask{display:flex;flex-direction:column;align-items:center;gap:14px;width:min(90vw,420px)}
+.ask label{font-size:18px;font-weight:600}
+.ask input{width:100%;font:800 28px Inter;text-align:center;padding:12px;border-radius:14px;border:0;color:var(--blue);background:#fff}
+.word{font-size:clamp(34px,8vw,68px);font-weight:800;padding:8px 18px;border-radius:14px}
+.word.pop{animation:pop .2s}@keyframes pop{from{transform:scale(.9);opacity:.4}}
+.word.g{background:#16a34a}.word.b{background:var(--red)}
+.word .gap{color:#ffd400;border-bottom:4px solid #ffd400;padding:0 4px}
+.stage{background:#fff;border-radius:18px;padding:26px 30px;min-width:min(80vw,340px)}
+.sw{font:800 clamp(34px,8vw,60px) Inter}
+.pad{width:min(86vw,520px);height:min(46vh,320px);border:0;border-radius:24px;background:#fff;color:var(--blue);font:800 clamp(28px,7vw,60px) Inter;cursor:pointer}
+.pad:active{background:#dbe7f7}
+.typebox{width:min(94vw,820px);display:flex;flex-direction:column;gap:12px}
+.tt{background:#fff;color:#7a8699;border-radius:16px;padding:18px 20px;font-size:clamp(18px,2.4vw,22px);line-height:1.6;text-align:left;margin:0}
+.tt .ok{color:#0f1a2b}.tt .no{color:#fff;background:var(--red);border-radius:3px}
+.tt .cur{box-shadow:inset 0 -3px 0 var(--blue)}
+.typebox textarea{font:18px/1.5 Inter;border-radius:14px;border:0;padding:14px;resize:none;width:100%}
+.dots{width:min(94vw,640px);aspect-ratio:400/260;background:rgba(255,255,255,.08);border-radius:16px}
+.sch{grid-template-columns:repeat(5,minmax(0,1fr));width:min(90vw,420px);gap:8px}
+.sc{aspect-ratio:1;border:0;border-radius:10px;background:#fff;color:var(--blue);font:800 clamp(18px,5vw,28px) Inter;cursor:pointer}
+.sc.done{opacity:.3}.sc.x,.lt.x{background:var(--red);color:#fff}
+.gng{width:min(46vw,180px);aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.1)}
+.gng.go{background:#22c55e}.gng.no{background:var(--red)}.gng.hit{background:#fff}.gng.bad{background:#000}
+.btn.on{background:#ffd400}
+.mot{position:relative;width:min(92vw,640px);height:min(48vh,360px);background:rgba(255,255,255,.08);border-radius:16px;overflow:hidden}
+.ball{position:absolute;left:0;top:0;width:36px;height:36px;border-radius:50%;border:0;padding:0;background:#fff;cursor:pointer}
+.ball.tg{background:#ffd400}.ball.no{background:var(--red)}
+.shp{width:min(40vw,200px);height:min(40vw,200px);background:rgba(255,255,255,.08);border-radius:16px}
+.track{position:relative;width:min(90vw,640px);height:56px;background:rgba(255,255,255,.12);border-radius:12px}
+.tl{position:absolute;top:-8px;bottom:-8px;width:4px;margin-left:-2px;background:#ffd400}
+.mk{position:absolute;top:8px;bottom:8px;width:8px;margin-left:-4px;background:#fff;border-radius:4px}
+.ang{width:min(70vw,260px);height:min(70vw,260px)}
+.srch{grid-template-columns:repeat(8,minmax(0,1fr));width:min(94vw,560px);gap:4px}
+.lt{min-height:44px;border:0;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font:600 clamp(20px,5vw,28px) Inter;cursor:pointer}
+.fnd{font-size:22px;color:#ffd400}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:clamp(24px,4vw,56px);align-items:start}
+.world h2{font-size:22px;margin:0 0 8px}.world>p{margin:0 0 12px}
+.hrow.wr{grid-template-columns:9.5em minmax(0,1fr) auto}.wr span:first-child{overflow-wrap:normal;hyphens:auto;line-height:1.3}
+.wr.ext i{background:#8a97ab!important}.wr.you i{background:var(--red)!important}.wr.you,.wr.mine{font-weight:700}
+.wr.mine i{box-shadow:0 0 0 3px light-dark(#ffd400,#ffd400)}
+.agein{display:flex;align-items:center;gap:10px;margin:0 0 12px;font-weight:600}
+.agein input{width:6em;font:16px Inter;padding:10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.src{font-size:13px;color:var(--mut)}
+.pform{display:grid;gap:16px;max-width:640px}.pform h2{margin:0;font-size:24px}
+.pform label{display:grid;gap:6px;font-weight:600}
+.pform input:not([type=checkbox]),.pform select{font:16px Inter;padding:12px;min-height:48px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.pform label.chk,label.chk{display:flex;align-items:center;gap:10px;font-weight:400;min-height:36px}
+.chk input{width:22px;height:22px;flex:none;accent-color:var(--blue)}
+fieldset{border:2px solid var(--line);border-radius:12px;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:4px 14px;padding:12px 14px}
+legend{font-weight:600;padding:0 6px}
+.err{color:var(--red);font-weight:600;margin:0}.arena .err{color:#ffd400}
+.pinrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pinrow input{width:9em;font:16px Inter;padding:12px;min-height:48px;border-radius:10px;border:2px solid var(--line);background:var(--bg);color:var(--ink)}
+.arena .pinrow input{border:0;background:#fff;color:var(--blue)}
+.ptop{background:var(--card);padding:12px max(5vw,16px);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-weight:600}
+.dz summary{cursor:pointer;font-weight:600;color:var(--mut);min-height:44px;display:flex;align-items:center}
+table.res{border-collapse:collapse;width:100%;font-size:15px}
+.res th,.res td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.res th{font-size:13px;color:var(--mut);font-weight:600}.res .n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+textarea.cp{width:100%;min-height:120px;margin-top:10px;font:14px Inter;border-radius:10px;padding:10px}
+.cert{background:#fff;color:#0f1a2b;border-radius:18px;padding:clamp(20px,4vw,44px);max-width:780px;margin:0 auto;border:8px solid var(--blue);box-shadow:inset 0 0 0 3px var(--red)}
+.cert .res th,.cert .res td{border-color:#dfe4ec}.cert .res th{color:#5a6678}
+.ch{display:flex;align-items:center;gap:10px;font:800 18px Inter}
+.ctag{margin:18px 0 0;color:var(--red);font-weight:700}
+.cname{font:800 clamp(30px,5vw,46px)/1.1 Inter;margin:6px 0 10px}
+.code{font:700 18px ui-monospace,Menlo,monospace;letter-spacing:.06em}
+.cnote{font-size:13px;color:#5a6678}
+.intro p{max-width:46ch;margin:0 auto 18px;opacity:.9}
+.hist h2{font-size:22px;margin:0 0 12px}
+.hrow{display:grid;grid-template-columns:3em minmax(0,1fr) auto;gap:10px;align-items:center;font-size:14px;margin:6px 0}
+.hrow i{display:block;height:12px;border-radius:6px;background:var(--blue)}
+:root:not([data-theme=light]) .hrow i{background:light-dark(var(--blue),#5b8fd6)}
+.hrow i.b{background:var(--red)}
+.hrow span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums;text-align:right}
+.mut{color:var(--mut)}
+.foot{font-size:14px;color:var(--mut);border-top:1px solid var(--line)}
+@media(max-width:600px){.hero::after{width:200px;height:200px;border-width:28px;right:-70px;bottom:-90px}.arena{padding-top:56px}}
+@media(prefers-reduced-motion:reduce){.card,.word.pop,.arena.bad{transition:none;animation:none}}
+</style>
+</head>
+<body>
+<header class="band top"><div class="wrap head">
+  <a href="index.html" class="logo" title="Späť na rebríčky"><span class="brand"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="12" width="5" height="9" rx="1.2" fill="#fff" fill-opacity=".65"/><rect x="9.5" y="3" width="5" height="18" rx="1.2" fill="#fff"/><rect x="16" y="15" width="5" height="6" rx="1.2" fill="#fff" fill-opacity=".45"/></svg></span><span><b>Porovnaj sa</b><small id="logoT">Kognitívne testy</small></span></a>
+  <div class="hr"><a href="#" class="pill" id="allT">🧠</a><div id="auth"></div><div class="seg" role="group" aria-label="Jazyk / Jazyk"><button data-l="sk">SK</button><button data-l="cz">CZ</button></div></div>
+</div></header>
+<main id="app"></main>
+<footer class="band foot"><div class="wrap"><span id="foot"></span> <a href="ochrana-udajov.html">Ochrana údajov</a></div></footer>
+<script>
+{
+const app=document.getElementById('app');
+const store={get(k){try{return JSON.parse(localStorage.getItem('hb-'+k))}catch(e){return null}},set(k,v){try{localStorage.setItem('hb-'+k,JSON.stringify(v))}catch(e){}}};
+let lang=store.get('lang')==='cz'?'cz':'sk';
+let T=[];
+const later=(f,ms)=>{const id=setTimeout(f,ms);T.push(id);return id};
+const cleanup=()=>{T.forEach(clearTimeout);T=[];running=false};
+/* anti-cheat: flags collected during one run */
+let running=false,flags=new Set();
+const flag=k=>{if(running)flags.add(k)};
+const gaps=ts=>ts.slice(1).map((t,i)=>t-ts[i]);
+const cv=xs=>{if(xs.length<2)return 1;const m=xs.reduce((a,b)=>a+b,0)/xs.length;const sd=Math.sqrt(xs.reduce((a,b)=>a+(b-m)**2,0)/xs.length);return m?sd/m:0};
+const away=()=>flag('blur');
+window.addEventListener('blur',away);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)away()});
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const shuf=x=>{x=x.slice();for(let i=x.length-1;i>0;i--){const j=R(0,i);[x[i],x[j]]=[x[j],x[i]]}return x};
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const Q=(a,s)=>a.querySelector(s);
+const L=o=>o[lang];
+const dec=v=>String(v).replace('.',',');
+
+const S={
+sk:{title:'Kognitívne testy',sub:'Zmeraj si reakcie, pamäť, postreh aj slovenčinu v {n} testoch a porovnaj sa s ostatnými hráčmi na porovnajsa.sk.',start:'Otestuj sa',again:'Skúsiť znova',back:'Všetky testy',best:'Najlepšie',none:'Zatiaľ neodskúšané',newBest:'Nový osobný rekord!',wait:'Počkaj na zelenú…',click:'Klikni!',early:'Príliš skoro!',tap:'Klikni pre pokračovanie',level:'Úroveň',lives:'Životy',seen:'Videné',new:'Nové',submit:'Potvrdiť',next:'Ďalej',result:'Výsledok',yours:'Tvoja odpoveď',number:'Číslo',whatNum:'Aké to bolo číslo?',score:'Skóre',skip:'Preskočiť',stop:'Stop',go:'Štart',correct:'Správne',wrong:'Chyby',reset:'Vymazať všetky výsledky',sure:'Naozaj vymazať? Klikni znova',howMany:'Koľko bodiek?',was:'Bolo ich',typeHere:'Začni písať sem…',acc:'Presnosť',time:'Čas',target:'Zastav presne po',counting:'Počítaj v duchu…',yourTime:'Tvoj čas',diff:'Odchýlka',numbers:'Čísla',strikes:'Chyby',remaining:'Zostáva',aimStart:'Klikni na terč a začni',cpsStart:'Čas sa spustí prvým klikom',clickHere:'Klikaj!',clicksTotal:'klikov spolu',solved:'Vyriešené',skL:'Slovenské',czL:'České',tested:'testov odskúšaných',records:'Osobné rekordy',random:'Náhodný test',hist:'Tvoje posledné pokusy',histNone:'Zatiaľ žiadne pokusy.',better:'lepšie je',lower:'menej',higher:'viac',foot:'Prihláseným hráčom sa výsledky ukladajú do rebríčkov porovnajsa.sk. Bez prihlásenia zostanú iba v tomto prehliadači.',sus:'Podozrivý výsledok, neuložil sa',world:'Porovnanie s výskumami',ageLabel:'Tvoj vek:',you:'Ty (najlepší)',noAge:'Pre tvoj vek táto štúdia nemá údaje.',src:'Zdroj',p10:'Hranica najpomalších 10 %',avg:'Priemer',p90:'Hranica najrýchlejších 10 %',pct:'Si rýchlejší ako približne {p} % ľudí zo štúdie.',find:'Nájdi',gngHint:'Klikni iba na zelený kruh, na červený nie.',avgRt:'Priemerná reakcia',match:'Zhoda!',nbHint:'Stlač Zhoda, keď je písmeno rovnaké ako pred dvoma krokmi.',motHint:'Sleduj žlté loptičky. Keď zastanú, klikni na ne.',lastWord:'Posledné slovo bolo',same:'Len otočený',mirror:'Zrkadlový',deg:'Koľko stupňov má uhol?',angWas:'Bolo to',f_bot:'Kliky neprišli od človeka (umelo vyvolané udalosti).',f_blur:'Počas testu si odišiel z okna alebo karty.',f_fast:'Časy sú pod hranicou ľudských možností.',f_robot:'Rozostupy medzi akciami sú až príliš pravidelné, ako od stroja.',f_paste:'Text bol vložený, nie napísaný.',f_teleport:'Kurzor skáče na terče bez pohybu myšou.'},
+cz:{title:'Kognitivní testy',sub:'Změř si reakce, paměť, postřeh i češtinu v {n} testech a porovnej se s ostatními hráči na porovnajsa.sk.',start:'Otestuj se',again:'Zkusit znovu',back:'Všechny testy',best:'Nejlepší',none:'Zatím nevyzkoušeno',newBest:'Nový osobní rekord!',wait:'Počkej na zelenou…',click:'Klikni!',early:'Příliš brzy!',tap:'Klikni pro pokračování',level:'Úroveň',lives:'Životy',seen:'Viděné',new:'Nové',submit:'Potvrdit',next:'Dále',result:'Výsledek',yours:'Tvoje odpověď',number:'Číslo',whatNum:'Jaké to bylo číslo?',score:'Skóre',skip:'Přeskočit',stop:'Stop',go:'Start',correct:'Správně',wrong:'Chyby',reset:'Smazat všechny výsledky',sure:'Opravdu smazat? Klikni znovu',howMany:'Kolik teček?',was:'Bylo jich',typeHere:'Začni psát sem…',acc:'Přesnost',time:'Čas',target:'Zastav přesně po',counting:'Počítej v duchu…',yourTime:'Tvůj čas',diff:'Odchylka',numbers:'Čísla',strikes:'Chyby',remaining:'Zbývá',aimStart:'Klikni na terč a začni',cpsStart:'Čas se spustí prvním kliknutím',clickHere:'Klikej!',clicksTotal:'kliknutí celkem',solved:'Vyřešeno',skL:'Slovenské',czL:'České',tested:'testů vyzkoušeno',records:'Osobní rekordy',random:'Náhodný test',hist:'Tvoje poslední pokusy',histNone:'Zatím žádné pokusy.',better:'lepší je',lower:'méně',higher:'více',foot:'Přihlášeným hráčům se výsledky ukládají do žebříčků porovnajsa.sk. Bez přihlášení zůstanou jen v tomto prohlížeči.',sus:'Podezřelý výsledek, neuložil se',world:'Srovnání s výzkumy',ageLabel:'Tvůj věk:',you:'Ty (nejlepší)',noAge:'Pro tvůj věk tato studie nemá údaje.',src:'Zdroj',p10:'Hranice nejpomalejších 10 %',avg:'Průměr',p90:'Hranice nejrychlejších 10 %',pct:'Jsi rychlejší než přibližně {p} % lidí ze studie.',find:'Najdi',gngHint:'Klikni jen na zelený kruh, na červený ne.',avgRt:'Průměrná reakce',match:'Shoda!',nbHint:'Stiskni Shoda, když je písmeno stejné jako před dvěma kroky.',motHint:'Sleduj žluté míčky. Až se zastaví, klikni na ně.',lastWord:'Poslední slovo bylo',same:'Jen otočený',mirror:'Zrcadlový',deg:'Kolik stupňů má úhel?',angWas:'Bylo to',f_bot:'Kliknutí nepřišla od člověka (uměle vyvolané události).',f_blur:'Během testu jsi odešel z okna nebo karty.',f_fast:'Časy jsou pod hranicí lidských možností.',f_robot:'Rozestupy mezi akcemi jsou až příliš pravidelné, jako od stroje.',f_paste:'Text byl vložen, ne napsán.',f_teleport:'Kurzor skáče na terče bez pohybu myší.'}};
+const tx=k=>S[lang][k];
+
+const WORDS={
+sk:'jablko hruška stôl stolička okno dvere kniha pero ceruzka zošit lampa kľúč hodiny telefón počítač auto vlak lietadlo loď bicykel cesta most rieka jazero more hora les strom kvet tráva slnko mesiac hviezda oblak dážď sneh vietor búrka zima leto jeseň jar ráno večer noc deň týždeň rok pes mačka kôň krava ovca koza sliepka kačka líška vlk medveď zajac ryba vták motýľ včela mravec chlieb maslo syr mlieko vajce polievka koláč čokoláda káva čaj voda víno pivo soľ cukor kabát čiapka topánka košeľa sukňa nohavice rukavica dáždnik taška peňaženka škola učiteľ lekár kuchár hasič policajt pekár záhrada plot brána dvor pivnica kuchyňa izba posteľ vankúš perina zrkadlo hrebeň mydlo uterák gitara bubon husle klavír hudba pieseň tanec obraz farba štetec papier lepidlo nožnice'.split(' '),
+cz:'jablko hruška stůl židle okno dveře kniha pero tužka sešit lampa klíč hodiny telefon počítač auto vlak letadlo loď kolo cesta most řeka jezero moře hora les strom květina tráva slunce měsíc hvězda mrak déšť sníh vítr bouřka zima léto podzim jaro ráno večer noc den týden rok pes kočka kůň kráva ovce koza slepice kachna liška vlk medvěd zajíc ryba pták motýl včela mravenec chléb máslo sýr mléko vejce polévka koláč čokoláda káva čaj voda víno pivo sůl cukr kabát čepice bota košile sukně kalhoty rukavice deštník taška peněženka škola učitel lékař kuchař hasič policista pekař zahrada plot brána dvůr sklep kuchyně pokoj postel polštář peřina zrcadlo hřeben mýdlo ručník kytara buben housle klavír hudba píseň tanec obraz barva štětec papír lepidlo nůžky'.split(' ')};
+const SENT={
+sk:['Dnes ráno som si dal kávu a pozeral sa z okna na dážď.','Vysoké Tatry sú najvyššie pohorie na Slovensku.','Ďaleko za horami žila múdra stará líška.','Bratislava leží na brehu Dunaja blízko hraníc s Rakúskom.','Keď sa zotmie, celá dedina ide spať.','Kŕdeľ šťastných ďatľov učí pri ústí Váhu mĺkveho koňa obhrýzať kôru a žrať čerstvé mäso.','V záhrade rastú paradajky, uhorky a mrkva.','Päť malých mačiatok sa hrá na mäkkom koberci.'],
+cz:['Dnes ráno jsem si dal kávu a díval se z okna na déšť.','Sněžka je nejvyšší hora České republiky.','Příliš žluťoučký kůň úpěl ďábelské ódy.','Praha leží na řece Vltavě a má mnoho mostů.','Když se setmí, celá vesnice jde spát.','Na zahradě rostou rajčata, okurky a mrkev.','Pět malých koťátek si hraje na měkkém koberci.','Dědeček vyprávěl dětem pohádku o hloupém Honzovi.']};
+const SKW='ďakujem kôň rieka zemiaky uhorka lietadlo mrkva ihrisko štvrtok žiarovka sviečka pondelok päť mäso chlieb mačka stolička ceruzka vtáčik dieťa'.split(' ');
+const CZW='děkuji kůň řeka brambory okurka letadlo mrkev hřiště čtvrtek žárovka svíčka pondělí pět maso chléb kočka židle tužka ptáček dítě'.split(' ');
+const IY=[['myš','myš',1],['ryba','ryba',1],['pivo','pivo',1],['vysoký','vysoký',1],['bylina','bylina',1],['zima','zima',1],['list','list',1],['syn','syn',1],['jazyk','jazyk',4],['kniha','kniha',2],['pýcha','pýcha',1],['lyže','lyže',1],['mlyn','mlýn',2],['syr','sýr',1],['mydlo','mýdlo',1],['kino','kino',1],['lipa','lipa',1],['ryža','rýže',1],['obyčajný','obyčejný',3],['bicykel','bicykl',1],['líška','liška',1],['sýkorka','sýkorka',1],['býk','býk',1],['kobyla','kobyla',3],['vidlička','vidlička',1],['milý','milý',1]];
+const COL=[{sk:'červená',cz:'červená',c:'#d7141a'},{sk:'modrá',cz:'modrá',c:'#1f5fd1'},{sk:'zelená',cz:'zelená',c:'#15934a'},{sk:'žltá',cz:'žlutá',c:'#d9a800'},{sk:'fialová',cz:'fialová',c:'#8b3fd0'},{sk:'oranžová',cz:'oranžová',c:'#ea6a0c'}];
+const SHAPES=[[[1,0],[2,0],[0,1],[1,1],[1,2]],[[0,0],[0,1],[0,2],[0,3],[1,3]],[[0,0],[0,1],[1,1],[1,2],[1,3]],[[0,0],[1,0],[0,1],[1,1],[0,2]],[[1,0],[0,1],[1,1],[1,2],[1,3]]];
+const shapeSvg=(c,rot,mir)=>{const xs=c.map(p=>p[0]),ys=c.map(p=>p[1]),cx=(Math.min(...xs)+Math.max(...xs)+1)*10,cy=(Math.min(...ys)+Math.max(...ys)+1)*10;
+ return `<svg viewBox="-60 -60 120 120" class=shp aria-hidden=true><g transform="rotate(${rot}) scale(${mir?-1:1},1) translate(${-cx},${-cy})">${c.map(p=>`<rect x=${p[0]*20} y=${p[1]*20} width=19 height=19 rx=3 fill="#fff"/>`).join('')}</g></svg>`};
+const angleSvg=(base,ang)=>{const p=d=>[150+130*Math.cos(d*Math.PI/180),150-130*Math.sin(d*Math.PI/180)],[x1,y1]=p(base),[x2,y2]=p(base+ang);
+ return `<svg viewBox="0 0 300 300" class=ang aria-hidden=true><line x1=150 y1=150 x2=${x1} y2=${y1} stroke="#fff" stroke-width=5 stroke-linecap=round /><line x1=150 y1=150 x2=${x2} y2=${y2} stroke="#fff" stroke-width=5 stroke-linecap=round /><circle cx=150 cy=150 r=6 fill="#ffd400"/></svg>`};
+const PAIRS=[['ř',['ŕ','r']],['ô',['ó','ö','o']],['ů',['ú','ü','u']],['ä',['á','a','à']],['ľ',['ĺ','l']],['ě',['é','e','ë']],['ť',['t','ţ']],['ž',['z','ź']],['ň',['n','ń']]];
+const U=(sk,cz)=>({sk,cz:cz??sk});
+
+const TESTS=[
+{id:'reakcia',g:'ms',low:1,u:U('ms'),name:U('Reakčný čas','Reakční doba'),desc:U('Keď sa plocha zmení na zelenú, klikni čo najrýchlejšie. Päť pokusov, počíta sa priemer.','Až se plocha změní na zelenou, klikni co nejrychleji. Pět pokusů, počítá se průměr.'),
+run(a,done){let n=0,res=[],t0,st;
+ const round=()=>{st='wait';a.className='arena red';a.innerHTML=`<div class=hud>${n+1}/5</div><div class=big>${tx('wait')}</div>`;
+  later(()=>{st='go';a.className='arena green';a.innerHTML=`<div class=big>${tx('click')}</div>`;t0=performance.now()},1500+Math.random()*3000)};
+ a.onpointerdown=e=>{if(e.target.closest('button'))return;
+  if(st==='wait'){cleanup();st='pause';a.className='arena';a.innerHTML=`<div class=big>${tx('early')}</div><p>${tx('tap')}</p>`}
+  else if(st==='go'){const ms=Math.round(performance.now()-t0);res.push(ms);n++;st='pause';
+   if(ms<100)flag('fast');
+   if(n===5&&cv(res)<.03)flag('robot');
+   if(n===5)return done(Math.round(res.reduce((x,y)=>x+y,0)/5),res.join(' · ')+' ms');
+   a.className='arena';a.innerHTML=`<div class=hud>${n}/5</div><div class=huge>${ms} ms</div><p>${tx('tap')}</p>`}
+  else round()};
+ round()}},
+{id:'sekvencia',g:'▦',u:U('úroveň','úroveň'),name:U('Sekvenčná pamäť','Sekvenční paměť'),desc:U('Zapamätaj si poradie, v akom sa políčka rozsvietia, a zopakuj ho. Každé kolo pribudne jedno.','Zapamatuj si pořadí, v jakém se políčka rozsvítí, a zopakuj ho. Každé kolo přibude jedno.'),
+run(a,done){let seq=[],idx=0,ok=false;
+ a.innerHTML=`<div class=hud></div><div class="cells g3">${'<button class=cell aria-label="políčko"></button>'.repeat(9)}</div>`;
+ const cs=[...a.querySelectorAll('.cell')],hud=Q(a,'.hud');
+ const flash=(k,c='on')=>{cs[k].classList.add(c);later(()=>cs[k].classList.remove(c),300)};
+ const next=()=>{seq.push(R(0,8));idx=0;ok=false;hud.textContent=tx('level')+' '+seq.length;
+  seq.forEach((k,i)=>later(()=>flash(k),700+i*550));later(()=>ok=true,700+seq.length*550)};
+ cs.forEach((c,k)=>c.onpointerdown=e=>{e.preventDefault();if(!ok)return;flash(k,'tap');
+  if(seq[idx]===k){if(++idx===seq.length){ok=false;later(next,500)}}
+  else{ok=false;a.classList.add('bad');later(()=>done(seq.length-1),600)}});
+ next()}},
+{id:'mierenie',g:'◎',low:1,u:U('ms / terč'),name:U('Mierenie','Míření'),desc:U('Zasiahni 30 terčov čo najrýchlejšie. Meria sa priemerný čas na jeden terč.','Zasáhni 30 terčů co nejrychleji. Měří se průměrný čas na jeden terč.'),
+run(a,done){let left=30,t0=0,moves=0,jumps=0,last=0;const hits=[];
+ a.innerHTML=`<div class=hud>${tx('aimStart')}</div><button class=target aria-label="terč" style="left:calc(50% - 36px);top:calc(50% - 36px)"></button>`;
+ const tg=Q(a,'.target'),hud=Q(a,'.hud');
+ a.addEventListener('pointermove',()=>moves++);
+ tg.onpointerdown=e=>{e.preventDefault();const now=performance.now();
+  if(t0){hits.push(now-last);if(e.pointerType==='mouse'&&moves<2)jumps++}
+  moves=0;last=now;if(!t0)t0=now;else left--;
+  if(!left){if(jumps>=5)flag('teleport');if(hits.filter(h=>h<120).length>=8)flag('fast');if(cv(hits)<.05)flag('robot');
+   return done(Math.round((now-t0)/30))}
+  hud.textContent=tx('remaining')+': '+left;
+  tg.style.left=R(8,Math.max(8,a.clientWidth-80))+'px';tg.style.top=R(52,Math.max(52,a.clientHeight-80))+'px'}}},
+{id:'cisla',g:'123',u:U('číslic'),name:U('Číselná pamäť','Číselná paměť'),desc:U('Zapamätaj si číslo a napíš ho. Každé kolo je o jednu číslicu dlhšie.','Zapamatuj si číslo a napiš ho. Každé kolo je o jednu číslici delší.'),
+run(a,done){let n=1;
+ const show=()=>{let num=String(R(1,9));for(let i=1;i<n;i++)num+=R(0,9);const dur=1200+n*600;
+  a.innerHTML=`<div class=hud>${tx('level')} ${n}</div><div class=num>${num}</div><div class=bar><i style="animation-duration:${dur}ms"></i></div>`;
+  later(()=>ask(num),dur)};
+ const ask=num=>{a.innerHTML=`<form class=ask><label for=ans>${tx('whatNum')}</label><input id=ans inputmode=numeric autocomplete=off><button class=btn>${tx('submit')}</button></form>`;
+  const i=Q(a,'#ans');i.focus();
+  Q(a,'form').onsubmit=e=>{e.preventDefault();const v=i.value.replace(/\D/g,''),ok=v===num;
+   a.innerHTML=`<p class=lbl>${tx('number')}</p><div class=num>${num}</div><p class=lbl>${tx('yours')}</p><div class="num ${ok?'':'x'}">${esc(v)||'—'}</div><button class=btn>${ok?tx('next'):tx('result')}</button>`;
+   const b=Q(a,'button');b.focus();b.onclick=()=>{if(ok){n++;show()}else done(n-1)}}};
+ show()}},
+{id:'slova',g:'Aa',u:U('slov'),name:U('Slovná pamäť','Slovní paměť'),desc:U('Ukazujú sa slová. Ak si slovo už videl, stlač Videné, inak Nové. Máš 3 životy.','Ukazují se slova. Pokud jsi slovo už viděl, stiskni Viděné, jinak Nové. Máš 3 životy.'),
+run(a,done){const pool=shuf(WORDS[lang]),seen=[],set=new Set();let lives=3,score=0,cur;
+ a.innerHTML=`<div class=hud></div><div class=word></div><div class=row><button class=btn data-v=1>${tx('seen')}</button><button class=btn data-v=0>${tx('new')}</button></div>`;
+ const w=Q(a,'.word'),hud=Q(a,'.hud');
+ const next=()=>{hud.textContent=`${tx('lives')}: ${lives} · ${tx('score')}: ${score}`;
+  cur=(seen.length>3&&Math.random()<.45)||!pool.length?seen[R(0,seen.length-1)]:pool.pop();
+  w.textContent=cur;w.classList.remove('pop');void w.offsetWidth;w.classList.add('pop')};
+ a.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{const truth=set.has(cur);
+  if(truth===(b.dataset.v==='1'))score++;else lives--;
+  if(!truth){set.add(cur);seen.push(cur)}
+  if(!lives)return done(score);next()});
+ next()}},
+{id:'simpanz',g:'1→9',u:U('čísel'),name:U('Šimpanzí test','Šimpanzí test'),desc:U('Klikaj na čísla od najmenšieho. Po prvom kliknutí sa ostatné skryjú. Tri chyby a končíš.','Klikej na čísla od nejmenšího. Po prvním kliknutí se ostatní skryjí. Tři chyby a končíš.'),
+run(a,done){let n=4,strikes=0,best=0;
+ const round=()=>{const pos=shuf([...Array(40).keys()]).slice(0,n);let next=1;
+  a.innerHTML=`<div class=hud>${tx('numbers')}: ${n} · ${tx('strikes')}: ${strikes}/3</div><div class="cells chimp">${[...Array(40)].map((_,i)=>{const k=pos.indexOf(i);return k<0?'<span></span>':`<button class=cn data-k=${k+1}>${k+1}</button>`}).join('')}</div>`;
+  a.querySelectorAll('.cn').forEach(b=>b.onpointerdown=e=>{e.preventDefault();if(b.classList.contains('gone')||next>n)return;
+   if(+b.dataset.k===next){b.classList.add('gone');if(next===1)a.querySelectorAll('.cn').forEach(x=>x.classList.add('mask'));
+    if(++next>n){best=n;n++;later(round,400)}}
+   else{next=n+1;if(++strikes>=3)return done(best);a.classList.add('bad');later(()=>{a.classList.remove('bad');round()},600)}})};
+ round()}},
+{id:'vizualna',g:'▣',u:U('úroveň'),name:U('Vizuálna pamäť','Vizuální paměť'),desc:U('Na chvíľu sa rozsvieti niekoľko políčok. Označ všetky. Tri omyly v kole stoja život, máš 3 životy.','Na chvíli se rozsvítí několik políček. Označ všechna. Tři omyly v kole stojí život, máš 3 životy.'),
+run(a,done){let level=1,lives=3;
+ const round=()=>{const size=level<3?3:level<6?4:level<10?5:level<15?6:7,k=Math.min(level+2,Math.floor(size*size*.55));
+  const on=new Set(shuf([...Array(size*size).keys()]).slice(0,k));let found=0,miss=0,ready=false;
+  a.innerHTML=`<div class=hud>${tx('level')} ${level} · ${tx('lives')}: ${lives}</div><div class=cells style="grid-template-columns:repeat(${size},minmax(0,1fr));width:min(86vw,420px);gap:8px">${'<button class=cell aria-label="políčko"></button>'.repeat(size*size)}</div>`;
+  const cs=[...a.querySelectorAll('.cell')];
+  later(()=>on.forEach(i=>cs[i].classList.add('on')),400);
+  later(()=>{on.forEach(i=>cs[i].classList.remove('on'));ready=true},1600);
+  cs.forEach((c,i)=>c.onpointerdown=e=>{e.preventDefault();if(!ready||c.dataset.d)return;c.dataset.d=1;
+   if(on.has(i)){c.classList.add('on');if(++found===k){ready=false;level++;later(round,500)}}
+   else{c.classList.add('miss');if(++miss===3){ready=false;lives--;on.forEach(j=>cs[j].classList.add('on'));
+    if(!lives)return later(()=>done(level-1),800);later(round,1000)}}})};
+ round()}},
+{id:'pisanie',g:'ťž',u:U('WPM'),name:U('Písanie na klávesnici','Psaní na klávesnici'),desc:U('Prepíš text aj s diakritikou. Meria sa rýchlosť v slovách za minútu a presnosť.','Přepiš text i s diakritikou. Měří se rychlost ve slovech za minutu a přesnost.'),
+run(a,done){const target=shuf(SENT[lang]).slice(0,3).join(' ');let t0=0;
+ a.innerHTML=`<div class=typebox><p class=tt>${[...target].map(c=>`<span>${esc(c)}</span>`).join('')}</p><textarea rows=3 autocomplete=off autocorrect=off autocapitalize=off spellcheck=false placeholder="${tx('typeHere')}" aria-label="text"></textarea><p class=lbl></p></div>`;
+ const sp=[...a.querySelectorAll('.tt span')],ti=Q(a,'textarea'),info=Q(a,'.lbl');sp[0].className='cur';ti.focus();
+ const keys=[];let prevLen=0;
+ ti.onpaste=ti.ondrop=e=>{e.preventDefault();flag('paste')};
+ ti.oninput=e=>{if(!t0)t0=performance.now();const v=ti.value;let ok=0;
+  if((e.inputType||'').includes('Paste')||v.length-prevLen>3)flag('paste');prevLen=v.length;keys.push(performance.now());
+  if(v.length>=target.length){if(cv(gaps(keys))<.15&&keys.length>30)flag('robot')}
+  sp.forEach((x,i)=>{const good=i<v.length&&v[i]===target[i];if(good)ok++;x.className=i<v.length?(good?'ok':'no'):(i===v.length?'cur':'')});
+  const min=Math.max((performance.now()-t0)/60000,1e-4);if(min>.03)info.textContent=Math.round(ok/5/min)+' WPM';
+  if(v.length>=target.length){ti.disabled=true;if(ok/5/min>220)flag('fast');done(Math.round(ok/5/min),`${tx('acc')} ${Math.round(ok/target.length*100)} %`)}}}},
+{id:'stroop',g:'Č',u:U('bodov','bodů'),name:U('Stroopov test','Stroopův test'),desc:U('Klikni na farbu, ktorou je slovo napísané, nie na to, čo slovo znamená. Máš 30 sekúnd, chyby sa odpočítavajú.','Klikni na barvu, kterou je slovo napsané, ne na to, co slovo znamená. Máš 30 sekund, chyby se odečítají.'),
+run(a,done){let ok=0,bad=0,ink;const end=performance.now()+30000;
+ a.innerHTML=`<div class=hud></div><div class=stage><div class=sw></div></div><div class=row>${COL.map((c,i)=>`<button class="btn sm" data-i=${i}>${c[lang]}</button>`).join('')}</div>`;
+ const sw=Q(a,'.sw'),hud=Q(a,'.hud');
+ const next=()=>{const w=R(0,5);ink=Math.random()<.75?(w+R(1,5))%6:w;sw.textContent=COL[w][lang];sw.style.color=COL[ink].c};
+ const ts=[performance.now()];
+ a.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{ts.push(performance.now());+b.dataset.i===ink?ok++:bad++;next()});
+ const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('correct')}: ${ok} · ${tx('wrong')}: ${bad}`;
+  if(r<=0){const g=gaps(ts);if(g.filter(x=>x<250).length>=10)flag('fast');if(g.length>10&&cv(g)<.08)flag('robot')}
+  if(r<=0)return done(Math.max(0,ok-bad),`${tx('correct')} ${ok} · ${tx('wrong')} ${bad}`);later(tick,200)};
+ next();tick()}},
+{id:'klikanie',g:'×5',dec:1,u:U('klikov/s','kliků/s'),name:U('Rýchlosť klikania','Rychlost klikání'),desc:U('Koľko klikov zvládneš za 5 sekúnd? Čas sa spustí prvým klikom.','Kolik kliknutí zvládneš za 5 sekund? Čas se spustí prvním kliknutím.'),
+run(a,done){let n=0,t0=0;
+ a.innerHTML=`<div class=hud>${tx('cpsStart')}</div><button class=pad>${tx('clickHere')}</button>`;
+ const pad=Q(a,'.pad'),hud=Q(a,'.hud');
+ const tick=()=>{const r=5-(performance.now()-t0)/1000;hud.textContent=dec(Math.max(0,r).toFixed(1))+' s';if(r>0)later(tick,100)};
+ const ts=[];pad.addEventListener('pointerdown',()=>ts.push(performance.now()));
+ pad.onpointerdown=e=>{e.preventDefault();if(!t0){t0=performance.now();tick();later(()=>{pad.disabled=true;if(n/5>20)flag('fast');if(n>15&&cv(gaps(ts))<.06)flag('robot');done(Math.round(n/5*10)/10,`${n} ${tx('clicksTotal')}`)},5000)}n++;pad.textContent=n}}},
+{id:'pocty',g:'±',u:U('príkladov','příkladů'),name:U('Rýchle počty','Rychlé počty'),desc:U('Vyrieš čo najviac príkladov za 60 sekúnd. Správna odpoveď sa potvrdí sama.','Vyřeš co nejvíc příkladů za 60 sekund. Správná odpověď se potvrdí sama.'),
+run(a,done){let solved=0,ans;const end=performance.now()+60000;
+ a.innerHTML=`<div class=hud></div><div class=num></div><div class=ask><input inputmode=numeric autocomplete=off aria-label="odpoveď"><button class="btn ghost">${tx('skip')}</button></div>`;
+ const q=Q(a,'.num'),mi=Q(a,'input'),hud=Q(a,'.hud');
+ const gen=()=>{const op=R(0,3);let x,y,t;
+  if(op===0){x=R(2,99);y=R(2,99);ans=x+y;t='+'}else if(op===1){x=R(10,99);y=R(1,x);ans=x-y;t='−'}
+  else if(op===2){x=R(2,12);y=R(2,12);ans=x*y;t='×'}else{y=R(2,12);ans=R(2,12);x=y*ans;t=':'}
+  q.textContent=`${x} ${t} ${y}`;mi.value='';mi.focus()};
+ let shown=performance.now(),quick=0;
+ mi.onpaste=e=>{e.preventDefault();flag('paste')};
+ mi.oninput=()=>{if(mi.value.trim()!==''&&+mi.value===ans){const dt=performance.now()-shown;if(dt<350)quick++;if(quick>=5)flag('fast');solved++;gen();shown=performance.now()}};
+ Q(a,'.ask button').onclick=gen;
+ const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('solved')}: ${solved}`;if(r<=0){mi.disabled=true;return done(solved)}later(tick,200)};
+ gen();tick()}},
+{id:'cas',g:'5,0',low:1,u:U('ms odchýlka','ms odchylka'),name:U('Odhad času','Odhad času'),desc:U('Zastav stopky presne po zadanom čase, bez pozerania na hodiny. Tri pokusy, počíta sa priemerná odchýlka.','Zastav stopky přesně po zadaném čase, bez dívání na hodiny. Tři pokusy, počítá se průměrná odchylka.'),
+run(a,done){const tg=shuf([3,5,7,10]).slice(0,3);let i=0,errs=[];
+ const ready=()=>{a.innerHTML=`<div class=hud>${i+1}/3</div><p class=lbl>${tx('target')}</p><div class=huge>${tg[i]} s</div><button class=btn>${tx('go')}</button>`;
+  Q(a,'button').onclick=()=>{const t0=performance.now();
+   a.innerHTML=`<div class=hud>${i+1}/3</div><p class=lbl>${tx('counting')}</p><div class=huge>${tg[i]} s</div><button class="btn red">${tx('stop')}</button>`;
+   Q(a,'button').onclick=()=>{const el=(performance.now()-t0)/1000,err=Math.abs(el-tg[i]);errs.push(err);i++;
+    a.innerHTML=`<p class=lbl>${tx('yourTime')}</p><div class=huge>${dec(el.toFixed(2))} s</div><p>${tx('diff')}: ${Math.round(err*1000)} ms</p><button class=btn>${i<3?tx('next'):tx('result')}</button>`;
+    Q(a,'button').onclick=()=>i<3?ready():(errs.every(x=>x<.02)&&flag('fast'),done(Math.round(errs.reduce((x,y)=>x+y,0)/3*1000)))}}};
+ ready()}},
+{id:'farby',g:'◐',u:U('úroveň'),name:U('Postreh na farby','Postřeh na barvy'),desc:U('Nájdi políčko, ktoré má trochu iný odtieň. Rozdiel sa každým kolom zmenšuje. Máš 3 životy.','Najdi políčko, které má trochu jiný odstín. Rozdíl se každým kolem zmenšuje. Máš 3 životy.'),
+run(a,done){let level=1,lives=3,lock=false;
+ const round=()=>{lock=false;const size=Math.min(2+Math.floor((level+1)/2),8),n=size*size,odd=R(0,n-1),h=R(0,359),sat=R(45,75),l=R(36,56),d=Math.max(1.2,24*Math.pow(.86,level-1));
+  a.innerHTML=`<div class=hud>${tx('level')} ${level} · ${tx('lives')}: ${lives}</div><div class="cells tight" style="grid-template-columns:repeat(${size},minmax(0,1fr));width:min(86vw,420px)">${[...Array(n)].map((_,i)=>`<button class=cc aria-label="políčko" style="background:hsl(${h} ${sat}% ${i===odd?l+d:l}%)" data-i=${i}></button>`).join('')}</div>`;
+  const cs=a.querySelectorAll('.cc');
+  cs.forEach(b=>b.onpointerdown=e=>{e.preventDefault();if(lock)return;
+   if(+b.dataset.i===odd){level++;round()}else{lock=true;lives--;cs[odd].classList.add('hint');if(!lives)return later(()=>done(level-1),800);later(round,800)}})};
+ round()}},
+{id:'bodky',g:'∴',u:U('správne','správně'),name:U('Počítanie bodiek','Počítání teček'),desc:U('Bodky sa ukážu na zlomok sekundy. Do 10 bodiek musíš trafiť presne, potom stačí ±10 %. Máš 3 životy.','Tečky se ukážou na zlomek sekundy. Do 10 teček musíš trefit přesně, pak stačí ±10 %. Máš 3 životy.'),
+run(a,done){let lives=3,score=0,r=0;
+ const round=()=>{r++;const want=Math.min(60,3+r*2+R(0,3)),pts=[];let tries=0;
+  while(pts.length<want&&tries++<6000){const x=R(12,388),y=R(12,248);if(pts.every(p=>(p[0]-x)**2+(p[1]-y)**2>21*21))pts.push([x,y])}
+  a.innerHTML=`<div class=hud>${tx('lives')}: ${lives} · ${tx('correct')}: ${score}</div><svg class=dots viewBox="0 0 400 260" aria-hidden=true>${pts.map(p=>`<circle cx=${p[0]} cy=${p[1]} r=7 fill="#fff"/>`).join('')}</svg>`;
+  later(()=>ask(pts.length),r<4?900:700)};
+ const ask=n=>{a.innerHTML=`<form class=ask><label for=di>${tx('howMany')}</label><input id=di inputmode=numeric autocomplete=off><button class=btn>${tx('submit')}</button></form>`;
+  const i=Q(a,'#di');i.focus();
+  Q(a,'form').onsubmit=e=>{e.preventDefault();const v=parseInt(i.value,10);const ok=n<=10?v===n:Math.abs(v-n)<=Math.max(1,Math.round(n*.1));
+   ok?score++:lives--;
+   a.innerHTML=`<div class="word ${ok?'g':'b'}">${ok?tx('correct'):'✗'}</div><p>${tx('was')} ${n} · ${tx('yours')}: ${isNaN(v)?'—':v}</p><button class=btn>${lives?tx('next'):tx('result')}</button>`;
+   const b=Q(a,'button');b.focus();b.onclick=()=>lives?round():done(score)}};
+ round()}},
+{id:'skcz',g:'SK CZ',u:U('bodov','bodů'),name:U('Slovenské či české?','Slovenské, nebo české?'),desc:U('Rozhodni, či je slovo slovenské alebo české. Máš 45 sekúnd, správna odpoveď +1, chyba −1.','Rozhodni, jestli je slovo slovenské, nebo české. Máš 45 sekund, správná odpověď +1, chyba −1.'),
+run(a,done){const items=[...SKW.map(w=>[w,'sk']),...CZW.map(w=>[w,'cz'])];let deck=[],ok=0,bad=0,cur,lock=false;const end=performance.now()+45000;
+ a.innerHTML=`<div class=hud></div><div class=word></div><div class=row><button class=btn data-v=sk>${tx('skL')}</button><button class=btn data-v=cz>${tx('czL')}</button></div>`;
+ const w=Q(a,'.word'),hud=Q(a,'.hud');
+ const next=()=>{if(!deck.length)deck=shuf(items);cur=deck.pop();w.textContent=cur[0];w.className='word pop'};
+ a.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if(lock)return;lock=true;const good=b.dataset.v===cur[1];good?ok++:bad++;w.className='word '+(good?'g':'b');later(()=>{lock=false;next()},good?250:600)});
+ const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('correct')}: ${ok}`;if(r<=0)return done(Math.max(0,ok-bad),`${tx('correct')} ${ok} · ${tx('wrong')} ${bad}`);later(tick,200)};
+ next();tick()}},
+{id:'vybrane',g:'i/y',u:U('bodov','bodů'),name:U('Vybrané slová','Vyjmenovaná slova'),desc:U('Doplň do slova i/í alebo y/ý. Máš 45 sekúnd, správna odpoveď +1, chyba −1.','Doplň do slova i/í, nebo y/ý. Máš 45 sekund, správná odpověď +1, chyba −1.'),
+run(a,done){let deck=[],it,ok=0,bad=0,lock=false;const end=performance.now()+45000;
+ a.innerHTML=`<div class=hud></div><div class=word></div><div class=row><button class=btn data-v=i>i / í</button><button class=btn data-v=y>y / ý</button></div>`;
+ const w=Q(a,'.word'),hud=Q(a,'.hud');
+ const cur=()=>{const word=lang==='sk'?it[0]:it[1];return{word,k:it[2],ans:'yý'.includes(word[it[2]])?'y':'i'}};
+ const next=()=>{if(!deck.length)deck=shuf(IY);it=deck.pop();const c=cur();w.className='word pop';w.innerHTML=`${esc(c.word.slice(0,c.k))}<span class=gap>_</span>${esc(c.word.slice(c.k+1))}`};
+ a.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{if(lock)return;lock=true;const c=cur(),good=b.dataset.v===c.ans;good?ok++:bad++;
+  w.className='word '+(good?'g':'b');w.textContent=c.word;later(()=>{lock=false;next()},good?300:900)});
+ const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('correct')}: ${ok}`;if(r<=0)return done(Math.max(0,ok-bad),`${tx('correct')} ${ok} · ${tx('wrong')} ${bad}`);later(tick,200)};
+ next();tick()}},
+{id:'schulte',g:'1–25',low:1,dec:1,u:U('s'),name:U('Schulteho tabuľka','Schulteho tabulka'),desc:U('Klikaj na čísla od 1 do 25 v poradí, čo najrýchlejšie. Meria sa čas v sekundách.','Klikej na čísla od 1 do 25 popořadě, co nejrychleji. Měří se čas v sekundách.'),
+run(a,done){const nums=shuf([...Array(25)].map((_,i)=>i+1));let next=1,err=0;const t0=performance.now(),ts=[t0];
+ a.innerHTML=`<div class=hud>${tx('find')}: 1</div><div class="cells sch">${nums.map(n=>`<button class=sc data-n=${n}>${n}</button>`).join('')}</div>`;
+ const hud=Q(a,'.hud');
+ a.querySelectorAll('.sc').forEach(b=>b.onpointerdown=e=>{e.preventDefault();if(+b.dataset.n!==next){if(!b.classList.contains('done')){err++;b.classList.add('x');later(()=>b.classList.remove('x'),250)}return}
+  const now=performance.now();ts.push(now);b.classList.add('done');next++;
+  if(next>25){const g=gaps(ts);if(g.filter(x=>x<150).length>8)flag('fast');if(cv(g)<.08)flag('robot');return done(Math.round((now-t0)/100)/10,`${tx('wrong')}: ${err}`)}
+  hud.textContent=`${tx('find')}: ${next}`})}},
+{id:'gonogo',g:'●○',low:1,u:U('ms'),name:U('Zelená / červená','Zelená / červená'),desc:U('Keď sa objaví zelený kruh, klikni. Na červený neklikaj. Výsledok je priemerná reakcia plus 100 ms za každú chybu.','Když se objeví zelený kruh, klikni. Na červený neklikej. Výsledek je průměrná reakce plus 100 ms za každou chybu.'),
+run(a,done){const N=30;let i=0,rts=[],err=0,cur=null,t0=0,resp=false;
+ a.innerHTML=`<div class=hud></div><div class=gng></div><p class=lbl>${tx('gngHint')}</p>`;
+ const d=Q(a,'.gng'),hud=Q(a,'.hud');
+ const trial=()=>{if(i===N){const m=rts.length?rts.reduce((x,y)=>x+y,0)/rts.length:800;if(rts.filter(x=>x<110).length>3)flag('fast');if(rts.length>10&&cv(rts)<.03)flag('robot');
+   return done(Math.round(m+err*100),`${tx('avgRt')} ${Math.round(m)} ms · ${tx('wrong')}: ${err}`)}
+  i++;hud.textContent=`${i}/${N}`;cur=null;resp=false;d.className='gng';
+  later(()=>{cur=Math.random()<.7?'go':'no';d.className='gng '+cur;t0=performance.now();
+   later(()=>{if(!resp&&cur==='go')err++;trial()},800)},500+Math.random()*800)};
+ a.onpointerdown=e=>{e.preventDefault();if(resp||!cur)return;resp=true;
+  if(cur==='go'){rts.push(performance.now()-t0);d.className='gng hit'}else{err++;d.className='gng bad'}};
+ trial()}},
+{id:'nback',g:'2←',u:U('%'),name:U('Pracovná pamäť (2-back)','Pracovní paměť (2-back)'),desc:U('Ukazujú sa písmená. Stlač Zhoda, keď je písmeno rovnaké ako to spred dvoch krokov. Výsledok je percento správnych rozhodnutí.','Ukazují se písmena. Stiskni Shoda, když je písmeno stejné jako to před dvěma kroky. Výsledek je procento správných rozhodnutí.'),
+run(a,done){const letters=[...'ABČDEFHKLMNOPRŠTŽ'],N=32,seq=[];
+ for(let i=0;i<N;i++)seq.push(i>=2&&Math.random()<.33?seq[i-2]:letters[R(0,letters.length-1)]);
+ let i=-1,pressed=false,right=0;
+ a.innerHTML=`<div class=hud></div><div class=word style="min-height:1.4em;min-width:2em"></div><button class=btn>${tx('match')}</button><p class=lbl>${tx('nbHint')}</p>`;
+ const w=Q(a,'.word'),hud=Q(a,'.hud'),b=Q(a,'button');
+ const step=()=>{if(i>=2&&(seq[i]===seq[i-2])===pressed)right++;
+  i++;pressed=false;b.classList.remove('on');if(i===N)return done(Math.round(right/(N-2)*100));
+  hud.textContent=`${i+1}/${N}`;w.textContent=seq[i];w.className='word pop';later(()=>w.textContent='',700);later(step,2400)};
+ b.onclick=()=>{if(i>=2&&!pressed){pressed=true;b.classList.add('on')}};
+ step()}},
+{id:'lopticky',g:'⁘',u:U('úroveň'),name:U('Sledovanie loptičiek','Sledování míčků'),desc:U('Zapamätaj si žlté loptičky. Potom sa premiešajú medzi ostatné. Keď zastanú, klikni na tie, ktoré boli žlté. Máš 3 životy.','Zapamatuj si žluté míčky. Pak se zamíchají mezi ostatní. Až se zastaví, klikni na ty, které byly žluté. Máš 3 životy.'),
+run(a,done){let level=1,lives=3;
+ const round=()=>{const k=Math.min(2+Math.floor((level-1)/2),6),n=k+5,sp=1.4+level*.3,r=18;
+  a.innerHTML=`<div class=hud>${tx('level')} ${level} · ${tx('lives')}: ${lives}</div><div class=mot></div><p class=lbl>${tx('motHint')}</p>`;
+  const box=Q(a,'.mot'),W=box.clientWidth,H=box.clientHeight;
+  const balls=[...Array(n)].map((_,i)=>{const g=Math.random()*6.283;return{x:R(r,W-r),y:R(r,H-r),vx:Math.cos(g)*sp,vy:Math.sin(g)*sp,t:i<k}});
+  box.innerHTML=balls.map(()=>'<button class=ball aria-label="loptička"></button>').join('');
+  const els=[...box.children];balls.forEach((b,i)=>{b.el=els[i];if(b.t)b.el.classList.add('tg')});
+  const draw=()=>balls.forEach(b=>b.el.style.transform=`translate(${b.x-r}px,${b.y-r}px)`);draw();
+  let moving=false,picking=false,picked=0,good=0;
+  const tick=()=>{if(!moving||!box.isConnected)return;balls.forEach(b=>{b.x+=b.vx;b.y+=b.vy;
+   if(b.x<r||b.x>W-r){b.vx*=-1;b.x=Math.min(W-r,Math.max(r,b.x))}if(b.y<r||b.y>H-r){b.vy*=-1;b.y=Math.min(H-r,Math.max(r,b.y))}});draw();requestAnimationFrame(tick)};
+  later(()=>{els.forEach(e=>e.classList.remove('tg'));moving=true;requestAnimationFrame(tick)},2000);
+  later(()=>{moving=false;picking=true},7000);
+  els.forEach((e,i)=>e.onpointerdown=ev=>{ev.preventDefault();if(!picking||e.dataset.p)return;e.dataset.p=1;picked++;
+   if(balls[i].t){good++;e.classList.add('tg')}else e.classList.add('no');
+   if(picked===k){picking=false;balls.forEach(b=>b.t&&b.el.classList.add('tg'));
+    if(good===k){level++;later(round,800)}else{lives--;if(!lives)return later(()=>done(level-1),1100);later(round,1300)}}})};
+ round()}},
+{id:'anagramy',g:'?!',u:U('slov'),name:U('Anagramy','Přesmyčky'),desc:U('Poskladaj slovo z prehádzaných písmen. Máš 60 sekúnd, diakritiku písať nemusíš.','Slož slovo z přeházených písmen. Máš 60 sekund, diakritiku psát nemusíš.'),
+run(a,done){const pool=shuf(WORDS[lang].filter(w=>w.length>=4&&w.length<=7));let solved=0,cur,k=0;const end=performance.now()+60000;
+ a.innerHTML=`<div class=hud></div><div class=word></div><div class=ask><input autocomplete=off autocapitalize=off autocorrect=off spellcheck=false aria-label="slovo"><button class="btn ghost">${tx('skip')}</button></div>`;
+ const w=Q(a,'.word'),mi=Q(a,'input'),hud=Q(a,'.hud');
+ const strip=s=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+ const gen=()=>{cur=pool[k++%pool.length];let s,t=0;do{s=shuf([...cur]).join('')}while(s===cur&&t++<20);w.textContent=s.toUpperCase();mi.value='';mi.focus()};
+ mi.onpaste=e=>{e.preventDefault();flag('paste')};
+ mi.oninput=()=>{if(strip(mi.value.trim())===strip(cur)){solved++;gen()}};
+ Q(a,'.ask button').onclick=gen;
+ const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('solved')}: ${solved}`;if(r<=0){mi.disabled=true;return done(solved,`${tx('lastWord')}: ${cur}`)}later(tick,200)};
+ gen();tick()}},
+{id:'rotacia',g:'↻',u:U('bodov','bodů'),name:U('Otáčanie tvarov','Otáčení tvarů'),desc:U('Je pravý tvar len otočený, alebo aj zrkadlovo prevrátený? Máš 60 sekúnd, správne +1, chyba −1.','Je pravý tvar jen otočený, nebo i zrcadlově převrácený? Máš 60 sekund, správně +1, chyba −1.'),
+run(a,done){let ok=0,bad=0,mir;const end=performance.now()+60000;
+ a.innerHTML=`<div class=hud></div><div class=row id=sh></div><div class=row><button class=btn data-m=0>${tx('same')}</button><button class=btn data-m=1>${tx('mirror')}</button></div>`;
+ const sh=Q(a,'#sh'),hud=Q(a,'.hud');
+ const next=()=>{const c=SHAPES[R(0,SHAPES.length-1)],base=R(0,7)*45;mir=Math.random()<.5;sh.innerHTML=shapeSvg(c,base,false)+shapeSvg(c,base+R(1,11)*30,mir)};
+ a.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{(b.dataset.m==='1')===mir?ok++:bad++;next()});
+ const tick=()=>{const r=Math.max(0,end-performance.now());hud.textContent=`${Math.ceil(r/1000)} s · ${tx('correct')}: ${ok} · ${tx('wrong')}: ${bad}`;if(r<=0)return done(Math.max(0,ok-bad),`${tx('correct')} ${ok} · ${tx('wrong')} ${bad}`);later(tick,200)};
+ next();tick()}},
+{id:'ciara',g:'—|',low:1,dec:1,u:U('% odchýlka','% odchylka'),name:U('Zastav na čiare','Zastav na čáře'),desc:U('Bežec sa pohybuje po dráhe. Zastav ho presne na žltej čiare. Päť pokusov, každý rýchlejší.','Běžec se pohybuje po dráze. Zastav ho přesně na žluté čáře. Pět pokusů, každý rychlejší.'),
+run(a,done){let i=0;const errs=[];
+ const round=()=>{const tgt=R(15,85),spd=.7+i*.3;let p=0,dir=1,go=true;
+  a.innerHTML=`<div class=hud>${i+1}/5</div><div class=track><i class=tl style="left:${tgt}%"></i><b class=mk></b></div><button class="btn red">${tx('stop')}</button>`;
+  const mk=Q(a,'.mk'),bt=Q(a,'button');bt.focus();
+  const tick=()=>{if(!go||!mk.isConnected)return;p+=spd*dir;if(p>=100){p=100;dir=-1}if(p<=0){p=0;dir=1}mk.style.left=p+'%';requestAnimationFrame(tick)};requestAnimationFrame(tick);
+  bt.onclick=()=>{go=false;const e=Math.abs(p-tgt);errs.push(e);i++;
+   bt.outerHTML=`<p>${tx('diff')}: ${dec(e.toFixed(1))} %</p><button class=btn id=nx>${i<5?tx('next'):tx('result')}</button>`;
+   const nx=Q(a,'#nx');nx.focus();nx.onclick=()=>i<5?round():done(Math.round(errs.reduce((x,y)=>x+y,0)/5*10)/10)}};
+ round()}},
+{id:'uhol',g:'∠',low:1,dec:1,u:U('° odchýlka','° odchylka'),name:U('Odhad uhla','Odhad úhlu'),desc:U('Odhadni, koľko stupňov má zobrazený uhol. Päť pokusov, počíta sa priemerná odchýlka.','Odhadni, kolik stupňů má zobrazený úhel. Pět pokusů, počítá se průměrná odchylka.'),
+run(a,done){let i=0;const errs=[];
+ const round=()=>{const ang=R(10,170),base=R(0,359);
+  a.innerHTML=`<div class=hud>${i+1}/5</div>${angleSvg(base,ang)}<form class=ask><label for=ag>${tx('deg')}</label><input id=ag inputmode=numeric autocomplete=off><button class=btn>${tx('submit')}</button></form>`;
+  const inp=Q(a,'#ag');inp.focus();
+  Q(a,'form').onsubmit=e=>{e.preventDefault();const v=parseInt(inp.value,10);if(isNaN(v))return;const err=Math.abs(v-ang);errs.push(err);i++;
+   Q(a,'form').outerHTML=`<p>${tx('angWas')} ${ang}° · ${tx('yours')}: ${v}° · ${tx('diff')}: ${err}°</p><button class=btn id=nx>${i<5?tx('next'):tx('result')}</button>`;
+   const nx=Q(a,'#nx');nx.focus();nx.onclick=()=>i<5?round():done(Math.round(errs.reduce((x,y)=>x+y,0)/5*10)/10)}};
+ round()}},
+{id:'pismeno',g:'ř?',low:1,dec:1,u:U('s'),name:U('Nájdi písmeno','Najdi písmeno'),desc:U('V mriežke podobných znakov nájdi to správne písmeno s diakritikou. Desať kôl, každý omyl pridá sekundu.','V mřížce podobných znaků najdi to správné písmeno s diakritikou. Deset kol, každý omyl přidá sekundu.'),
+run(a,done){let i=0,pen=0;const t0=performance.now();
+ const round=()=>{const [tg,ds]=PAIRS[R(0,PAIRS.length-1)],n=48,pos=R(0,n-1);
+  a.innerHTML=`<div class=hud>${i+1}/10 · ${tx('find')}: <b class=fnd>${tg}</b></div><div class="cells srch">${[...Array(n)].map((_,j)=>`<button class=lt data-t=${j===pos?1:0}>${j===pos?tg:ds[R(0,ds.length-1)]}</button>`).join('')}</div>`;
+  a.querySelectorAll('.lt').forEach(b=>b.onpointerdown=e=>{e.preventDefault();
+   if(b.dataset.t==='1'){if(++i===10)return done(Math.round((performance.now()-t0+pen)/100)/10,`${tx('wrong')}: ${pen/1000}`);round()}
+   else if(!b.classList.contains('x')){pen+=1000;b.classList.add('x')}})};
+ round()}}
+];
+TESTS.forEach((t,i)=>t.col=i%2?'var(--red)':'var(--blue)');
+
+const fmt=(t,v)=>{const x=dec(v),u=L(t.u);return u.startsWith('/')?x+u:x+' '+u};
+const first=t=>L(t.desc).split('. ')[0].replace(/\.$/,'')+'.';
+const getBest=()=>store.get('best')||{};
+
+function fresh(){const o=document.getElementById('arena'),n=document.createElement('div');n.id='arena';n.className='arena';o.replaceWith(n);return n}
+
+function home(){cleanup();const best=getBest(),VT=visibleTests();const n=VT.filter(t=>best[t.id]!=null).length;
+ app.innerHTML=`<section class="band hero"><div class=wrap><h1>${tx('title')}</h1><p class=lead>${tx('sub').replace('{n}',VT.length)}</p>
+ <div class=stats><div class=chip><b>${n}/${VT.length}</b>${tx('tested')}</div>${VT.length?`<a class=btn href="#${VT[R(0,VT.length-1)].id}">${tx('random')}</a>`:''}${isStaff()?`<a class="btn ghost" href="#dohlad">${ps('homeBtn')}</a>`:''}</div></div></section>
+ <section class=band><div class="wrap grid">${VT.map(t=>`<a class=card href="#${t.id}"><span class=glyph style="--g:${t.col}">${t.g}</span><span class=ct><b>${L(t.name)}</b><small>${first(t)}</small><em>${best[t.id]!=null?tx('best')+': '+fmt(t,best[t.id]):tx('none')}</em></span></a>`).join('')}</div>
+ <div class="wrap tools"><button class="btn line" id=reset>${tx('reset')}</button></div></section>`;
+ const rb=document.getElementById('reset');let armed=false;
+ rb.onclick=()=>{if(!armed){armed=true;rb.textContent=tx('sure');return}store.set('best',{});store.set('hist',{});home()}}
+
+const REF={
+reakcia:{kind:'age',unit:'ms',rows:[['18–24',217.9],['25–31',221],['32–38',224.8],['39–45',227.7],['46–51',233.6],['51–58',236.4],['59–65',239.1]],ranges:[[18,24],[25,31],[32,38],[39,45],[46,51],[52,58],[59,65]],
+ extra:[U('Online medián (Human Benchmark)'),273],
+ note:U('Priemerný čas jednoduchej reakcie v laboratóriu podľa veku (1 469 dospelých, herná myš). V prehliadači vychádzajú časy pomalšie, lebo sa pripočíta oneskorenie myši, obrazovky a počítača. Preto je medián online testu Human Benchmark okolo 273 ms.','Průměrná doba jednoduché reakce v laboratoři podle věku (1 469 dospělých, herní myš). V prohlížeči vycházejí časy pomaleji, protože se přičte zpoždění myši, obrazovky a počítače. Proto je medián online testu Human Benchmark kolem 273 ms.'),
+ src:[['Woods a kol. (2015), Frontiers in Human Neuroscience','https://www.frontiersin.org/articles/10.3389/fnhum.2015.00131/full'],['Human Benchmark','https://humanbenchmark.com/tests/reactiontime/statistics']]},
+cisla:{kind:'age',unit:'',rows:[['16–17',6.52],['18–19',6.37],['20–24',6.24],['25–34',6.2],['35–44',6.04],['45–54',5.92],['55–64',5.91],['65–69',5.56],['70–74',5.39],['75–79',4.98]],ranges:[[16,17],[18,19],[20,24],[25,34],[35,44],[45,54],[55,64],[65,69],[70,74],[75,79]],
+ note:U('Priemerný počet číslic, ktoré ľudia zopakovali bez chyby, podľa veku (1 000 ľudí vo veku 16–79 rokov). V štúdii čísla počuli nahlas, tu ich vidíš na obrazovke, preto ber porovnanie orientačne.','Průměrný počet číslic, které lidé zopakovali bez chyby, podle věku (1 000 lidí ve věku 16–79 let). Ve studii čísla slyšeli nahlas, tady je vidíš na obrazovce, proto ber srovnání orientačně.'),
+ src:[['Grégoire a Van der Linden (1997), Aging, Neuropsychology, and Cognition','https://orbi.uliege.be/bitstream/2268/241393/1/Gregoire_Effectofage_1997.pdf']]},
+pisanie:{kind:'dist',unit:'WPM',mean:51.56,sd:20.2,p10:26,p90:78,
+ note:U('Rýchlosť písania 168 000 dobrovoľníkov z viac ako 200 krajín, väčšinou v angličtine. Text s diakritikou sa píše pomalšie, takže porovnanie ťa skôr podhodnotí. Údaje o veku štúdia neuvádza.','Rychlost psaní 168 000 dobrovolníků z více než 200 zemí, většinou v angličtině. Text s diakritikou se píše pomaleji, takže srovnání tě spíš podhodnotí. Údaje o věku studie neuvádí.'),
+ src:[['Dhakal a kol. (2018), CHI Conference','https://userinterfaces.aalto.fi/136Mkeystrokes/']]}};
+const erf=x=>{const s=Math.sign(x);x=Math.abs(x);const t=1/(1+.3275911*x);return s*(1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x))};
+function world(t){const r=REF[t.id];if(!r)return '';const best=getBest()[t.id],age=store.get('age');let rows,h='';
+ if(r.kind==='age'){const gi=age?r.ranges.findIndex(([a,b])=>age>=a&&age<=b):-1;
+  rows=r.rows.map((x,i)=>({l:x[0],v:x[1],c:i===gi?'mine':''}));if(r.extra)rows.push({l:L(r.extra[0]),v:r.extra[1],c:'ext'});
+  h+=`<label class=agein>${tx('ageLabel')} <input id=age type=number min=5 max=110 inputmode=numeric value="${age??''}"></label>`;
+  if(age&&gi<0)h+=`<p class=mut>${tx('noAge')}</p>`}
+ else rows=[{l:tx('p10'),v:r.p10},{l:tx('avg'),v:r.mean},{l:tx('p90'),v:r.p90}];
+ if(best!=null)rows.push({l:tx('you'),v:best,c:'you'});
+ const mx=Math.max(...rows.map(x=>x.v));
+ h+=rows.map(x=>`<div class="hrow wr ${x.c||''}"><span>${esc(x.l)}</span><i style="width:${Math.max(2,x.v/mx*100)}%"></i><span>${dec(Math.round(x.v*10)/10)}${r.unit?' '+r.unit:''}</span></div>`).join('');
+ if(r.kind==='dist'&&best!=null){const p=Math.min(99,Math.max(1,Math.round(50*(1+erf((best-r.mean)/r.sd/Math.SQRT2)))));h+=`<p><b>${tx('pct').replace('{p}',p)}</b></p>`}
+ return `<div class=world><h2>${tx('world')}</h2><p class=mut>${L(r.note)}</p>${h}<p class=src>${tx('src')}: ${r.src.map(s=>`<a href="${s[1]}" target=_blank rel=noopener>${s[0]}</a>`).join(' · ')}</p></div>`}
+function stats(t){const el=document.getElementById('stats');if(!el)return;const h=(store.get('hist')||{})[t.id]||[],best=getBest()[t.id];let out;
+ if(!h.length)out=`<div class=hist><h2>${tx('hist')}</h2><p class=mut>${tx('histNone')}</p></div>`;
+ else{const mx=Math.max(...h,1);
+ out=`<div class=hist><h2>${tx('hist')}</h2><p class=mut>${tx('best')}: <b>${fmt(t,best)}</b> · ${tx('better')} ${t.low?tx('lower'):tx('higher')}</p>${h.slice().reverse().map((v,i)=>`<div class=hrow><span class=mut>#${h.length-i}</span><i class="${v===best?'b':''}" style="width:${Math.max(2,v/mx*100)}%"></i><span>${fmt(t,v)}</span></div>`).join('')}</div>`}
+ el.innerHTML=`<div class=sgrid>${out}${world(t)}</div>`;
+ const ai=el.querySelector('#age');if(ai)ai.onchange=()=>{const v=parseInt(ai.value,10);store.set('age',v>0&&v<120?v:null);stats(t)}}
+
+function openTest(t){cleanup();
+ app.innerHTML=`<section class="band testhead"><div class=wrap><a href="#" class=back>← ${tx('back')}</a><h1>${L(t.name)}</h1><p>${L(t.desc)}</p></div></section>
+ <div id=arena class=arena><div class=intro><div class="glyph big">${t.g}</div><button class=btn id=go>${tx('start')}</button></div></div>
+ <section class=band><div class=wrap><div id=cmp></div><div id=stats></div></div></section>`;
+ stats(t);cmpLoad(t);document.getElementById('go').onclick=()=>start(t)}
+
+function runTest(t,cb){cleanup();const a=fresh();flags=new Set();running=true;runDev=defDev();
+ a.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'||e.pointerType==='pen')runDev='touch';else if(e.pointerType==='mouse')runDev='mouse'},true);
+ ['pointerdown','click','keydown','input'].forEach(ev=>a.addEventListener(ev,e=>{if(!e.isTrusted)flag('bot')},true));
+ t.run(a,(v,d)=>{const fl=[...flags];cleanup();cb(v,d,fl)})}
+function start(t){runTest(t,(v,d)=>finish(t,v,d))}
+
+function finish(t,v,detail){cleanup();const a=fresh();const best=getBest(),old=best[t.id],sus=[...flags];
+ const rec=!sus.length&&(old==null||(t.low?v<old:v>old));if(rec){best[t.id]=v;store.set('best',best)}
+ if(!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
+ a.innerHTML=`<p class=lbl>${tx('score')}</p><div class=huge>${fmt(t,v)}</div><p class=save id=save></p>${detail?`<p>${esc(detail)}</p>`:''}${sus.length?`<div class=sus><b>${tx('sus')}</b>${sus.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div>`:''}${rec&&old!=null?`<p class=rec>${tx('newBest')}</p>`:''}${best[t.id]!=null?`<p class=lbl>${tx('best')}: ${fmt(t,best[t.id])}</p>`:''}<div class=row><button class=btn id=again>${tx('again')}</button><a class="btn ghost" href="#">${tx('back')}</a></div>`;
+ document.getElementById('again').onclick=()=>start(t);stats(t);submitRun(t,v,detail,sus).finally(()=>cmpLoad(t))}
+
+/* ===== Testovanie pod dohľadom ===== */
+const PS={
+sk:{title:'Testovanie pod dohľadom',intro:'Oficiálny režim ako na Mense: účastník príde osobne, testy idú v pevnom poradí na rovnakom zariadení a dozor potvrdzuje regulárnosť. Na konci dostane certifikát.',newEv:'Nové podujatie',evName:'Názov podujatia',place:'Miesto',proctor:'Dozor',pin:'PIN dozoru (4–8 číslic)',tests:'Testy (pôjdu v tomto poradí)',tries:'Ostré pokusy na test',rule:'Do výsledku sa počíta',ruleBest:'najlepší pokus',ruleAvg:'priemer pokusov',practice:'Skúšobné kolo pred každým testom (nepočíta sa)',lag:'Oneskorenie zostavy na odpočítanie (ms)',lagHelp:'Ak ste oneskorenie myši a monitora zmerali, odpočíta sa od reakčných testov. Ak nie, nechajte 0.',create:'Vytvoriť podujatie',needTest:'Vyber aspoň jeden test.',setupSum:'Testy: {n} · ostré pokusy na test: {k} · počíta sa {r}',lagS:'odpočet oneskorenia',newP:'Nový účastník',copyCsv:'Kopírovať výsledky (CSV)',copied:'Skopírované',board:'Výsledky podujatia',nameH:'Meno',ageH:'Vek',bornH:'Rok narodenia',idH:'Totožnosť overená',noId:'bez overenia totožnosti',cert:'Certifikát',rankNote:'Poradie je priemer umiestnení v jednotlivých testoch.',empty:'Zatiaľ nikto netestoval.',endEv:'Ukončiť podujatie',badPin:'Nesprávny PIN.',localNote:'Mená a výsledky sú zatiaľ uložené iba v tomto prehliadači.',idOk:'Dozor overil totožnosť podľa dokladu',consent:'Účastník súhlasí s uložením mena, roku narodenia a výsledkov',pinStart:'PIN dozoru na spustenie',startS:'Spustiť testovanie',testN:'Test {i} z {n}',tryN:'Pokus {i} z {n}',proctorPanel:'Dozor',abort:'Prerušiť testovanie',practiceB:'Skúšobné kolo',official:'Ostrý pokus',prDone:'Skúšobné kolo (nepočíta sa)',tryDone:'Pokus hotový',nextTry:'Ďalší pokus',lastRes:'Výsledok predchádzajúceho testu',flagged:'Pokus je označený ako podozrivý',flagHelp:'Dozor rozhodne, či pokus uzná, alebo ho nechá zopakovať.',accept:'Uznať',repeat:'Opakovať pokus',certTitle:'Certifikát overeného výsledku',testH:'Test',resH:'Výsledok',triesH:'Pokusy',proctoredBy:'Pod dohľadom',idOkS:'totožnosť overená',navS:'pokusy opustiť test',code:'Kontrolný kód',certNote:'Certifikát potvrdzuje výsledky v uvedených testoch reakcie, pamäti a postrehu, namerané pod dohľadom. Nejde o IQ test ani psychologické vyšetrenie. Kontrolný kód sa zatiaľ dá overiť iba na zariadení, kde testovanie prebehlo.',accMark:'pokus označený systémom a uznaný dozorom',copyCert:'Kopírovať certifikát',backEv:'Späť na podujatie',homeBtn:'Testovanie pod dohľadom'},
+cz:{title:'Testování pod dohledem',intro:'Oficiální režim jako v Mense: účastník přijde osobně, testy jdou v pevném pořadí na stejném zařízení a dozor potvrzuje regulérnost. Na konci dostane certifikát.',newEv:'Nová akce',evName:'Název akce',place:'Místo',proctor:'Dozor',pin:'PIN dozoru (4–8 číslic)',tests:'Testy (půjdou v tomto pořadí)',tries:'Ostré pokusy na test',rule:'Do výsledku se počítá',ruleBest:'nejlepší pokus',ruleAvg:'průměr pokusů',practice:'Zkušební kolo před každým testem (nepočítá se)',lag:'Zpoždění sestavy k odečtení (ms)',lagHelp:'Pokud jste zpoždění myši a monitoru změřili, odečte se od reakčních testů. Pokud ne, nechte 0.',create:'Vytvořit akci',needTest:'Vyber alespoň jeden test.',setupSum:'Testy: {n} · ostré pokusy na test: {k} · počítá se {r}',lagS:'odečet zpoždění',newP:'Nový účastník',copyCsv:'Kopírovat výsledky (CSV)',copied:'Zkopírováno',board:'Výsledky akce',nameH:'Jméno',ageH:'Věk',bornH:'Rok narození',idH:'Totožnost ověřena',noId:'bez ověření totožnosti',cert:'Certifikát',rankNote:'Pořadí je průměr umístění v jednotlivých testech.',empty:'Zatím nikdo netestoval.',endEv:'Ukončit akci',badPin:'Nesprávný PIN.',localNote:'Jména a výsledky jsou zatím uložené jen v tomto prohlížeči.',idOk:'Dozor ověřil totožnost podle dokladu',consent:'Účastník souhlasí s uložením jména, roku narození a výsledků',pinStart:'PIN dozoru ke spuštění',startS:'Spustit testování',testN:'Test {i} z {n}',tryN:'Pokus {i} z {n}',proctorPanel:'Dozor',abort:'Přerušit testování',practiceB:'Zkušební kolo',official:'Ostrý pokus',prDone:'Zkušební kolo (nepočítá se)',tryDone:'Pokus hotový',nextTry:'Další pokus',lastRes:'Výsledek předchozího testu',flagged:'Pokus je označený jako podezřelý',flagHelp:'Dozor rozhodne, zda pokus uzná, nebo ho nechá zopakovat.',accept:'Uznat',repeat:'Opakovat pokus',certTitle:'Certifikát ověřeného výsledku',testH:'Test',resH:'Výsledek',triesH:'Pokusy',proctoredBy:'Pod dohledem',idOkS:'totožnost ověřena',navS:'pokusy opustit test',code:'Kontrolní kód',certNote:'Certifikát potvrzuje výsledky v uvedených testech reakce, paměti a postřehu, naměřené pod dohledem. Nejde o IQ test ani psychologické vyšetření. Kontrolní kód lze zatím ověřit jen na zařízení, kde testování proběhlo.',accMark:'pokus označený systémem a uznaný dozorem',copyCert:'Kopírovat certifikát',backEv:'Zpět na akci',homeBtn:'Testování pod dohledem'}};
+const ps=k=>PS[lang][k];
+const DEF=['reakcia','mierenie','schulte','gonogo','cisla','stroop'],LAGT=['reakcia','gonogo'];
+let EV=store.get('event'),P=null;
+const byId=id=>TESTS.find(t=>t.id===id);
+const sessions=()=>store.get('sessions')||[];
+const evSessions=()=>EV?sessions().filter(s=>s.ev===EV.id):[];
+const fmtv=(t,v)=>v==null?'—':fmt(t,v);
+const today=()=>new Date().toLocaleDateString(lang==='cz'?'cs-CZ':'sk-SK');
+const el=id=>document.getElementById(id);
+const exitFs=()=>{try{if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}catch(e){}};
+function copyOut(text,btn){const ok=()=>{btn.textContent=ps('copied')};
+ const fb=()=>{let ta=btn.parentElement.querySelector('textarea.cp');if(!ta){ta=document.createElement('textarea');ta.className='cp';ta.readOnly=true;btn.parentElement.appendChild(ta)}ta.value=text;ta.select()};
+ try{navigator.clipboard.writeText(text).then(ok,fb)}catch(e){fb()}}
+
+function proctor(){cleanup();if(P&&!P.done)return step();if(!EV)return setup();dash()}
+
+function setup(){
+ app.innerHTML=`<section class="band testhead"><div class=wrap><a href="#" class=back>← ${tx('back')}</a><h1>${ps('title')}</h1><p>${ps('intro')}</p></div></section>
+ <section class=band><div class=wrap><form class=pform id=evf><h2>${ps('newEv')}</h2>
+ <label>${ps('evName')}<input name=name required maxlength=80></label>
+ <label>${ps('place')}<input name=place maxlength=80></label>
+ <label>${ps('proctor')}<input name=proctor required maxlength=60></label>
+ <label>${ps('pin')}<input name=pin required inputmode=numeric pattern="[0-9]{4,8}" autocomplete=off></label>
+ <fieldset><legend>${ps('tests')}</legend>${TESTS.map(t=>`<label class=chk><input type=checkbox name=t value=${t.id}${DEF.includes(t.id)?' checked':''}>${L(t.name)}</label>`).join('')}</fieldset>
+ <label>${ps('tries')}<select name=tries><option>1</option><option selected>2</option><option>3</option></select></label>
+ <label>${ps('rule')}<select name=rule><option value=best>${ps('ruleBest')}</option><option value=avg>${ps('ruleAvg')}</option></select></label>
+ <label class=chk><input type=checkbox name=practice checked>${ps('practice')}</label>
+ <label>${ps('lag')}<input name=lag type=number min=0 max=150 value=0 inputmode=numeric></label><small class=mut>${ps('lagHelp')}</small>
+ <p class=err id=everr></p><button class="btn red">${ps('create')}</button></form></div></section>`;
+ const f=el('evf');
+ f.onsubmit=e=>{e.preventDefault();const d=new FormData(f),tests=d.getAll('t');if(!tests.length){el('everr').textContent=ps('needTest');return}
+  EV={id:Date.now(),name:d.get('name').trim(),place:d.get('place').trim(),proctor:d.get('proctor').trim(),pin:d.get('pin'),tests,tries:+d.get('tries'),rule:d.get('rule'),practice:!!d.get('practice'),lag:Math.max(0,+d.get('lag')||0),date:today()};
+  store.set('event',EV);dash()}}
+
+function ranked(list){const rk={};
+ EV.tests.map(byId).forEach(t=>{const vals=list.map(s=>s.res[t.id]?.final).filter(v=>v!=null);
+  list.forEach(s=>{const v=s.res[t.id]?.final;if(v==null)return;(rk[s.id]=rk[s.id]||[]).push(vals.filter(x=>t.low?x<v:x>v).length+1)})});
+ return list.map(s=>({s,m:rk[s.id]?rk[s.id].reduce((a,b)=>a+b,0)/rk[s.id].length:999})).sort((a,b)=>a.m-b.m).map(r=>r.s)}
+function csv(list,tests){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+ return [[ps('nameH'),ps('ageH'),ps('bornH'),ps('idH'),...tests.map(t=>L(t.name)+' ('+L(t.u)+')'),ps('code')].map(q).join(';'),
+  ...list.map(s=>[s.name,s.age,s.by,s.idOk?1:0,...tests.map(t=>{const v=s.res[t.id]?.final;return v==null?'':dec(v)}),s.code].map(q).join(';'))].join('\n')}
+
+function dash(){cleanup();const tests=EV.tests.map(byId),list=ranked(evSessions());
+ app.innerHTML=`<section class="band testhead"><div class=wrap><a href="#" class=back>← ${tx('back')}</a><h1>${esc(EV.name)}</h1>
+ <p>${[EV.place,EV.date,ps('proctor')+': '+EV.proctor].filter(Boolean).map(esc).join(' · ')}</p>
+ <p class=mut>${ps('setupSum').replace('{n}',tests.map(t=>L(t.name)).join(', ')).replace('{k}',EV.tries).replace('{r}',EV.rule==='best'?ps('ruleBest'):ps('ruleAvg'))}${EV.lag?' · '+ps('lagS')+' '+EV.lag+' ms':''}</p>
+ <div class=row style="justify-content:flex-start;margin-top:16px"><button class="btn red" id=newp>${ps('newP')}</button><button class="btn line" id=cpy>${ps('copyCsv')}</button></div></div></section>
+ <section class=band><div class=wrap><h2>${ps('board')} (${list.length})</h2>
+ ${list.length?`<div class=scroll><table class=res><thead><tr><th>#</th><th>${ps('nameH')}</th><th class=n>${ps('ageH')}</th>${tests.map(t=>`<th class=n>${L(t.name)}</th>`).join('')}<th></th></tr></thead><tbody>${list.map((s,i)=>`<tr><td>${i+1}.</td><td><b>${esc(s.name)}</b>${s.idOk?'':` <small class=mut>(${ps('noId')})</small>`}</td><td class=n>${s.age}</td>${tests.map(t=>`<td class=n>${fmtv(t,s.res[t.id]?.final)}</td>`).join('')}<td><button class="btn line sm" data-c="${s.id}">${ps('cert')}</button></td></tr>`).join('')}</tbody></table></div><p class=mut>${ps('rankNote')}</p>`:`<p class=mut>${ps('empty')}</p>`}
+ <div class=pinrow style="margin-top:28px"><input type=password inputmode=numeric placeholder="PIN" id=pinE aria-label="PIN"><button class="btn line" id=endE>${ps('endEv')}</button><span class=err id=pe></span></div>
+ <p class=mut>${ps('localNote')}</p></div></section>`;
+ el('newp').onclick=register;
+ el('cpy').onclick=e=>copyOut(csv(list,tests),e.currentTarget);
+ app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>cert(list.find(s=>String(s.id)===b.dataset.c)));
+ el('endE').onclick=()=>{if(el('pinE').value!==EV.pin){el('pe').textContent=ps('badPin');return}EV=null;store.set('event',null);setup()}}
+
+function register(){
+ app.innerHTML=`<section class="band testhead"><div class=wrap><a href="#dohlad" class=back id=bk>← ${esc(EV.name)}</a><h1>${ps('newP')}</h1></div></section>
+ <section class=band><div class=wrap><form class=pform id=rf>
+ <label>${ps('nameH')}<input name=name required maxlength=80 autocomplete=off></label>
+ <label>${ps('bornH')}<input name=by required type=number min=1900 max=${new Date().getFullYear()} inputmode=numeric></label>
+ <label class=chk><input type=checkbox name=id>${ps('idOk')}</label>
+ <label class=chk><input type=checkbox name=ok required>${ps('consent')}</label>
+ <label>${ps('pinStart')}<input name=pin type=password required inputmode=numeric autocomplete=off></label>
+ <p class=err id=rerr></p><button class="btn red">${ps('startS')}</button></form></div></section>`;
+ el('bk').onclick=e=>{e.preventDefault();dash()};
+ const f=el('rf');
+ f.onsubmit=e=>{e.preventDefault();const d=new FormData(f);if(d.get('pin')!==EV.pin){el('rerr').textContent=ps('badPin');return}
+  const by=+d.get('by');
+  P={id:Date.now(),name:d.get('name').trim(),by,age:new Date().getFullYear()-by,idOk:!!d.get('id'),res:{},ti:0,k:0,ph:'intro',pr:false,note:'',nav:0,done:false,date:today()};
+  try{const r=document.documentElement.requestFullscreen?.();if(r)r.catch(()=>{})}catch(e){}
+  step()}}
+
+const adj=(t,v)=>LAGT.includes(t.id)&&EV.lag?Math.max(0,v-EV.lag):v;
+function step(){cleanup();const t=byId(EV.tests[P.ti]),n=EV.tests.length,tr=P.res[t.id]?.tries||[],last=tr[tr.length-1];
+ app.innerHTML=`<div class=ptop><span>${esc(P.name)} · ${ps('testN').replace('{i}',P.ti+1).replace('{n}',n)}: ${L(t.name)}</span><span>${ps('tryN').replace('{i}',P.k+1).replace('{n}',EV.tries)}</span></div>
+ <div id=arena class=arena></div>
+ <section class=band><div class=wrap><details class=dz><summary>${ps('proctorPanel')}</summary><div class=pinrow><input type=password inputmode=numeric placeholder="PIN" id=pinA aria-label="PIN"><button class="btn line" id=abort>${ps('abort')}</button><span class=err id=pa></span></div></details></div></section>`;
+ el('abort').onclick=()=>{if(el('pinA').value!==EV.pin){el('pa').textContent=ps('badPin');return}P=null;exitFs();dash()};
+ const a=el('arena');
+ if(P.ph==='flag'){
+  a.innerHTML=`<div class=sus><b>${ps('flagged')}</b>${last.fl.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div><p>${ps('flagHelp')}</p>
+  <div class=pinrow style="justify-content:center"><input type=password inputmode=numeric placeholder="PIN" id=pinF aria-label="PIN"><button class=btn id=acc>${ps('accept')}</button><button class="btn ghost" id=rep>${ps('repeat')}</button></div><p class=err id=pf></p>`;
+  const chk=()=>{if(el('pinF').value!==EV.pin){el('pf').textContent=ps('badPin');return false}return true};
+  el('acc').onclick=()=>{if(!chk())return;last.ok=true;advance(t)};
+  el('rep').onclick=()=>{if(!chk())return;tr.pop();P.ph=P.k?'between':'intro';step()};
+  return}
+ if(P.ph==='between'){
+  a.innerHTML=`<p class=lbl>${ps('tryDone')}</p><div class=huge>${fmt(t,last.v)}</div>${last.d?`<p>${esc(last.d)}</p>`:''}<button class=btn id=gob>${ps('nextTry')}</button>`}
+ else{
+  a.innerHTML=`<div class=intro><div class="glyph big">${t.g}</div><div class=big>${L(t.name)}</div><p>${L(t.desc)}</p>${P.note?`<p class=lbl>${esc(P.note)}</p>`:''}
+  <div class=row>${EV.practice&&!P.pr?`<button class="btn ghost" id=prb>${ps('practiceB')}</button>`:''}<button class=btn id=gob>${ps('official')}</button></div></div>`;
+  const prb=el('prb');if(prb)prb.onclick=()=>runTest(t,v=>{P.pr=true;P.note=ps('prDone')+': '+fmt(t,adj(t,v));step()})}
+ el('gob').onclick=()=>runTest(t,(v,d,fl)=>{const r=P.res[t.id]=P.res[t.id]||{tries:[]};r.tries.push({v:adj(t,v),d,fl,ok:!fl.length});
+  if(fl.length){P.ph='flag';step()}else advance(t)})}
+
+function advance(t){P.k++;
+ if(P.k<EV.tries){P.ph='between';return step()}
+ const r=P.res[t.id],vs=r.tries.filter(x=>x.ok).map(x=>x.v);
+ r.final=EV.rule==='best'?(t.low?Math.min(...vs):Math.max(...vs)):Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*10)/10;
+ P.ti++;P.k=0;P.pr=false;P.note=ps('lastRes')+' ('+L(t.name)+'): '+fmt(t,r.final);
+ if(P.ti<EV.tests.length){P.ph='intro';return step()}
+ done2()}
+
+async function codeOf(o){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(o)));const h=[...new Uint8Array(b)].slice(0,5).map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();return h.slice(0,5)+'-'+h.slice(5)}catch(e){return o.id.toString(36).toUpperCase()}}
+async function done2(){P.done=true;exitFs();
+ const rec={id:P.id,ev:EV.id,evName:EV.name,place:EV.place,proctor:EV.proctor,date:P.date,name:P.name,by:P.by,age:P.age,idOk:P.idOk,nav:P.nav,
+  res:Object.fromEntries(Object.entries(P.res).map(([k,r])=>[k,{final:r.final,tries:r.tries.map(x=>({v:x.v,fl:x.fl,ok:x.ok}))}]))};
+ rec.code=await codeOf(rec);store.set('sessions',[...sessions(),rec]);P=null;cert(rec)}
+
+function certText(s,tests){return `${tx('title')} – ${ps('certTitle')}\n${s.name} (${ps('bornH')}: ${s.by})\n${[s.evName,s.place,s.date].filter(Boolean).join(' · ')}\n\n${tests.map(t=>L(t.name)+': '+fmtv(t,s.res[t.id].final)).join('\n')}\n\n${ps('proctoredBy')}: ${s.proctor}\n${ps('code')}: ${s.code}`}
+function cert(s){cleanup();const tests=Object.keys(s.res).map(byId).filter(Boolean),anyF=tests.some(t=>s.res[t.id].tries.some(x=>x.fl.length));
+ app.innerHTML=`<section class=band><div class=wrap><div class=cert>
+ <div class=ch><span class=flag aria-hidden=true></span><b>${tx('title')}</b></div>
+ <p class=ctag>${ps('certTitle')}</p><h2 class=cname>${esc(s.name)}</h2>
+ <p>${ps('bornH')}: ${s.by} · ${ps('ageH')}: ${s.age}<br>${[s.evName,s.place,s.date].filter(Boolean).map(esc).join(' · ')}</p>
+ <div class=scroll><table class=res><thead><tr><th>${ps('testH')}</th><th class=n>${ps('resH')}</th><th class=n>${ps('triesH')}</th></tr></thead><tbody>${tests.map(t=>{const r=s.res[t.id];return `<tr><td>${L(t.name)}</td><td class=n><b>${fmtv(t,r.final)}</b></td><td class=n>${r.tries.map(x=>(x.fl.length?'⚑ ':'')+dec(x.v)).join(' · ')}</td></tr>`}).join('')}</tbody></table></div>
+ ${anyF?`<p class=cnote>⚑ ${ps('accMark')}</p>`:''}
+ <p>${ps('proctoredBy')}: <b>${esc(s.proctor)}</b>${s.idOk?' · '+ps('idOkS'):''}${s.nav?' · '+ps('navS')+': '+s.nav:''}</p>
+ <p class=code>${ps('code')}: ${esc(s.code)}</p><p class=cnote>${ps('certNote')}</p></div>
+ <div class=row style="margin-top:18px"><button class="btn red" id=cc>${ps('copyCert')}</button><button class="btn line" id=bd>${ps('backEv')}</button></div></div></section>`;
+ el('cc').onclick=e=>copyOut(certText(s,tests),e.currentTarget);
+ el('bd').onclick=()=>EV?dash():setup()}
+
+/* ===== Napojenie na porovnajsa.sk (Supabase) ===== */
+const SB_URL='https://khduswpbhozkqjxnqufk.supabase.co',SB_KEY='sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8';
+const sb=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(SB_URL,SB_KEY):null;
+let ME=null,SP={},remoteOk=false,cmpDev=null,runDev='mouse';
+const RS={
+sk:{login:'Prihlásiť sa',saveLogin:'Prihlás sa na porovnajsa.sk a výsledok sa uloží do rebríčka.',saving:'Ukladám do rebríčka…',saved:'Uložené do rebríčka.',savedPb:'Nový osobný rekord v rebríčku porovnajsa.sk!',savedNoPb:'Uložené. Tvoj rekord v rebríčku je stále lepší.',savedFlag:'Pokus sa uložil ako podozrivý a do rebríčka nejde.',saveErr:'Výsledok sa nepodarilo uložiť',offline:'Tento test zatiaľ nie je zapojený do rebríčka.',cmp:'Porovnaj sa s ostatnými',players:'Hráčov',fewPlayers:'Zatiaľ {n} hráčov. Percentil ukážeme, keď ich bude aspoň {m}.',pctTxt:'Si lepší ako {p} % hráčov',eqTxt:'rovnaký výsledok má {e}',median:'Medián hráčov',myBest:'Tvoj rekord',typical:'Tvoj bežný výkon',typHelp:'posledné pokusy bez najhoršieho',mouse:'Myš',touch:'Dotyk',byAge:'Medián podľa veku',ageNote:'Vekové skupiny sa ukážu, keď v nich bude aspoň 5 hráčov.',board:'Rebríček na porovnajsa.sk',loginCmp:'Prihlás sa a uvidíš, ako si na tom v porovnaní s ostatnými.',noStats:'Štatistiky sa nepodarilo načítať.',loading:'Načítavam…',
+ err_not_authenticated:'nie si prihlásený',err_no_profile:'najprv dokonči profil na porovnajsa.sk',err_unknown_test:'test nie je aktívny',err_implausible_score:'výsledok je mimo možného rozsahu',err_rate_limited:'príliš veľa pokusov za minútu, skús o chvíľu',err_bad_device:'neznáme zariadenie'},
+cz:{login:'Přihlásit se',saveLogin:'Přihlas se na porovnajsa.sk a výsledek se uloží do žebříčku.',saving:'Ukládám do žebříčku…',saved:'Uloženo do žebříčku.',savedPb:'Nový osobní rekord v žebříčku porovnajsa.sk!',savedNoPb:'Uloženo. Tvůj rekord v žebříčku je stále lepší.',savedFlag:'Pokus se uložil jako podezřelý a do žebříčku nejde.',saveErr:'Výsledek se nepodařilo uložit',offline:'Tento test zatím není zapojený do žebříčku.',cmp:'Porovnej se s ostatními',players:'Hráčů',fewPlayers:'Zatím {n} hráčů. Percentil ukážeme, až jich bude alespoň {m}.',pctTxt:'Jsi lepší než {p} % hráčů',eqTxt:'stejný výsledek má {e}',median:'Medián hráčů',myBest:'Tvůj rekord',typical:'Tvůj běžný výkon',typHelp:'poslední pokusy bez nejhoršího',mouse:'Myš',touch:'Dotyk',byAge:'Medián podle věku',ageNote:'Věkové skupiny se ukážou, až v nich bude alespoň 5 hráčů.',board:'Žebříček na porovnajsa.sk',loginCmp:'Přihlas se a uvidíš, jak si stojíš v porovnání s ostatními.',noStats:'Statistiky se nepodařilo načíst.',loading:'Načítám…',
+ err_not_authenticated:'nejsi přihlášený',err_no_profile:'nejdřív dokonči profil na porovnajsa.sk',err_unknown_test:'test není aktivní',err_implausible_score:'výsledek je mimo možný rozsah',err_rate_limited:'příliš mnoho pokusů za minutu, zkus to za chvíli',err_bad_device:'neznámé zařízení'}};
+const rs=k=>RS[lang][k];
+const MINP=30;
+const sportOf=t=>SP[t.id];
+const visibleTests=()=>Object.keys(SP).length?TESTS.filter(t=>SP[t.id]&&SP[t.id].active!==false):TESTS;
+const defDev=()=>{try{return matchMedia('(pointer: coarse)').matches?'touch':'mouse'}catch(e){return 'mouse'}};
+const isStaff=()=>!!(ME&&['moderator','superadmin'].includes(ME.role));
+const AGEG=['do 17','18–24','25–34','35–44','45–54','55–64','65+'];
+const ageGroup=by=>{if(!by)return null;const a=new Date().getFullYear()-by;return a<18?AGEG[0]:a<25?AGEG[1]:a<35?AGEG[2]:a<45?AGEG[3]:a<55?AGEG[4]:a<65?AGEG[5]:AGEG[6]};
+const r1=v=>Math.round(v*10)/10;
+
+async function initRemote(){if(!sb)return;
+ try{const {data}=await sb.auth.getSession();const u=data&&data.session&&data.session.user;
+  if(u){const r=await sb.from('profiles').select('id,display_name,birth_year,role').eq('id',u.id).maybeSingle();ME=r.data||{id:u.id}}}catch(e){}
+ try{const {data,error}=await sb.from('sports').select('id,name,unit,kind,hb_test,active').eq('kind','cognitive');
+  if(!error&&data){SP={};data.forEach(s=>{if(s.hb_test)SP[s.hb_test]=s});remoteOk=true}}catch(e){}
+ renderAuth();if(!(P&&!P.done))route()}
+
+function renderAuth(){const el=document.getElementById('auth');if(!el)return;
+ el.innerHTML=ME?`<a class=pill href="index.html#profil=${encodeURIComponent(ME.id)}">👤 ${esc(ME.display_name||'')}</a>`:`<a class=pill href="index.html">${rs('login')}</a>`}
+
+async function submitRun(t,v,detail,fl){const el=document.getElementById('save');if(!el)return;const s=sportOf(t);
+ if(!sb||!s||s.active===false){el.textContent=remoteOk?rs('offline'):'';return}
+ if(!ME){el.innerHTML=`<a href="index.html">${rs('saveLogin')}</a>`;return}
+ el.textContent=rs('saving');
+ try{const {data,error}=await sb.rpc('hb_submit',{p_sport:s.id,p_score:v,p_device:runDev,p_lang:lang,p_flags:fl,p_detail:detail||null});
+  if(error)throw error;
+  el.textContent=data.status==='flagged'?rs('savedFlag'):data.personal_best?rs('savedPb'):data.previous_best!=null?rs('savedNoPb'):rs('saved')}
+ catch(e){const m=String(e&&e.message||'');const k=Object.keys(RS.sk).find(x=>x.startsWith('err_')&&m.includes(x.slice(4)));el.textContent=rs('saveErr')+(k?': '+rs(k):'.')}}
+
+async function cmpLoad(t){const el=document.getElementById('cmp');if(!el)return;const s=sportOf(t);
+ if(!sb||!s){el.innerHTML='';return}
+ const dev=cmpDev||defDev();
+ el.innerHTML=`<h2>${rs('cmp')}</h2><p class=mut>${rs('loading')}</p>`;
+ try{const {data,error}=await sb.rpc('hb_stats',{p_sport:s.id,p_device:dev});if(error)throw error;
+  let typ=null;
+  if(ME){const r=await sb.from('hb_runs').select('score').eq('sport_id',s.id).eq('user_id',ME.id).eq('status','ok').eq('device',dev).order('created_at',{ascending:false}).limit(10);
+   const xs=(r.data||[]).map(x=>+x.score);
+   if(xs.length>=3){xs.sort((a,b)=>t.low?a-b:b-a);const keep=xs.slice(0,xs.length-Math.max(1,Math.floor(xs.length*.1)));typ=r1(keep.reduce((a,b)=>a+b,0)/keep.length)}}
+  if(!el.isConnected)return;
+  el.innerHTML=cmpHtml(t,s,data||{n:0},typ,dev);
+  el.querySelectorAll('[data-dev]').forEach(b=>b.onclick=()=>{cmpDev=b.dataset.dev;cmpLoad(t)})}
+ catch(e){if(el.isConnected)el.innerHTML=`<h2>${rs('cmp')}</h2><p class=mut>${rs('noStats')}</p>`}}
+
+function cmpHtml(t,s,d,typ,dev){const n=+d.n||0;
+ let h=`<div class=cmph><h2>${rs('cmp')}</h2><div class=seg role=group>${['mouse','touch'].map(x=>`<button data-dev=${x} aria-pressed=${x===dev}>${rs(x)}</button>`).join('')}</div></div>`;
+ const tiles=[];
+ if(d.my_best!=null)tiles.push([rs('myBest'),fmt(t,r1(+d.my_best))]);
+ if(typ!=null)tiles.push([rs('typical'),fmt(t,typ),rs('typHelp')]);
+ if(d.median!=null)tiles.push([rs('median'),fmt(t,r1(+d.median))]);
+ tiles.push([rs('players'),String(n)]);
+ h+=`<div class=tiles>${tiles.map(x=>`<div class=tile><small>${x[0]}</small><b>${x[1]}</b>${x[2]?`<small>${x[2]}</small>`:''}</div>`).join('')}</div>`;
+ if(!ME)h+=`<p><a href="index.html">${rs('loginCmp')}</a></p>`;
+ else if(d.my_best!=null){
+  if(n>=MINP){const p=Math.round((+d.worse+0.5*+d.equal)/(n-1)*100);h+=`<p class=pct><b>${rs('pctTxt').replace('{p}',p)}</b>${+d.equal?' · '+rs('eqTxt').replace('{e}',d.equal):''}</p>`}
+  else h+=`<p class=mut>${rs('fewPlayers').replace('{n}',n).replace('{m}',MINP)}</p>`}
+ const gs=(d.groups||[]).slice().sort((a,b)=>AGEG.indexOf(a.g)-AGEG.indexOf(b.g));
+ if(gs.length){const myG=ME?ageGroup(ME.birth_year):null,mx=Math.max(...gs.map(g=>+g.median),1);
+  h+=`<h3>${rs('byAge')}</h3>${gs.map(g=>`<div class="hrow wr ${g.g===myG?'mine':''}"><span>${esc(g.g)} <small class=mut>(${+g.n})</small></span><i style="width:${Math.max(2,+g.median/mx*100)}%"></i><span>${fmt(t,r1(+g.median))}</span></div>`).join('')}`}
+ else if(n)h+=`<p class=mut>${rs('ageNote')}</p>`;
+ h+=`<p><a href="index.html?sport=${encodeURIComponent(s.id)}">${rs('board')} →</a></p>`;
+ return h}
+
+function route(){const id=location.hash.slice(1);
+ if(P&&!P.done&&id!=='dohlad'){P.nav++;location.hash='dohlad';return}
+ if(id==='dohlad'){proctor();window.scrollTo(0,0);return}
+ const t=visibleTests().find(x=>x.id===id);t?openTest(t):home();window.scrollTo(0,0)}
+
+function setLang(l){lang=l;store.set('lang',l);document.documentElement.lang=l==='cz'?'cs':'sk';document.title=tx('title')+' · Porovnaj sa';
+ document.getElementById('logoT').textContent=tx('title');document.getElementById('allT').textContent='🧠 '+tx('back');renderAuth();document.getElementById('foot').textContent=tx('foot');
+ document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.l===l))}
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{setLang(b.dataset.l);route()});
+window.addEventListener('hashchange',route);
+setLang(lang);route();initRemote();
+}
+</script>
+</body>
+</html>
