@@ -358,11 +358,19 @@
     body.dark-chess ::-webkit-scrollbar { width: 10px; height: 10px; }
     body.dark-chess ::-webkit-scrollbar-track { background: #101a2f; }
     body.dark-chess ::-webkit-scrollbar-thumb { background: #3d4f74; border-radius: 6px; }
+  @media (min-width: 640px) { #search-toggle-btn { display: none !important; } }
   @media (max-width: 640px) {
     html, body { overflow-x: hidden; max-width: 100%; }
     .cn-full { display: none; }
     .cn-short { display: inline; }
     #country-tabs button { padding: 6px 9px !important; }
+    @media (max-width: 639px) {
+      .hide-sm { display: none !important; }
+      #search-row:not(.open) { display: none; }
+      #open-compare-btn { display: none; }
+      #extra-filters #country-tabs { width: 100%; padding-top: 4px; }
+      .gender-btn { font-size: 16px !important; line-height: 1; padding: 6px 12px !important; }
+    }
     #search-input { min-width: 0; }
     #main-header #user-auth-controls { max-width: 100%; }
     #my-profile-btn, #header-my-profile-btn { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -511,19 +519,20 @@
 
           <div class="inline-flex rounded-xl p-1 bg-slate-500/10 border border-slate-500/15">
             <button type="button" data-gender="M" class="gender-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-blue-600 text-white shadow-sm">
-              ♂ Muži
+              ♂<span class="hide-sm"> Muži</span>
             </button>
             <button type="button" data-gender="Z" class="gender-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-slate-500/10 hover:bg-slate-500/20">
-              ♀ Ženy
+              ♀<span class="hide-sm"> Ženy</span>
             </button>
           </div>
 
           <button id="friends-filter-btn" type="button" title="Zobraziť v rebríčku len sledovaných a priateľov" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">🤝 Priatelia</button>
           <button id="celebrities-filter-btn" type="button" title="Zobraziť v rebríčku len známe osobnosti" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">⭐ Celebrity</button>
           <button id="filters-toggle-btn" type="button" aria-expanded="false" class="px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">⚙️ Filtre</button>
+          <button id="search-toggle-btn" type="button" title="Hľadať športovca" aria-label="Hľadať športovca" class="sm:hidden px-3 py-1.5 rounded-lg text-xs font-semibold border border-slate-500/20 bg-slate-500/10 hover:bg-slate-500/20 transition cursor-pointer">🔍</button>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
+        <div id="search-row" class="flex items-center gap-2 flex-wrap">
           <div class="relative flex-1 sm:w-64">
             <input id="search-input" type="text" placeholder="Hľadať športovca..." class="w-full px-3.5 py-2 rounded-xl border border-slate-300/80 bg-transparent text-xs sm:text-sm outline-none focus:border-blue-500">
           </div>
@@ -566,8 +575,8 @@
 
     <!-- Hlavný rebríček -->
     <section id="leaderboard-section" class="rounded-2xl border border-slate-200/90 bg-white shadow-sm overflow-hidden">
-      <div class="px-4 sm:px-6 py-3.5 border-b border-slate-200/70 flex items-center justify-between gap-2 flex-wrap">
-        <div class="flex items-center gap-2.5">
+      <div class="px-4 sm:px-6 py-3.5 border-b border-slate-200/70 flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5 min-w-0 flex-1 flex-wrap">
           <span id="leaderboard-sport-logo"><span class="w-7 h-7 rounded-lg inline-flex items-center justify-center text-[11px] font-bold border shrink-0" style="background:#2563eb14;border-color:#2563eb38;color:#2563eb">B</span></span>
           <h2 id="leaderboard-title" class="text-sm sm:text-base font-bold">Biceps 1 minúta — 🇸🇰 Slovensko (Muži)</h2>
           <button id="clear-age-filter-btn" type="button" class="hidden px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-600/15 text-blue-700 hover:bg-blue-600/25 transition cursor-pointer">
@@ -575,10 +584,10 @@
           </button>
           <span id="leaderboard-count" class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-slate-500/15 whitespace-nowrap">1 účastníkov</span>
         </div>
-        <a id="hb-cta" href="benchmark.html" class="hidden px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition no-underline">🧠 Otestuj sa</a>
+        <a id="hb-cta" href="benchmark.html" class="hidden shrink-0 whitespace-nowrap px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold bg-blue-600 text-white hover:bg-blue-700 transition no-underline">🧠 Otestuj sa</a>
       </div>
 
-      <div id="my-rank-banner" class="hidden px-4 sm:px-6 py-2.5 border-b border-blue-500/25 bg-blue-500/10 text-xs sm:text-sm flex items-center justify-between gap-2 flex-wrap"></div>
+      <div id="my-rank-banner" class="hidden border-b border-blue-500/25 bg-blue-500/10 text-xs sm:text-sm"></div>
 
       <div class="overflow-auto sm:max-h-[75vh]">
         <table class="w-full text-left border-collapse">
@@ -2971,9 +2980,11 @@
         return [selectedAgeAtRecord !== null, !!selectedAgeGroup, !!selectedWeight, !!selectedYear, perKg].filter(Boolean).length;
       }
       function syncFiltersUi() {
-        const n = activeFilterCount();
+        let n = activeFilterCount();
         const t = document.getElementById('filters-toggle-btn');
         if (t) {
+          const mob = window.matchMedia && window.matchMedia('(max-width: 639px)').matches;
+          n += mob ? (onlyFriends ? 1 : 0) + (onlyCelebrities ? 1 : 0) : 0;
           t.textContent = n ? `⚙️ Filtre (${n})` : '⚙️ Filtre';
           const open = !document.getElementById('extra-filters').classList.contains('hidden');
           t.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -3287,7 +3298,10 @@
           .sort((x, y) => (sport.lowerIsBetter ? x.metric - y.metric : y.metric - x.metric) || (useTie ? hbTieCmp(sport, x.athlete.id, y.athlete.id) : 0));
         const tiedMetrics = new Set(); { const seen = new Set(); rows.forEach(r => { if (seen.has(r.metric)) tiedMetrics.add(r.metric); seen.add(r.metric); }); }
 
-        if (countEl) countEl.textContent = `${rows.length} účastníkov`;
+        if (countEl) {
+          countEl.textContent = `${rows.length} účastníkov`;
+          countEl.classList.toggle('hide-sm', !!(currentUserId && rows.some(r => String(r.athlete.id) === String(currentUserId))));
+        }
 
         const banner = document.getElementById('my-rank-banner');
         if (banner) {
@@ -3309,10 +3323,9 @@
               if (selectedWeight && WEIGHT_BANDS[selectedWeight]) parts.push(`s váhou ${WEIGHT_BANDS[selectedWeight].label}`);
               if (selectedYear) parts.push(`v roku ${selectedYear}`);
               const place = selectedCountry === 'ALL' ? 'na svete' : `v krajine ${selectedCountry}`;
-              pctSentence = ` · si ${betterLabel} ako <strong>${Math.round(myPct)} %</strong> ${whoLabel} ${parts.join(' ')} ${place}`.replace(/\s+/g, ' ');
+              pctSentence = ` · ${betterLabel} ako <strong>${Math.round(myPct)} %</strong><span class="hide-sm"> ${whoLabel} ${parts.join(' ')} ${place}</span>`.replace(/\s+/g, ' ');
             }
-            banner.innerHTML = `<span>📍 <strong>Tvoja pozícia: #${myIdx + 1}</strong> z ${rows.length} · ${escapeHtml(formatVal(mine.best, sport.unit))}${pctSentence}</span>
-              <button type="button" id="my-rank-jump" class="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold cursor-pointer">Ukázať v tabuľke</button>`;
+            banner.innerHTML = `<button type="button" id="my-rank-jump" title="Ukázať v tabuľke" class="w-full text-left px-4 sm:px-6 py-2 flex items-center gap-2 cursor-pointer hover:bg-blue-500/10"><span class="flex-1 min-w-0">📍 <strong>#${myIdx + 1}</strong> z ${rows.length} · ${escapeHtml(formatVal(mine.best, sport.unit))}${pctSentence}</span><span class="text-blue-600 font-bold text-base leading-none">›</span></button>`;
             banner.querySelector('#my-rank-jump').addEventListener('click', () => {
               currentPage = Math.floor(myIdx / PAGE_SIZE) + 1;
               renderLeaderboard();
@@ -5270,6 +5283,29 @@
           syncFiltersUi();
         });
         document.getElementById('clear-extra-filters-btn').addEventListener('click', clearExtraFilters);
+        document.getElementById('search-toggle-btn').addEventListener('click', () => {
+          const row = document.getElementById('search-row');
+          const si = document.getElementById('search-input');
+          const open = !row.classList.contains('open');
+          if (!open && si.value) { si.value = ''; si.dispatchEvent(new Event('input')); }
+          row.classList.toggle('open', open);
+          if (open) si.focus();
+        });
+        // Na mobile sa Priatelia, Celebrity a krajiny presunú do panela Filtre, aby nad rebríčkom nezaberali veľa riadkov.
+        (function () {
+          const mq = window.matchMedia('(max-width: 639px)');
+          const ef = document.getElementById('extra-filters');
+          const fb = document.getElementById('friends-filter-btn'), cb = document.getElementById('celebrities-filter-btn');
+          const ct = document.getElementById('country-tabs');
+          const home = { fbParent: fb.parentNode, fbNext: document.getElementById('filters-toggle-btn'), ctParent: ct.parentNode, ctNext: ct.nextSibling };
+          const apply = () => {
+            if (mq.matches) { ef.insertBefore(cb, ef.firstChild); ef.insertBefore(fb, ef.firstChild); ef.appendChild(ct); }
+            else { home.fbParent.insertBefore(fb, home.fbNext); home.fbParent.insertBefore(cb, home.fbNext); home.ctParent.insertBefore(ct, home.ctNext); }
+            syncFiltersUi();
+          };
+          apply();
+          if (mq.addEventListener) mq.addEventListener('change', apply);
+        })();
         document.getElementById('perkg-btn').addEventListener('click', () => {
           const sp = getSportById(selectedSportId);
           if (!sp || sp.unit !== 'kg') return;
