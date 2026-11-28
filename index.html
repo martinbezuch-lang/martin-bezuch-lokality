@@ -1789,8 +1789,23 @@
         return parts.length < 2 ? parts.join(' ') : parts[parts.length - 1] + ' ' + parts.slice(0, -1).join(' ');
       }
 
+      // vlajka aj pre krajiny mimo zoznamu (napr. Madagaskar z časového pásma pri teste): slovenský názov → ISO kód → vlajka
+      let regionByName = null;
       function getFlag(country) {
-        return COUNTRY_FLAGS[country] || '🌍';
+        if (COUNTRY_FLAGS[country]) return COUNTRY_FLAGS[country];
+        try {
+          if (!regionByName) {
+            regionByName = {};
+            const dn = new Intl.DisplayNames(['sk'], { type: 'region' });
+            for (let a = 65; a <= 90; a++) for (let b = 65; b <= 90; b++) {
+              const code = String.fromCharCode(a, b);
+              try { const nm = dn.of(code); if (nm && nm !== code) regionByName[nm] = code; } catch (e) {}
+            }
+          }
+          const code = regionByName[country];
+          if (code) return String.fromCodePoint(...[...code].map(ch => 0x1F1E6 + ch.charCodeAt(0) - 65));
+        } catch (e) {}
+        return '🌍';
       }
 
       function getSportById(id) {
@@ -2113,7 +2128,9 @@
         const drop = () => { try { localStorage.setItem('hb-pending', 'null'); } catch (e) {} };
         if (Date.now() - (p.ts || 0) > 86400000) { drop(); return; }
         try {
-          const { data, error } = await sb.rpc('hb_submit', { p_sport: p.sport, p_score: p.score, p_device: p.device, p_lang: p.lang, p_flags: [], p_detail: p.detail || null });
+          const args = { p_sport: p.sport, p_score: p.score, p_device: p.device, p_lang: p.lang, p_flags: [], p_detail: p.detail || null, p_place: p.place || null };
+          let { data, error } = await sb.rpc('hb_submit', args);
+          if (error && /p_place|function|schema cache/i.test(String(error.message || ''))) { delete args.p_place; ({ data, error } = await sb.rpc('hb_submit', args)); }
           if (error && /no_profile/.test(error.message || '')) return;
           drop();
           if (!error && data && data.status === 'ok') { showToast('Tvoj výsledok z testu sa uložil do rebríčka.'); await reloadData(); }

@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="disciplines.js"></script>
+<script src="tz-country.js"></script>
 <style>
 /* VOICE: hravý, športový, ako tester reflexov na jarmoku – jasné úlohy, žiadne kecy
    IDEA: testovacia plocha (arena) ako veľká modrá tabuľa z vlajok SK/CZ
@@ -597,7 +598,7 @@ function start(t){runTest(t,(v,d)=>finish(t,v,d))}
 function finish(t,v,detail){cleanup();logEv('test_done',t.id);const a=fresh();const G=gated(),best=G?{}:getBest(),old=best[t.id],sus=[...flags];
  const rec=!G&&!sus.length&&(old==null||(t.low?v<old:v>old));if(rec){best[t.id]=v;store.set('best',best)}
  if(!G&&!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
- if(G){const s=sportOf(t);if(s&&!sus.length)store.set('pending',{sport:s.id,score:v,detail:detail||null,device:runDev,lang,ts:Date.now()});else store.set('pending',null);setTimeout(()=>gateModal(t,v),700)}
+ if(G){const s=sportOf(t);if(s&&!sus.length)store.set('pending',{sport:s.id,score:v,detail:detail||null,device:runDev,lang,place:placeName(),ts:Date.now()});else store.set('pending',null);setTimeout(()=>gateModal(t,v),700)}
  a.innerHTML=`<p class=lbl>${tx('score')}</p><div class=huge>${fmt(t,v)}</div><p class=save id=save></p><p class=quick id=quick></p>${detail?`<p>${esc(detail)}</p>`:''}${sus.length?`<div class=sus><b>${tx('sus')}</b>${sus.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div>`:''}${rec&&old!=null?`<p class=rec>${tx('newBest')}</p>`:''}${best[t.id]!=null?`<p class=lbl>${tx('best')}: ${fmt(t,best[t.id])}</p>`:''}<div class=row><button class=btn id=again>${tx('again')}</button><a class="btn ghost" href="#">${tx('back')}</a></div>`;
  {const rw=a.querySelector('.row');if(rw){const qb=document.createElement('button');qb.type='button';qb.className='btn ghost';qb.textContent='📱 '+qs('btn');qb.onclick=()=>qrModal(t);rw.appendChild(qb)}}
  document.getElementById('again').onclick=()=>start(t);stats(t);submitRun(t,v,detail,sus).finally(()=>{quickLoad(t);cmpLoad(t)})}
@@ -806,7 +807,7 @@ async function initRemote(){if(!sb)return;
  renderAuth();if(!(P&&!P.done))route();if(ME)submitPending()}
 async function submitPending(){const p=store.get('pending');if(!p||!sb||!ME)return;
  if(Date.now()-(p.ts||0)>864e5){store.set('pending',null);return}
- try{const {data,error}=await sb.rpc('hb_submit',{p_sport:p.sport,p_score:p.score,p_device:p.device,p_lang:p.lang,p_flags:[],p_detail:p.detail});
+ try{const {data,error}=await hbSubmit({p_sport:p.sport,p_score:p.score,p_device:p.device,p_lang:p.lang,p_flags:[],p_detail:p.detail,p_place:p.place||placeName()});
   if(error&&/no_profile/.test(error.message||''))return;
   store.set('pending',null);if(!error&&data&&data.status==='ok')toast(rs('pendingSaved'))}catch(e){}}
 function toast(msg){const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}
@@ -823,11 +824,15 @@ function gateModal(t,v){if(!gated()||document.querySelector('.gate'))return;
 function renderAuth(){const el=document.getElementById('auth');if(!el)return;
  el.innerHTML=ME?`<a class=pill href="index.html#profil=${encodeURIComponent(ME.id)}">👤 ${esc(ME.display_name||'')}</a>`:`<a class=pill href="index.html">${rs('login')}</a>`}
 
+// Krajina merania = krajina podľa časového pásma telefónu (po slovensky, ako v zozname krajín); poloha sa nezisťuje
+// odoslanie výsledku; ak databáza ešte nepozná p_place (staršia verzia), skúsi to bez neho
+async function hbSubmit(args){let r=await sb.rpc('hb_submit',args);if(r.error&&args.p_place!==undefined&&/p_place|function|schema cache/i.test(String(r.error.message||''))){const a={...args};delete a.p_place;r=await sb.rpc('hb_submit',a)}return r}
+function placeName(){try{const c=window.tzCountry&&tzCountry();return c?new Intl.DisplayNames(['sk'],{type:'region'}).of(c):null}catch(e){return null}}
 async function submitRun(t,v,detail,fl){const el=document.getElementById('save');if(!el)return;const s=sportOf(t);
  if(!sb||!s||s.active===false){el.textContent=remoteOk?rs('offline'):'';return}
  if(!ME){el.textContent=rs('notSaved');return}
  el.textContent=rs('saving');
- try{const {data,error}=await sb.rpc('hb_submit',{p_sport:s.id,p_score:v,p_device:runDev,p_lang:lang,p_flags:fl,p_detail:detail||null});
+ try{const {data,error}=await hbSubmit({p_sport:s.id,p_score:v,p_device:runDev,p_lang:lang,p_flags:fl,p_detail:detail||null,p_place:placeName()});
   if(error)throw error;
   el.textContent=data.status==='flagged'?rs('savedFlag'):data.personal_best?rs('savedPb'):data.previous_best!=null?rs('savedNoPb'):rs('saved')}
  catch(e){const m=String(e&&e.message||'');const k=Object.keys(RS.sk).find(x=>x.startsWith('err_')&&m.includes(x.slice(4)));el.textContent=rs('saveErr')+(k?': '+rs(k):'.')}}
