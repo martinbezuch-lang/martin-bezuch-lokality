@@ -681,6 +681,7 @@
               </span>
             </div>
             <h2 id="profile-name" class="text-2xl sm:text-3xl font-extrabold tracking-tight">Martin Bezuch</h2>
+            <p id="profile-last-seen" class="hidden text-xs opacity-60"></p>
           </div>
 
           <div id="profile-owner-actions" class="flex items-center gap-2 flex-wrap"></div>
@@ -1808,6 +1809,24 @@
         return '🌍';
       }
 
+      // „Naposledy online“: zaokrúhlene (teraz, pred X min/h, včera, pred X dňami, dátum)
+      function lastSeenText(iso) {
+        if (!iso) return '';
+        const d = new Date(iso), s = (Date.now() - d.getTime()) / 1000;
+        if (!isFinite(s)) return '';
+        if (s < 300) return 'práve teraz';
+        if (s < 3600) return `pred ${Math.round(s / 60)} min`;
+        if (s < 86400) return `pred ${Math.round(s / 3600)} h`;
+        const days = Math.floor(s / 86400);
+        if (days === 1) return 'včera';
+        if (days < 30) return `pred ${days} dňami`;
+        return d.toLocaleDateString('sk-SK');
+      }
+
+      // zapíše „naposledy online“ pre prihláseného (server zapisuje najviac raz za 5 minút)
+      function touchLastSeen() { if (currentUserId) { try { sb.rpc('touch_last_seen').then(() => {}, () => {}); } catch (e) {} } }
+      setInterval(() => { if (document.visibilityState === 'visible') touchLastSeen(); }, 5 * 60 * 1000);
+
       function getSportById(id) {
         return db.sports.find(s => s.id === id) || db.sports[0] || null;
       }
@@ -1997,7 +2016,7 @@
           const athletes = pr.map(p => {
             const a = { id: p.id, name: p.display_name, country: p.country || '', gender: p.gender || 'M',
               birthYear: p.birth_year, weightKg: p.weight_kg, heightCm: p.height_cm,
-              isFriend: false, isCelebrity: !!p.is_celebrity, celebrityType: p.celebrity_type || '', socialYoutube: p.social_youtube || '', socialInstagram: p.social_instagram || '', socialFacebook: p.social_facebook || '', socialTiktok: p.social_tiktok || '', records: [] };
+              isFriend: false, lastSeen: p.last_seen_at || null, isCelebrity: !!p.is_celebrity, celebrityType: p.celebrity_type || '', socialYoutube: p.social_youtube || '', socialInstagram: p.social_instagram || '', socialFacebook: p.social_facebook || '', socialTiktok: p.social_tiktok || '', records: [] };
             byId.set(p.id, a);
             return a;
           });
@@ -2429,6 +2448,7 @@
           a.birthYear = p.birth_year; a.weightKg = p.weight_kg; a.heightCm = p.height_cm;
           currentUserId = p.id;
         }
+        touchLastSeen();
         if (p.role === 'moderator' || p.role === 'superadmin') {
           currentAdmin = { id: p.id, name: p.display_name, role: p.role };
         }
@@ -4217,6 +4237,12 @@
         const isOwnProfile = Boolean(loggedUser && String(loggedUser.id) === String(athlete.id));
 
         document.getElementById('profile-name').textContent = athlete.name;
+        {
+          const ls = document.getElementById('profile-last-seen');
+          const txt = lastSeenText(athlete.lastSeen);
+          ls.textContent = txt ? 'Naposledy online ' + txt : '';
+          ls.classList.toggle('hidden', !txt);
+        }
         document.getElementById('profile-country-pill').textContent = `${getFlag(athlete.country)} ${athlete.country}`;
         document.getElementById('profile-gender-pill').textContent = athlete.gender === 'Z' ? '♀ Žena' : '♂ Muž';
         renderSocialLinks(athlete);
@@ -5779,8 +5805,22 @@
     const lead = s.match(/^\s*/)[0], tail = s.match(/\s*$/)[0];
     return lead + r + tail;
   }
+  const LSEEN = {"cz": ["Naposledy online", "právě teď"], "en": ["Last online", "just now"], "de": ["Zuletzt online", "gerade eben"], "fr": ["Dernière connexion", "à l’instant"], "es": ["Última conexión", "ahora mismo"], "it": ["Ultimo accesso", "proprio ora"], "pt": ["Última vez online", "agora mesmo"], "pl": ["Ostatnio online", "przed chwilą"], "hu": ["Utoljára online", "épp most"], "uk": ["Востаннє онлайн", "щойно"], "ro": ["Ultima dată online", "chiar acum"], "nl": ["Laatst online", "zojuist"], "hi": ["आख़िरी बार ऑनलाइन", "अभी"], "zh": ["上次在线", "刚刚"], "ja": ["最終オンライン", "たった今"], "ko": ["마지막 접속", "방금"], "id": ["Terakhir online", "baru saja"], "th": ["ออนไลน์ล่าสุด", "เมื่อสักครู่"], "my": ["နောက်ဆုံး အွန်လိုင်း", "ယခုလေးတင်"], "fil": ["Huling online", "ngayon lang"]};
+  function lastSeenTr(rest) {
+    const L = LSEEN[lang]; if (!L) return null;
+    let rtf; try { rtf = new Intl.RelativeTimeFormat(lang === 'cz' ? 'cs' : lang, { numeric: 'auto' }); } catch (e) { return null; }
+    let m, v;
+    if (rest === 'práve teraz') v = L[1];
+    else if ((m = rest.match(/^pred (\d+) min$/))) v = rtf.format(-m[1], 'minute');
+    else if ((m = rest.match(/^pred (\d+) h$/))) v = rtf.format(-m[1], 'hour');
+    else if (rest === 'včera') v = rtf.format(-1, 'day');
+    else if ((m = rest.match(/^pred (\d+) dňami$/))) v = rtf.format(-m[1], 'day');
+    else v = rest;
+    return L[0] + ' ' + v;
+  }
   function pattern(t) {
     let m;
+    if ((m = t.match(/^Naposledy online (.+)$/))) { const r = lastSeenTr(m[1]); if (r) return r; }
     if ((m = t.match(reCountry))) { const c = flagCode(m[1]); const n = c && region(c); if (n) return m[1] + ' ' + n + (m[3] || ''); }
     if ((m = t.match(/^🌍 Svet(?: \((\d+)\))?$/))) return '🌍 ' + w('Svet') + (m[1] ? ' (' + m[1] + ')' : '');
     if ((m = t.match(/^👥 Priatelia \((\d+)\)$/))) return '👥 ' + w('Priatelia') + ' (' + m[1] + ')';
