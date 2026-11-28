@@ -1472,6 +1472,7 @@
 
       <div id="admin-dashboard" class="space-y-5">
         <div class="flex gap-2 flex-wrap border-b pb-3">
+          <button data-admin-tab="stats" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">📊 Štatistiky</button>
           <button data-admin-tab="athletes" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Športovci</button>
           <button data-admin-tab="sports" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Disciplíny</button>
           <button data-admin-tab="requests" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Žiadosti o zmazanie</button>
@@ -1479,6 +1480,16 @@
           <button data-admin-tab="records" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Výsledky</button>
           <button data-admin-tab="feedback" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Správy</button>
           <button id="admin-super-tab-btn" data-admin-tab="super" type="button" class="admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer bg-slate-500/10">Roly a audit log</button>
+        </div>
+
+        <div id="admin-panel-stats" class="hidden space-y-4">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-xs font-bold opacity-70">Obdobie:</span>
+            <button type="button" data-stats-days="7" class="stats-days-btn px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer bg-slate-500/10">7 dní</button>
+            <button type="button" data-stats-days="30" class="stats-days-btn px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer bg-slate-500/10">30 dní</button>
+            <button type="button" data-stats-days="90" class="stats-days-btn px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer bg-slate-500/10">90 dní</button>
+          </div>
+          <div id="admin-stats-body" class="space-y-4"><p class="text-xs opacity-70">Načítavam…</p></div>
         </div>
 
         <div id="admin-panel-athletes" class="space-y-3 hidden">
@@ -1660,7 +1671,8 @@
       let ageBestsCollapsed = true;
       let currentUserId = null;
       let currentAdmin = null;
-      let activeAdminTab = 'athletes';
+      let activeAdminTab = 'stats';
+      let statsDays = 30;
       let toastTimer = null;
       let lastInsertedByAthlete = {};
 
@@ -1854,6 +1866,81 @@
       const AUTH_ERROR_IN_URL = (URL_PARAMS.match(/(^|&)error_description=([^&]*)/) || [])[2] || '';
       const SPORT_IN_URL = (URL_PARAMS.match(/(^|&)sport=([A-Za-z0-9_]+)/) || [])[2] || '';
       const sb = window.supabase.createClient('https://khduswpbhozkqjxnqufk.supabase.co', 'sb_publishable_BKRTmdqqNQ7ELeKSRLsUAA_b59jHdx8');
+
+      // Anonymná štatistika návštevnosti: náhodné ID v prehliadači (spoločné so stránkou testov), raz za deň
+      const VISITOR_ID = (() => {
+        try {
+          let v = JSON.parse(localStorage.getItem('hb-vid') || 'null');
+          if (!v) { v = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2)); localStorage.setItem('hb-vid', JSON.stringify(v)); }
+          return v;
+        } catch (e) { return null; }
+      })();
+      if (VISITOR_ID) { try { sb.rpc('hb_log', { p_visitor: VISITOR_ID, p_kind: 'visit', p_page: 'home', p_detail: null, p_lang: (navigator.language || '').slice(0, 8) }).then(() => {}, () => {}); } catch (e) {} }
+
+      // ===== Admin: štatistiky a grafy =====
+      function statsBarChart(title, rows, key, color, note) {
+        const vals = rows.map(r => Number(r[key]) || 0);
+        const total = vals.reduce((a, b) => a + b, 0);
+        const max = Math.max(1, ...vals);
+        const W = 640, H = 170, L = 30, R = 6, T = 10, B = 22;
+        const n = rows.length, bw = (W - L - R) / n;
+        const y = v => T + (1 - v / max) * (H - T - B);
+        const fmtD = d => { const m = String(d).match(/^\d{4}-(\d{2})-(\d{2})/); return m ? `${Number(m[2])}.${Number(m[1])}.` : d; };
+        const labelEvery = Math.max(1, Math.ceil(n / 10));
+        const bars = rows.map((r, i) => {
+          const v = vals[i], x = L + i * bw + bw * 0.15, w = Math.max(1, bw * 0.7);
+          return `<rect x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${w.toFixed(1)}" height="${(H - B - y(v)).toFixed(1)}" rx="2" fill="${color}"><title>${fmtD(r.day)}: ${v}</title></rect>` +
+            (n <= 31 && v > 0 ? `<text x="${(x + w / 2).toFixed(1)}" y="${(y(v) - 3).toFixed(1)}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.75">${v}</text>` : '') +
+            ((i % labelEvery === 0 || i === n - 1) ? `<text x="${(x + w / 2).toFixed(1)}" y="${H - 6}" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.6">${fmtD(r.day)}</text>` : '');
+        }).join('');
+        const grid = [max, Math.round(max / 2), 0].map(v => `<line x1="${L}" y1="${y(v).toFixed(1)}" x2="${W - R}" y2="${y(v).toFixed(1)}" stroke="currentColor" stroke-opacity="0.1"/><text x="${L - 4}" y="${(y(v) + 3).toFixed(1)}" text-anchor="end" font-size="9" fill="currentColor" fill-opacity="0.55">${v}</text>`).join('');
+        return `<div class="rounded-xl border border-slate-500/20 p-3">
+          <div class="flex items-baseline justify-between gap-2 mb-1"><span class="text-sm font-bold">${escapeHtml(title)}</span><span class="text-xs opacity-70">spolu <strong>${total}</strong></span></div>
+          ${note ? `<div class="text-[11px] opacity-60 mb-1">${escapeHtml(note)}</div>` : ''}
+          <svg viewBox="0 0 ${W} ${H}" class="w-full h-auto" role="img" aria-label="${escapeHtml(title)}">${grid}${bars}</svg>
+        </div>`;
+      }
+
+      async function renderAdminStats() {
+        const box = document.getElementById('admin-stats-body');
+        if (!box) return;
+        document.querySelectorAll('.stats-days-btn').forEach(b => {
+          const on = Number(b.dataset.statsDays) === statsDays;
+          b.className = 'stats-days-btn px-2.5 py-1 rounded-lg text-xs font-bold cursor-pointer ' + (on ? 'bg-blue-600 text-white' : 'bg-slate-500/10');
+        });
+        box.innerHTML = '<p class="text-xs opacity-70">Načítavam…</p>';
+        let rows = [], top = [], err = null;
+        try {
+          const [a, b] = await Promise.all([sb.rpc('admin_stats', { p_days: statsDays }), sb.rpc('admin_top_tests', { p_days: statsDays })]);
+          if (a.error) throw a.error;
+          rows = a.data || []; top = (b && b.data) || [];
+        } catch (e) { err = (e && e.message) || String(e); }
+        if (err) { box.innerHTML = `<p class="text-xs text-rose-600">Štatistiky sa nepodarilo načítať: ${escapeHtml(err)}</p>`; return; }
+        const sum = k => rows.reduce((s, r) => s + (Number(r[k]) || 0), 0);
+        const totalUsers = (db && db.athletes) ? db.athletes.length : 0;
+        const tile = (label, val, sub) => `<div class="rounded-xl border border-slate-500/20 p-3"><div class="text-[11px] opacity-70">${escapeHtml(label)}</div><div class="text-xl font-extrabold tabular-nums">${val}</div>${sub ? `<div class="text-[11px] opacity-60">${escapeHtml(sub)}</div>` : ''}</div>`;
+        const nameOf = id => { const s = db && db.sports ? db.sports.find(x => x.hbTest === id) : null; return s ? s.name : id; };
+        const maxTop = Math.max(1, ...top.map(x => x.plays));
+        box.innerHTML = `
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            ${tile('Návštevníci denne (priemer)', (sum('visitors') / Math.max(1, rows.length)).toFixed(1), `za ${statsDays} dní`)}
+            ${tile('Dokončené testy', sum('test_plays'), `${sum('runs')} od prihlásených`)}
+            ${tile('Noví používatelia', sum('new_users'), `celkom ${totalUsers}`)}
+            ${tile('Nové športové výkony', sum('new_records'), '')}
+          </div>
+          ${statsBarChart('Unikátni návštevníci', rows, 'visitors', '#3b82f6', 'Každý prehliadač sa počíta najviac raz za deň.')}
+          ${statsBarChart('Návštevníci stránky testov', rows, 'test_visitors', '#6366f1', '')}
+          ${statsBarChart('Dokončené testy (aj hostia)', rows, 'test_plays', '#10b981', '')}
+          ${statsBarChart('Ľudia, ktorí dokončili test', rows, 'test_players', '#14b8a6', '')}
+          ${statsBarChart('Uložené pokusy prihlásených', rows, 'runs', '#8b5cf6', '')}
+          ${statsBarChart('Noví používatelia', rows, 'new_users', '#f59e0b', '')}
+          ${statsBarChart('Nové športové výkony', rows, 'new_records', '#ef4444', '')}
+          <div class="rounded-xl border border-slate-500/20 p-3">
+            <div class="text-sm font-bold mb-2">Najhranejšie testy za ${statsDays} dní</div>
+            ${top.length ? top.map(x => `<div class="flex items-center gap-2 text-xs py-0.5"><span class="w-40 shrink-0 truncate">${escapeHtml(nameOf(x.test))}</span><span class="flex-1 h-2.5 rounded bg-slate-500/10 overflow-hidden"><span class="block h-full bg-emerald-500" style="width:${(100 * x.plays / maxTop).toFixed(1)}%"></span></span><span class="w-24 text-right tabular-nums">${x.plays}× · ${x.players} ľudí</span></div>`).join('') : '<div class="text-xs opacity-60">Zatiaľ žiadne dáta.</div>'}
+          </div>
+          <p class="text-[11px] opacity-60">Návštevnosť a hry hostí sa zbierajú od spustenia štatistík. Registrácie, pokusy a výkony sú za celú históriu.</p>`;
+      }
 
       async function fetchAllRows(table, orderCol, cols) {
         const out = [];
@@ -4566,11 +4653,12 @@
           const active = b.getAttribute('data-admin-tab') === activeAdminTab;
           b.className = 'admin-tab-btn px-3 py-1.5 rounded-xl text-xs font-bold cursor-pointer ' + (active ? 'bg-blue-600 text-white' : 'bg-slate-500/10');
         });
-        ['athletes', 'sports', 'requests', 'celebs', 'feedback', 'records', 'super'].forEach(tab => {
+        ['stats', 'athletes', 'sports', 'requests', 'celebs', 'feedback', 'records', 'super'].forEach(tab => {
           const panel = document.getElementById(`admin-panel-${tab}`);
           if (panel) panel.classList.toggle('hidden', activeAdminTab !== tab);
         });
         document.getElementById('admin-add-sport-form').classList.toggle('hidden', !isSuper);
+        if (activeAdminTab === 'stats') renderAdminStats();
 
         let profiles = [], requests = [], audit = [], invitesRows = [];
         try {
@@ -5436,6 +5524,10 @@
           const m = document.getElementById('admin-modal');
           m.classList.add('hidden');
           m.classList.remove('flex');
+        });
+
+        document.querySelectorAll('.stats-days-btn').forEach(btn => {
+          btn.addEventListener('click', () => { statsDays = Number(btn.dataset.statsDays) || 30; renderAdminStats(); });
         });
 
         document.querySelectorAll('.admin-tab-btn').forEach(btn => {
