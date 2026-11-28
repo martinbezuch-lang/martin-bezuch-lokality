@@ -4344,7 +4344,7 @@
             <div class="min-w-0 flex-1">
               <div class="flex items-center justify-between gap-1.5">
                 ${sp.kind === 'cognitive' && sp.hbTest
-                  ? `<a href="benchmark.html#${encodeURIComponent(sp.hbTest)}" data-test-link title="Otestuj sa" class="text-xs font-bold truncate underline decoration-dotted underline-offset-4 ${hasRecord ? 'text-[#2563eb]' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</a>`
+                  ? `<a href="benchmark.html#${encodeURIComponent(sp.hbTest)}" data-test-link title="Otestuj sa" class="text-xs font-bold truncate underline decoration-dotted decoration-slate-400 underline-offset-4 ${hasRecord ? 'text-slate-900' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</a>`
                   : `<span class="text-xs font-bold truncate ${hasRecord ? 'text-slate-900' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</span>`}
                 <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 tabular-nums ${
                   hasRecord && pctClass(worldPct)
