@@ -2,5 +2,31 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://porovnajsa.sk/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
   <url><loc>https://porovnajsa.sk/benchmark.html</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://porovnajsa.sk/test/</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://porovnajsa.sk/test/reakcny-cas/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/sekvencna-pamat/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/mierenie/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/ciselna-pamat/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/slovna-pamat/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/simpanzi-test/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/vizualna-pamat/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/test-pisania-na-klavesnici/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/stroopov-test/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/rychlost-klikania/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/rychle-pocty/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/odhad-casu/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/postreh-na-farby/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/pocitanie-bodiek/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/slovenske-ci-ceske/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/vybrane-slova/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/schulteho-tabulka/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/zelena-cervena/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/pracovna-pamat-2-back/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/sledovanie-lopticiek/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/anagramy/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/otacanie-tvarov/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/zastav-na-ciare/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/odhad-uhla/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://porovnajsa.sk/test/najdi-pismeno/</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://porovnajsa.sk/ochrana-udajov.html</loc><changefreq>yearly</changefreq><priority>0.2</priority></url>
 </urlset>
