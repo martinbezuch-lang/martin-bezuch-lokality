@@ -5151,12 +5151,12 @@
             </td>
             <td class="py-3 px-4 text-sm">
               ${item.bestA !== null
-                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold ${isWinA ? 'bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-500/40' : 'bg-slate-500/10'}">${escapeHtml(formatVal(item.bestA, item.sport.unit))}</span>`
+                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold ${isWinA ? 'bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-500/40' : 'bg-slate-500/10'}">${escapeHtml(formatVal(item.bestA, item.sport.unit))}</span><span class="ml-1.5 text-[11px] opacity-50 tabular-nums" title="Počet meraní">${(athA.records || []).filter(r => r.sportId === item.sport.id).length}×</span>`
                 : `<span class="inline-block px-2.5 py-1 rounded-lg text-xs opacity-50 bg-slate-500/10">Bez záznamu</span>`}
             </td>
             <td class="py-3 px-4 text-sm">
               ${item.bestB !== null
-                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold ${isWinB ? 'bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-500/40' : 'bg-slate-500/10'}">${escapeHtml(formatVal(item.bestB, item.sport.unit))}</span>`
+                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg font-bold ${isWinB ? 'bg-emerald-500/20 text-emerald-700 ring-1 ring-emerald-500/40' : 'bg-slate-500/10'}">${escapeHtml(formatVal(item.bestB, item.sport.unit))}</span><span class="ml-1.5 text-[11px] opacity-50 tabular-nums" title="Počet meraní">${(athB.records || []).filter(r => r.sportId === item.sport.id).length}×</span>`
                 : `<span class="inline-block px-2.5 py-1 rounded-lg text-xs opacity-50 bg-slate-500/10">Bez záznamu</span>`}
             </td>
             <td class="py-3 px-4 text-sm font-mono tabular-nums">
