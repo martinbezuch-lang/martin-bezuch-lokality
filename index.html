@@ -4288,7 +4288,9 @@
               <div class="flex items-center justify-between gap-1.5">
                 <span class="text-xs font-bold truncate ${hasRecord ? 'text-slate-900' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</span>
                 <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 tabular-nums ${
-                  hasRecord
+                  hasRecord && pctClass(worldPct)
+                    ? 'border ' + pctClass(worldPct)
+                    : hasRecord
                     ? 'bg-slate-100 text-slate-700'
                     : 'bg-slate-100/70 text-slate-400 font-semibold'
                 }" title="Percentil vo svete">${escapeHtml(pctLabel)}</span>
