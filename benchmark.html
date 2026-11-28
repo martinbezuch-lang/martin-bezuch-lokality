@@ -805,7 +805,7 @@ const r1=v=>Math.round(v*10)/10;
 
 async function initRemote(){if(!sb)return;
  try{const {data}=await sb.auth.getSession();const u=data&&data.session&&data.session.user;
-  if(u){const r=await sb.from('profiles').select('id,display_name,birth_year,role,gender,country').eq('id',u.id).maybeSingle();ME=r.data||{id:u.id}}}catch(e){}
+  if(u){const r=await sb.from('profiles').select('id,display_name,birth_year,role,gender,country').eq('id',u.id).maybeSingle();ME=r.data||{id:u.id};try{sb.rpc('touch_last_seen').then(()=>{},()=>{})}catch(e){}}}catch(e){}
  authChecked=true;
  try{const {data,error}=await sb.from('sports').select('id,name,unit,kind,hb_test,active,lower_is_better').eq('kind','cognitive');
   if(!error&&data){SP={};data.forEach(s=>{if(s.hb_test)SP[s.hb_test]=s});remoteOk=true}}catch(e){}
