@@ -4324,8 +4324,10 @@
           const hasRecord = best !== null;
           const pctLabel = worldPct !== null ? `${worldPct.toFixed(1)}` : '—';
 
-          const card = document.createElement('button');
-          card.type = 'button';
+          // kartička je klikateľná (filter merania + graf), názov testu je samostatný odkaz rovno na test
+          const card = document.createElement('div');
+          card.setAttribute('role', 'button');
+          card.tabIndex = 0;
           card.className = 'p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition cursor-pointer min-w-0 ' +
             (isSelected
               ? 'border-[#2563eb] bg-[#eff6ff]/80 ring-2 ring-[#2563eb]/20'
@@ -4341,7 +4343,9 @@
             ${logoHtml}
             <div class="min-w-0 flex-1">
               <div class="flex items-center justify-between gap-1.5">
-                <span class="text-xs font-bold truncate ${hasRecord ? 'text-slate-900' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</span>
+                ${sp.kind === 'cognitive' && sp.hbTest
+                  ? `<a href="benchmark.html#${encodeURIComponent(sp.hbTest)}" data-test-link title="Otestuj sa" class="text-xs font-bold truncate underline decoration-dotted underline-offset-4 ${hasRecord ? 'text-[#2563eb]' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</a>`
+                  : `<span class="text-xs font-bold truncate ${hasRecord ? 'text-slate-900' : 'text-slate-400 font-semibold'}">${escapeHtml(sp.name)}</span>`}
                 <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold shrink-0 tabular-nums ${
                   hasRecord && pctClass(worldPct)
                     ? 'border ' + pctClass(worldPct)
@@ -4357,7 +4361,9 @@
             </div>
           `;
 
-          card.addEventListener('click', () => {
+          card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.click(); } });
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('[data-test-link]')) return; // odkaz na test nefiltruje, len otvorí test
             const same = selectedProfileSportId === sp.id;
             selectedProfileSportId = same ? null : sp.id;
             profileSportFilterId = same ? null : sp.id;
