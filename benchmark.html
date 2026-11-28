@@ -770,7 +770,7 @@ async function initRemote(){if(!sb)return;
  renderAuth();if(!(P&&!P.done))route();if(ME)submitPending()}
 async function submitPending(){const p=store.get('pending');if(!p||!sb||!ME)return;
  if(Date.now()-(p.ts||0)>864e5){store.set('pending',null);return}
- try{const {data,error}=await sb.rpc('hb_submit',{p_sport:p.sport,p_score:p.score,p_device:p.device,p_lang:p.lang,p_flags:[],p_detail:p.detail,p_place:p.place||placeName()});
+ try{const {data,error}=await hbSubmit({p_sport:p.sport,p_score:p.score,p_device:p.device,p_lang:p.lang,p_flags:[],p_detail:p.detail,p_place:p.place||placeName()});
   if(error&&/no_profile/.test(error.message||''))return;
   store.set('pending',null);if(!error&&data&&data.status==='ok')toast(rs('pendingSaved'))}catch(e){}}
 function toast(msg){const d=document.createElement('div');d.className='toast';d.setAttribute('role','status');d.textContent=msg;document.body.appendChild(d);setTimeout(()=>d.remove(),4500)}
@@ -788,12 +788,14 @@ function renderAuth(){const el=document.getElementById('auth');if(!el)return;
  el.innerHTML=ME?`<a class=pill href="index.html#profil=${encodeURIComponent(ME.id)}">👤 ${esc(ME.display_name||'')}</a>`:`<a class=pill href="index.html">${rs('login')}</a>`}
 
 // Krajina merania = krajina podľa časového pásma telefónu (po slovensky, ako v zozname krajín); poloha sa nezisťuje
+// odoslanie výsledku; ak databáza ešte nepozná p_place (staršia verzia), skúsi to bez neho
+async function hbSubmit(args){let r=await sb.rpc('hb_submit',args);if(r.error&&args.p_place!==undefined&&/p_place|function|schema cache/i.test(String(r.error.message||''))){const a={...args};delete a.p_place;r=await sb.rpc('hb_submit',a)}return r}
 function placeName(){try{const c=window.tzCountry&&tzCountry();return c?new Intl.DisplayNames(['sk'],{type:'region'}).of(c):null}catch(e){return null}}
 async function submitRun(t,v,detail,fl){const el=document.getElementById('save');if(!el)return;const s=sportOf(t);
  if(!sb||!s||s.active===false){el.textContent=remoteOk?rs('offline'):'';return}
  if(!ME){el.textContent=rs('notSaved');return}
  el.textContent=rs('saving');
- try{const {data,error}=await sb.rpc('hb_submit',{p_sport:s.id,p_score:v,p_device:runDev,p_lang:lang,p_flags:fl,p_detail:detail||null,p_place:placeName()});
+ try{const {data,error}=await hbSubmit({p_sport:s.id,p_score:v,p_device:runDev,p_lang:lang,p_flags:fl,p_detail:detail||null,p_place:placeName()});
   if(error)throw error;
   el.textContent=data.status==='flagged'?rs('savedFlag'):data.personal_best?rs('savedPb'):data.previous_best!=null?rs('savedNoPb'):rs('saved')}
  catch(e){const m=String(e&&e.message||'');const k=Object.keys(RS.sk).find(x=>x.startsWith('err_')&&m.includes(x.slice(4)));el.textContent=rs('saveErr')+(k?': '+rs(k):'.')}}

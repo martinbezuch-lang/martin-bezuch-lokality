@@ -2122,7 +2122,9 @@
         const drop = () => { try { localStorage.setItem('hb-pending', 'null'); } catch (e) {} };
         if (Date.now() - (p.ts || 0) > 86400000) { drop(); return; }
         try {
-          const { data, error } = await sb.rpc('hb_submit', { p_sport: p.sport, p_score: p.score, p_device: p.device, p_lang: p.lang, p_flags: [], p_detail: p.detail || null, p_place: p.place || null });
+          const args = { p_sport: p.sport, p_score: p.score, p_device: p.device, p_lang: p.lang, p_flags: [], p_detail: p.detail || null, p_place: p.place || null };
+          let { data, error } = await sb.rpc('hb_submit', args);
+          if (error && /p_place|function|schema cache/i.test(String(error.message || ''))) { delete args.p_place; ({ data, error } = await sb.rpc('hb_submit', args)); }
           if (error && /no_profile/.test(error.message || '')) return;
           drop();
           if (!error && data && data.status === 'ok') { showToast('Tvoj výsledok z testu sa uložil do rebríčka.'); await reloadData(); }
