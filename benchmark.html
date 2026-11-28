@@ -43,7 +43,7 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .cmph{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.cmph h2{font-size:22px;margin:0}
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:10px;margin:14px 0}
 .tile{background:var(--card);border-radius:14px;padding:12px 14px}.tile b{display:block;font-size:24px;font-weight:800;line-height:1.2;overflow-wrap:anywhere}.tile small{display:block;color:var(--mut);font-size:13px}
-.pct{font-size:18px;margin:6px 0 10px}#cmp{margin-bottom:40px}#cmp h3{font-size:17px;margin:18px 0 8px}#cmp:empty{display:none}
+.pct{font-size:18px;margin:6px 0 10px}.quick{margin:4px 0 8px;font-size:15px;line-height:1.6;opacity:.95}.quick a{color:inherit;text-decoration:underline;text-underline-offset:3px}.quick:empty{display:none}.fboard{margin-top:22px}.frow{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;margin:4px 0;background:rgba(127,140,170,.08)}.frow.mine{background:rgba(59,130,246,.18);font-weight:700}.frow a{flex:1;color:inherit;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.frow b{white-space:nowrap}.fr-n{opacity:.6;min-width:2.2em;font-variant-numeric:tabular-nums}#cmp{margin-bottom:40px}#cmp h3{font-size:17px;margin:18px 0 8px}#cmp:empty{display:none}
 .lock{position:relative;border-radius:16px;overflow:hidden;margin:12px 0 8px}
 .lockfake{filter:blur(6px);opacity:.55;pointer-events:none;user-select:none;padding:4px}
 .lockmsg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:16px;background:color-mix(in srgb,var(--bg) 40%,transparent)}
@@ -598,9 +598,9 @@ function finish(t,v,detail){cleanup();logEv('test_done',t.id);const a=fresh();co
  const rec=!G&&!sus.length&&(old==null||(t.low?v<old:v>old));if(rec){best[t.id]=v;store.set('best',best)}
  if(!G&&!sus.length){const hist=store.get('hist')||{};hist[t.id]=[...(hist[t.id]||[]),v].slice(-10);store.set('hist',hist)}
  if(G){const s=sportOf(t);if(s&&!sus.length)store.set('pending',{sport:s.id,score:v,detail:detail||null,device:runDev,lang,ts:Date.now()});else store.set('pending',null);setTimeout(()=>gateModal(t,v),700)}
- a.innerHTML=`<p class=lbl>${tx('score')}</p><div class=huge>${fmt(t,v)}</div><p class=save id=save></p>${detail?`<p>${esc(detail)}</p>`:''}${sus.length?`<div class=sus><b>${tx('sus')}</b>${sus.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div>`:''}${rec&&old!=null?`<p class=rec>${tx('newBest')}</p>`:''}${best[t.id]!=null?`<p class=lbl>${tx('best')}: ${fmt(t,best[t.id])}</p>`:''}<div class=row><button class=btn id=again>${tx('again')}</button><a class="btn ghost" href="#">${tx('back')}</a></div>`;
+ a.innerHTML=`<p class=lbl>${tx('score')}</p><div class=huge>${fmt(t,v)}</div><p class=save id=save></p><p class=quick id=quick></p>${detail?`<p>${esc(detail)}</p>`:''}${sus.length?`<div class=sus><b>${tx('sus')}</b>${sus.map(k=>`<span>${tx('f_'+k)}</span>`).join('')}</div>`:''}${rec&&old!=null?`<p class=rec>${tx('newBest')}</p>`:''}${best[t.id]!=null?`<p class=lbl>${tx('best')}: ${fmt(t,best[t.id])}</p>`:''}<div class=row><button class=btn id=again>${tx('again')}</button><a class="btn ghost" href="#">${tx('back')}</a></div>`;
  {const rw=a.querySelector('.row');if(rw){const qb=document.createElement('button');qb.type='button';qb.className='btn ghost';qb.textContent='📱 '+qs('btn');qb.onclick=()=>qrModal(t);rw.appendChild(qb)}}
- document.getElementById('again').onclick=()=>start(t);stats(t);submitRun(t,v,detail,sus).finally(()=>cmpLoad(t))}
+ document.getElementById('again').onclick=()=>start(t);stats(t);submitRun(t,v,detail,sus).finally(()=>{quickLoad(t);cmpLoad(t)})}
 
 /* ===== Testovanie pod dohľadom ===== */
 // Zatiaľ skryté: tlačidlo sa nezobrazuje a adresa #dohlad vedie na zoznam testov. Zapnete zmenou na true.
@@ -749,6 +749,43 @@ cz:{login:'Přihlásit se',saveLogin:'Přihlas se na porovnajsa.sk a výsledek s
  err_not_authenticated:'nejsi přihlášený',err_no_profile:'nejdřív dokonči profil na porovnajsa.sk',err_unknown_test:'test není aktivní',err_implausible_score:'výsledek je mimo možný rozsah',err_rate_limited:'příliš mnoho pokusů za minutu, zkus to za chvíli',err_bad_device:'neznámé zařízení',
  notSaved:'Výsledek se neuložil. Bez registrace se nikam neukládá.',gateT:'Chceš vědět, jak si stojíš?',gateB:'Zaregistruj se zdarma a uvidíš:',gate1:'své pořadí a percentil mezi ostatními',gate2:'srovnání s vrstevníky podle věku',gate3:'historii výsledků a svůj běžný výkon',gate4:'výzvy kamarádům a žebříčky',reg:'Zaregistrovat se zdarma',notNow:'Teď ne',haveAcc:'Už mám účet',gateNote:'Bez registrace se výsledek nikam neuloží. Pokud se zaregistruješ teď, tento výsledek se ti uloží automaticky.',lockT:'Jen pro registrované',lockB:'Pořadí, percentil, srovnání podle věku a historie výsledků.',pendingSaved:'Tvůj poslední výsledek z testu se uložil do žebříčku.'}};
 const rs=k=>(RS[lang]&&RS[lang][k])??RS.en?.[k]??RS.sk[k];
+const QK={"sk": {"fb": "Rebríček priateľov", "fbNone": "Zatiaľ tu nie sú priatelia s výsledkom v tomto teste. Priateľov si pridáš na porovnajsa.sk.", "men": "muži", "women": "ženy", "pctl": "percentil", "pb": "osobný rekord", "me": "Ty"}, "cz": {"fb": "Žebříček přátel", "fbNone": "Zatím tu nejsou přátelé s výsledkem v tomto testu. Přátele si přidáš na porovnajsa.sk.", "men": "muži", "women": "ženy", "pctl": "percentil", "pb": "osobní rekord", "me": "Ty"}, "en": {"fb": "Friends leaderboard", "fbNone": "No friends with a result in this test yet. Add friends on porovnajsa.sk.", "men": "men", "women": "women", "pctl": "percentile", "pb": "personal best", "me": "You"}, "de": {"fb": "Freunde-Rangliste", "fbNone": "Noch keine Freunde mit einem Ergebnis in diesem Test. Freunde fügst du auf porovnajsa.sk hinzu.", "men": "Männer", "women": "Frauen", "pctl": "Perzentil", "pb": "persönlicher Rekord", "me": "Du"}, "fr": {"fb": "Classement des amis", "fbNone": "Aucun ami n’a encore de résultat dans ce test. Ajoute des amis sur porovnajsa.sk.", "men": "hommes", "women": "femmes", "pctl": "percentile", "pb": "record personnel", "me": "Toi"}, "es": {"fb": "Clasificación de amigos", "fbNone": "Aún no hay amigos con resultado en esta prueba. Añade amigos en porovnajsa.sk.", "men": "hombres", "women": "mujeres", "pctl": "percentil", "pb": "récord personal", "me": "Tú"}, "it": {"fb": "Classifica degli amici", "fbNone": "Nessun amico ha ancora un risultato in questo test. Aggiungi amici su porovnajsa.sk.", "men": "uomini", "women": "donne", "pctl": "percentile", "pb": "record personale", "me": "Tu"}, "pt": {"fb": "Classificação dos amigos", "fbNone": "Ainda não há amigos com resultado neste teste. Adiciona amigos em porovnajsa.sk.", "men": "homens", "women": "mulheres", "pctl": "percentil", "pb": "recorde pessoal", "me": "Tu"}, "pl": {"fb": "Ranking znajomych", "fbNone": "Żaden znajomy nie ma jeszcze wyniku w tym teście. Znajomych dodasz na porovnajsa.sk.", "men": "mężczyźni", "women": "kobiety", "pctl": "percentyl", "pb": "rekord osobisty", "me": "Ty"}, "hu": {"fb": "Barátok ranglistája", "fbNone": "Még nincs barátod eredménnyel ebben a tesztben. Barátokat a porovnajsa.sk oldalon adhatsz hozzá.", "men": "férfiak", "women": "nők", "pctl": "percentilis", "pb": "egyéni csúcs", "me": "Te"}, "uk": {"fb": "Рейтинг друзів", "fbNone": "Поки що немає друзів із результатом у цьому тесті. Друзів можна додати на porovnajsa.sk.", "men": "чоловіки", "women": "жінки", "pctl": "перцентиль", "pb": "особистий рекорд", "me": "Ти"}, "ro": {"fb": "Clasamentul prietenilor", "fbNone": "Încă nu ai prieteni cu rezultat la acest test. Adaugă prieteni pe porovnajsa.sk.", "men": "bărbați", "women": "femei", "pctl": "percentilă", "pb": "record personal", "me": "Tu"}, "nl": {"fb": "Ranglijst van vrienden", "fbNone": "Nog geen vrienden met een resultaat in deze test. Voeg vrienden toe op porovnajsa.sk.", "men": "mannen", "women": "vrouwen", "pctl": "percentiel", "pb": "persoonlijk record", "me": "Jij"}, "hi": {"fb": "दोस्तों की रैंकिंग", "fbNone": "इस टेस्ट में अभी किसी दोस्त का परिणाम नहीं है। porovnajsa.sk पर दोस्त जोड़ें।", "men": "पुरुष", "women": "महिलाएँ", "pctl": "पर्सेंटाइल", "pb": "व्यक्तिगत रिकॉर्ड", "me": "आप"}, "zh": {"fb": "好友排行榜", "fbNone": "还没有好友在这个测试中有成绩。可在 porovnajsa.sk 添加好友。", "men": "男性", "women": "女性", "pctl": "百分位", "pb": "个人最佳", "me": "你"}, "ja": {"fb": "友達ランキング", "fbNone": "このテストに記録のある友達はまだいません。友達は porovnajsa.sk で追加できます。", "men": "男性", "women": "女性", "pctl": "パーセンタイル", "pb": "自己ベスト", "me": "あなた"}, "ko": {"fb": "친구 순위", "fbNone": "이 테스트에 기록이 있는 친구가 아직 없습니다. porovnajsa.sk에서 친구를 추가하세요.", "men": "남성", "women": "여성", "pctl": "백분위", "pb": "개인 최고 기록", "me": "나"}, "id": {"fb": "Peringkat teman", "fbNone": "Belum ada teman dengan hasil di tes ini. Tambahkan teman di porovnajsa.sk.", "men": "pria", "women": "wanita", "pctl": "persentil", "pb": "rekor pribadi", "me": "Kamu"}, "th": {"fb": "อันดับเพื่อน", "fbNone": "ยังไม่มีเพื่อนที่มีผลในแบบทดสอบนี้ เพิ่มเพื่อนได้ที่ porovnajsa.sk", "men": "ชาย", "women": "หญิง", "pctl": "เปอร์เซ็นไทล์", "pb": "สถิติส่วนตัว", "me": "คุณ"}, "my": {"fb": "သူငယ်ချင်း အဆင့်ဇယား", "fbNone": "ဤစမ်းသပ်မှုတွင် ရလဒ်ရှိသော သူငယ်ချင်း မရှိသေးပါ။ porovnajsa.sk တွင် သူငယ်ချင်း ထည့်ပါ။", "men": "အမျိုးသား", "women": "အမျိုးသမီး", "pctl": "ရာခိုင်နှုန်းအဆင့်", "pb": "ကိုယ်ပိုင်စံချိန်", "me": "သင်"}, "fil": {"fb": "Ranggo ng mga kaibigan", "fbNone": "Wala pang kaibigan na may resulta sa test na ito. Magdagdag ng kaibigan sa porovnajsa.sk.", "men": "lalaki", "women": "babae", "pctl": "percentile", "pb": "personal record", "me": "Ikaw"}};
+const qk=k=>(QK[lang]||QK.en)[k];
+
+/* ===== Poradie v rebríčku a rebríček priateľov (rovnaké pravidlá ako hlavný rebríček) ===== */
+const BOARD={};
+async function boardData(s,fresh){if(!fresh&&BOARD[s.id])return BOARD[s.id];
+ const [r,p,tp,fr]=await Promise.all([
+  sb.from('records').select('user_id,value').eq('sport_id',s.id),
+  sb.from('public_profiles').select('id,display_name,gender,country'),
+  sb.rpc('hb_tops').then(x=>x,()=>({data:[]})),
+  ME?sb.from('friendships').select('friend_id').eq('user_id',ME.id):Promise.resolve({data:[]})]);
+ if(r.error)throw r.error;
+ const low=!!s.lower_is_better,best=new Map();
+ (r.data||[]).forEach(x=>{const v=+x.value,o=best.get(x.user_id);if(o==null||(low?v<o:v>o))best.set(x.user_id,v)});
+ const prof=new Map((p.data||[]).map(x=>[x.id,x]));
+ const tops=new Map();(tp.data||[]).forEach(x=>{if(x.sport_id===s.id)tops.set(x.user_id,(x.tops||[]).map(Number))});
+ const friends=new Set((fr.data||[]).map(x=>x.friend_id));
+ const cmp=(a,b)=>{const d=low?best.get(a)-best.get(b):best.get(b)-best.get(a);if(d)return d;const A=tops.get(a)||[],B=tops.get(b)||[];
+  for(let i=1;i<5;i++){const x=A[i],y=B[i];if(x===undefined&&y===undefined)return 0;if(x===undefined)return 1;if(y===undefined)return -1;if(x!==y)return low?x-y:y-x}return 0};
+ return BOARD[s.id]={best,prof,friends,cmp}}
+
+async function quickLoad(t){const el=document.getElementById('quick'),s=sportOf(t);if(!el||!sb||!s||!ME)return;
+ try{const B=await boardData(s,true),me=B.prof.get(ME.id),mb=B.best.get(ME.id);if(!me||mb==null||!el.isConnected)return;
+  const pool=[...B.best.keys()].filter(id=>{const q=B.prof.get(id);return q&&q.gender===me.gender&&q.country===me.country}).sort(B.cmp);
+  const rank=pool.indexOf(ME.id)+1;if(!rank)return;
+  let worse=0,eq=0;pool.forEach(id=>{if(id===ME.id)return;const c=B.cmp(ME.id,id);if(c<0)worse++;else if(c===0)eq++});
+  const pct=pool.length>=2?Math.min(99.9,(worse+eq/2+0.5)/pool.length*100):null;
+  el.innerHTML=`<a href="index.html?sport=${encodeURIComponent(s.id)}">🏆 <b>#${rank}</b> z ${pool.length}</a> · ${esc(me.gender==='Z'?qk('women'):qk('men'))} · ${esc(me.country||'')}<br>${qk('pb')} <b>${fmt(t,mb)}</b>${pct!=null?` · ${qk('pctl')} <b>${Math.round(pct)}</b>`:''} · <a href="index.html?sport=${encodeURIComponent(s.id)}">${rs('board')} →</a>`}
+ catch(e){}}
+
+async function friendsBoard(t,host){const s=sportOf(t);if(!host||!sb||!s||!ME)return;
+ try{const B=await boardData(s);const ids=[...B.best.keys()].filter(id=>id===ME.id||B.friends.has(id)).sort(B.cmp);
+  const box=document.createElement('div');box.className='fboard';
+  if(ids.length<=1){box.innerHTML=`<h3>👥 ${qk('fb')}</h3><p class=mut>${qk('fbNone')}</p>`;host.appendChild(box);return}
+  box.innerHTML=`<h3>👥 ${qk('fb')}</h3>`+ids.map((id,i)=>{const q=B.prof.get(id)||{},mine=id===ME.id;
+   return `<div class="frow ${mine?'mine':''}"><span class=fr-n>#${i+1}</span><a href="index.html#profil=${encodeURIComponent(id)}">${esc(mine?qk('me')+' · '+(q.display_name||''):q.display_name||'?')}</a><b>${fmt(t,B.best.get(id))}</b></div>`}).join('');
+  host.appendChild(box)}catch(e){}}
 const MINP=30;
 const sportOf=t=>SP[t.id];
 const LANG_ONLY={skcz:['sk','cz'],vybrane:['sk','cz']},LANG_NOT={anagramy:['th','my','hi','zh','ja','ko'],pisanie:['my','hi','zh','ja','ko']};
@@ -762,9 +799,9 @@ const r1=v=>Math.round(v*10)/10;
 
 async function initRemote(){if(!sb)return;
  try{const {data}=await sb.auth.getSession();const u=data&&data.session&&data.session.user;
-  if(u){const r=await sb.from('profiles').select('id,display_name,birth_year,role').eq('id',u.id).maybeSingle();ME=r.data||{id:u.id}}}catch(e){}
+  if(u){const r=await sb.from('profiles').select('id,display_name,birth_year,role,gender,country').eq('id',u.id).maybeSingle();ME=r.data||{id:u.id}}}catch(e){}
  authChecked=true;
- try{const {data,error}=await sb.from('sports').select('id,name,unit,kind,hb_test,active').eq('kind','cognitive');
+ try{const {data,error}=await sb.from('sports').select('id,name,unit,kind,hb_test,active,lower_is_better').eq('kind','cognitive');
   if(!error&&data){SP={};data.forEach(s=>{if(s.hb_test)SP[s.hb_test]=s});remoteOk=true}}catch(e){}
  renderAuth();if(!(P&&!P.done))route();if(ME)submitPending()}
 async function submitPending(){const p=store.get('pending');if(!p||!sb||!ME)return;
@@ -806,6 +843,7 @@ async function cmpLoad(t){const el=document.getElementById('cmp');if(!el)return;
    if(xs.length>=3){xs.sort((a,b)=>t.low?a-b:b-a);const keep=xs.slice(0,xs.length-Math.max(1,Math.floor(xs.length*.1)));typ=r1(keep.reduce((a,b)=>a+b,0)/keep.length)}}
   if(!el.isConnected)return;
   el.innerHTML=cmpHtml(t,s,data||{n:0},typ,dev);
+  if(ME)friendsBoard(t,el);
   el.querySelectorAll('[data-dev]').forEach(b=>b.onclick=()=>{cmpDev=b.dataset.dev;cmpLoad(t)})}
  catch(e){if(el.isConnected)el.innerHTML=`<h2>${rs('cmp')}</h2><p class=mut>${rs('noStats')}</p>`}}
 
