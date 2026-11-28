@@ -1314,7 +1314,10 @@
           <label for="compare-ath-a-search" class="block text-xs font-bold uppercase tracking-wider opacity-75 mb-1.5">
             Športovec A
           </label>
-          <input id="compare-ath-a-search" type="text" autocomplete="off" placeholder="Začni písať meno alebo krajinu..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300/80 bg-transparent text-sm outline-none focus:border-blue-500">
+          <div class="relative">
+            <input id="compare-ath-a-search" type="text" autocomplete="off" placeholder="Začni písať meno alebo krajinu..." class="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-slate-300/80 bg-transparent text-sm outline-none focus:border-blue-500">
+            <button type="button" data-compare-clear="A" title="Vymazať" aria-label="Vymazať" class="compare-clear-btn hidden absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold opacity-70 hover:opacity-100 hover:bg-slate-500/15 cursor-pointer">✕</button>
+          </div>
           <div id="compare-ath-a-results" class="hidden absolute left-0 right-0 mt-1 rounded-xl border border-slate-300/80 bg-white text-slate-900 shadow-xl max-h-60 overflow-y-auto z-20"></div>
         </div>
 
@@ -1322,7 +1325,10 @@
           <label for="compare-ath-b-search" class="block text-xs font-bold uppercase tracking-wider opacity-75 mb-1.5">
             Športovec B
           </label>
-          <input id="compare-ath-b-search" type="text" autocomplete="off" placeholder="Začni písať meno alebo krajinu..." class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300/80 bg-transparent text-sm outline-none focus:border-blue-500">
+          <div class="relative">
+            <input id="compare-ath-b-search" type="text" autocomplete="off" placeholder="Začni písať meno alebo krajinu..." class="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-slate-300/80 bg-transparent text-sm outline-none focus:border-blue-500">
+            <button type="button" data-compare-clear="B" title="Vymazať" aria-label="Vymazať" class="compare-clear-btn hidden absolute right-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg flex items-center justify-center text-base font-bold opacity-70 hover:opacity-100 hover:bg-slate-500/15 cursor-pointer">✕</button>
+          </div>
           <div id="compare-ath-b-results" class="hidden absolute left-0 right-0 mt-1 rounded-xl border border-slate-300/80 bg-white text-slate-900 shadow-xl max-h-60 overflow-y-auto z-20"></div>
         </div>
       </div>
@@ -4868,6 +4874,15 @@
         if (inputB) {
           inputB.value = athB ? `${getFlag(athB.country)} ${athB.name} (${athB.country})${athB.isCelebrity ? ' ⭐' : ''}` : '';
         }
+        syncCompareClear();
+      }
+
+      // ✕ v poli porovnania je vidno, len keď je v poli text
+      function syncCompareClear() {
+        document.querySelectorAll('.compare-clear-btn').forEach(b => {
+          const inp = document.getElementById(`compare-ath-${b.dataset.compareClear.toLowerCase()}-search`);
+          b.classList.toggle('hidden', !(inp && inp.value));
+        });
       }
 
       function hideCompareDropdown(slot) {
@@ -5479,6 +5494,18 @@
         });
         searchB.addEventListener('focus', (e) => renderCompareSuggestions('B', e.target.value));
         searchB.addEventListener('blur', () => setTimeout(() => hideCompareDropdown('B'), 150));
+
+        // ✕ v poli vymaže meno jedným ťuknutím a hneď ponúkne výber iného hráča
+        [searchA, searchB].forEach(inp => inp.addEventListener('input', syncCompareClear));
+        document.querySelectorAll('.compare-clear-btn').forEach(b => {
+          b.addEventListener('mousedown', (e) => e.preventDefault());
+          b.addEventListener('click', () => {
+            const inp = document.getElementById(`compare-ath-${b.dataset.compareClear.toLowerCase()}-search`);
+            inp.value = '';
+            inp.dispatchEvent(new Event('input'));
+            inp.focus();
+          });
+        });
 
         document.getElementById('compare-only-both-checkbox').addEventListener('change', (e) => {
           compareState.onlyBothHaveRecord = Boolean(e.target.checked);
