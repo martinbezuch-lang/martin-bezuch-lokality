@@ -10,6 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="disciplines.js"></script>
 <style>
 /* VOICE: hravý, športový, ako tester reflexov na jarmoku – jasné úlohy, žiadne kecy
    IDEA: testovacia plocha (arena) ako veľká modrá tabuľa z vlajok SK/CZ
@@ -69,6 +70,7 @@ h1{font-size:clamp(32px,5vw,52px);line-height:1.05;margin:0 0 10px;text-wrap:bal
 .card{display:flex;gap:14px;align-items:flex-start;text-decoration:none;background:var(--card);border-radius:16px;padding:16px;transition:transform .15s}
 .card:hover{transform:translateY(-2px)}.card:focus-visible{outline:3px solid var(--red);outline-offset:2px}
 .glyph{flex:none;width:58px;height:58px;border-radius:14px;display:grid;place-items:center;background:var(--g);color:#fff;font-weight:800;font-size:19px}
+.cath{display:flex;align-items:center;gap:10px;font-size:20px;margin:26px 0 12px}.cath small{font-size:14px;color:var(--mut);font-weight:600}.cati{width:34px;height:34px;border-radius:10px;display:grid;place-items:center}.cath:first-child{margin-top:4px}
 .glyph.big{width:96px;height:96px;font-size:30px;border-radius:22px;margin:0 auto 18px;background:rgba(255,255,255,.16)}
 .ct b{display:block;font-size:17px;line-height:1.25}
 .ct small{display:block;color:var(--mut);font-size:14px;line-height:1.4;margin:3px 0 6px}
@@ -528,7 +530,8 @@ const CAT={reakcia:'rych',mierenie:'rych',klikanie:'rych',gonogo:'rych',ciara:'r
  stroop:'post',farby:'post',bodky:'post',schulte:'post',lopticky:'post',pismeno:'post',
  pisanie:'jaz',skcz:'jaz',vybrane:'jaz',anagramy:'jaz',
  pocty:'log',cas:'log',uhol:'log',rotacia:'log'};
-TESTS.forEach(t=>t.col='var(--c-'+(CAT[t.id]||'post')+')');
+// Jednotné farby a ikony s hlavnou stránkou (disciplines.js): farba = kategória, ikona = test
+TESTS.forEach(t=>{if(window.DISC){t.col=DISC.colorOfTest(t.id);t.ic=DISC.iconOfTest(t.id,30);t.icBig=DISC.iconOfTest(t.id,52)}else{t.col='var(--c-'+(CAT[t.id]||'post')+')';t.ic=t.icBig=t.g}});
 
 const fmt=(t,v)=>{const x=dec(v),u=L(t.u);return u.startsWith('/')?x+u:x+' '+u};
 const first=t=>{const d=L(t.desc),s=d.split('. ')[0];return s===d?d:s+'.'};
@@ -539,7 +542,10 @@ function fresh(){const o=document.getElementById('arena'),n=document.createEleme
 function home(){cleanup();const best=getBest(),VT=visibleTests();const n=VT.filter(t=>best[t.id]!=null).length;
  app.innerHTML=`<section class="band hero"><div class=wrap><h1>${tx('title')}</h1><p class=lead>${tx('sub').replace('{n}',VT.length)}</p>
  <div class=stats><div class=chip><b>${n}/${VT.length}</b>${tx('tested')}</div>${VT.length?`<a class=btn href="#${VT[R(0,VT.length-1)].id}">${tx('random')}</a>`:''}<button class="btn ghost" type=button id=qrh>📱 ${qs('btn')}</button>${PROCTOR_ON&&isStaff()?`<a class="btn ghost" href="#dohlad">${ps('homeBtn')}</a>`:''}</div></div></section>
- <section class=band><div class="wrap grid">${VT.map(t=>`<a class=card href="#${t.id}"><span class=glyph style="--g:${t.col}">${t.g}</span><span class=ct><b>${L(t.name)}</b><small>${first(t)}</small><em>${best[t.id]!=null?tx('best')+': '+fmt(t,best[t.id]):tx('none')}</em></span></a>`).join('')}</div>
+ <section class=band>${(()=>{const card=t=>`<a class=card href="#${t.id}"><span class=glyph style="--g:${t.col}">${t.ic}</span><span class=ct><b>${L(t.name)}</b><small>${first(t)}</small><em>${best[t.id]!=null?tx('best')+': '+fmt(t,best[t.id]):tx('none')}</em></span></a>`;
+  if(!window.DISC)return `<div class="wrap grid">${VT.map(card).join('')}</div>`;
+  return DISC.ORDER.map(c=>{const g=VT.filter(t=>DISC.catOfTest(t.id)===c);if(!g.length)return'';const col=DISC.CATS[c].color;
+   return `<div class=wrap><h2 class=cath><span class=cati style="color:${col};background:${col}22">${DISC.svg(DISC.CATS[c].icon,18)}</span>${esc(DISC.label(c,lang))} <small>${g.length}</small></h2></div><div class="wrap grid">${g.map(card).join('')}</div>`}).join('')})()}
  <div class="wrap tools"><button class="btn line" id=reset>${tx('reset')}</button></div></section>`;
  document.getElementById('qrh').onclick=()=>qrModal(null);
  const rb=document.getElementById('reset');let armed=false;
@@ -578,7 +584,7 @@ function stats(t){const el=document.getElementById('stats');if(!el)return;const 
 
 function openTest(t){cleanup();
  app.innerHTML=`<section class="band testhead"><div class=wrap><div class=thtop><a href="#" class=back>← ${tx('back')}</a><button class="pill qrbtn" type=button id=qrb>📱 ${qs('btn')}</button></div><h1>${L(t.name)}</h1><p>${L(t.desc)}</p></div></section>
- <div id=arena class=arena><div class=intro><div class="glyph big">${t.g}</div><button class=btn id=go>${tx('start')}</button></div></div>
+ <div id=arena class=arena><div class=intro><div class="glyph big">${t.icBig}</div><button class=btn id=go>${tx('start')}</button></div></div>
  <section class=band><div class=wrap><div id=cmp></div><div id=stats></div></div></section>`;
  stats(t);cmpLoad(t);document.getElementById('go').onclick=()=>start(t);document.getElementById('qrb').onclick=()=>qrModal(t)}
 
@@ -692,7 +698,7 @@ function step(){cleanup();const t=byId(EV.tests[P.ti]),n=EV.tests.length,tr=P.re
  if(P.ph==='between'){
   a.innerHTML=`<p class=lbl>${ps('tryDone')}</p><div class=huge>${fmt(t,last.v)}</div>${last.d?`<p>${esc(last.d)}</p>`:''}<button class=btn id=gob>${ps('nextTry')}</button>`}
  else{
-  a.innerHTML=`<div class=intro><div class="glyph big">${t.g}</div><div class=big>${L(t.name)}</div><p>${L(t.desc)}</p>${P.note?`<p class=lbl>${esc(P.note)}</p>`:''}
+  a.innerHTML=`<div class=intro><div class="glyph big">${t.icBig}</div><div class=big>${L(t.name)}</div><p>${L(t.desc)}</p>${P.note?`<p class=lbl>${esc(P.note)}</p>`:''}
   <div class=row>${EV.practice&&!P.pr?`<button class="btn ghost" id=prb>${ps('practiceB')}</button>`:''}<button class=btn id=gob>${ps('official')}</button></div></div>`;
   const prb=el('prb');if(prb)prb.onclick=()=>runTest(t,v=>{P.pr=true;P.note=ps('prDone')+': '+fmt(t,adj(t,v));step()})}
  el('gob').onclick=()=>runTest(t,(v,d,fl)=>{const r=P.res[t.id]=P.res[t.id]||{tries:[]};r.tries.push({v:adj(t,v),d,fl,ok:!fl.length});
